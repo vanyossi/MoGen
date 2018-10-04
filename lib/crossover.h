@@ -20,11 +20,11 @@
 #ifndef MOGEN_CROSSOVER_H
 #define MOGEN_CROSSOVER_H
 
-#include "mogen_mop.h";
+#include "mogen_mop.h"
 
 void PNX(Mop *mop, MoeazIndv *p1, MoeazIndv *p2, MoeazIndv *c1, MoeazIndv *c2);
 
 void crossover(Mop *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2);
-}
+
 
 #endif //MOGEN_CROSSOVER_H

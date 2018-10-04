@@ -60,7 +60,7 @@ Mop *mogen_mop(char *name, MopSpecs mop_specs) {
     return nmop;
 }
 
-MoeazIndv *mogen_mop_getIndv(Mop *mop, unsigned int pos) {
+MoeazIndv *mogen_mop_getindv(Mop *mop, unsigned int pos) {
     return &mop->pop->indv[pos];
 }
 

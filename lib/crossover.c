@@ -22,44 +22,44 @@
 #include <memory.h>
 
 void crossover(Mop *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2){
-    mop->cross(mop, mogen_mop_getIndv(p1), mogen_mop_getIndv(p2), mogen_mop_getIndv(c1), mogen_mop_getIndv(c2));
+    mop->cross(mop, mogen_mop_getindv(mop, p1), mogen_mop_getindv(mop, p2), mogen_mop_getindv(mop, c1), mogen_mop_getindv(mop, c2));
 }
 
-void PNX(Mop *mop, MoeazIndv *p1, MoeazIndv *p2, MoeazIndv *c1, MoeazIndv *c2){
-    if (mop->set.type != 1) {
-        // mop is not real, crossover might give unexpected results.
-    }
-    unsigned int j;
-    double s;
-    double eta = 0.5;
-
-    double *par1 = p1->x.real;
-    double *par2 = p2->x.real;
-    double *chi1 = c1->x.real;
-    double *chi2 = c2->x.real;
-
-    if (rnd_perc() > Pc)
-    {
-        memcpy(chi1, par1, sizeof(double) * mop->set.ndec);
-        memcpy(chi2, par2, sizeof(double) * mop->set.ndec);
-        return;
-    }
-
-    for (j = 0; j < mop.nreal; j++)
-    {
-        /* crossover */
-        s = fabs(par2[j] - par1[j]) / eta;
-        chi1[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
-        chi2[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
-
-        /* child1 bounds */
-        chi1[j] = (chi1[j] < low_bound[j]) ? low_bound[j] : chi1[j];
-        chi1[j] = (chi1[j] > up_bound[j]) ? up_bound[j] : chi1[j];
-
-        /* child2 bounds */
-        chi2[j] = (chi2[j] < low_bound[j]) ? low_bound[j] : chi2[j];
-        chi2[j] = (chi2[j] > up_bound[j]) ? up_bound[j] : chi2[j];
-    }
-    return;
-}
+//void PNX(Mop *mop, MoeazIndv *p1, MoeazIndv *p2, MoeazIndv *c1, MoeazIndv *c2){
+//    if (mop->set.type != 1) {
+//        // mop is not real, crossover might give unexpected results.
+//    }
+//    unsigned int j;
+//    double s;
+//    double eta = 0.5;
+//
+//    double *par1 = p1->x.real;
+//    double *par2 = p2->x.real;
+//    double *chi1 = c1->x.real;
+//    double *chi2 = c2->x.real;
+//
+//    if (rnd_perc() > Pc)
+//    {
+//        memcpy(chi1, par1, sizeof(double) * mop->set.ndec);
+//        memcpy(chi2, par2, sizeof(double) * mop->set.ndec);
+//        return;
+//    }
+//
+//    for (j = 0; j < mop.nreal; j++)
+//    {
+//        /* crossover */
+//        s = fabs(par2[j] - par1[j]) / eta;
+//        chi1[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
+//        chi2[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
+//
+//        /* child1 bounds */
+//        chi1[j] = (chi1[j] < low_bound[j]) ? low_bound[j] : chi1[j];
+//        chi1[j] = (chi1[j] > up_bound[j]) ? up_bound[j] : chi1[j];
+//
+//        /* child2 bounds */
+//        chi2[j] = (chi2[j] < low_bound[j]) ? low_bound[j] : chi2[j];
+//        chi2[j] = (chi2[j] > up_bound[j]) ? up_bound[j] : chi2[j];
+//    }
+//    return;
+//}
 

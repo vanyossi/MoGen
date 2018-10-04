@@ -66,13 +66,13 @@ typedef struct mop_t {
     Mop_limit limits;
     MoeazPop* pop;
     void (*evaluate)(struct mop_t* mop, unsigned int idx);
-    void (*cross)(struct mop_t *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2))
+    void (*cross)(struct mop_t *mop, MoeazIndv* p1, MoeazIndv* p2, MoeazIndv* c1, MoeazIndv* c2);
 } Mop;
 
 
 Mop *mogen_mop(char *name, MopSpecs mop_specs);
 
-MoeazIndv *mogen_mop_getIndv(Mop *mop, unsigned int pos);
+MoeazIndv *mogen_mop_getindv(Mop *mop, unsigned int pos);
 
 void mop_print(Mop *mop);
 
