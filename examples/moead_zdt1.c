@@ -47,7 +47,7 @@ void mopeval_zdt1(Mop* mop, unsigned int idx){
 
 Mop* init_zdt(unsigned int nreal, unsigned int nobjs){
 
-    assert(nreal > nobj);
+    assert(nreal > nobjs);
     Mop* mop = mogen_mop("ZDT", MOP_REAL | MOP_CONTIGUOUS);
     mop->set.ndec = nreal;
     mop->set.nobj = nobjs;
