@@ -21,10 +21,10 @@
 
 int main(int argc, char const *argv[]) {
 
-    mop_print(mogen_mop(0, MOP_BIN | MOP_RESTRICTED));
-    mop_print(mogen_mop(0, MOP_REAL | MOP_CONTIGUOUS));
-    mop_print(mogen_mop(0, MOP_DYNAMIC | MOP_BIN | MOP_REAL));
-    mop_print(mogen_mop(0, MOP_RESTRICTED | MOP_REAL | MOP_DYNAMIC));
+    mop_print(mogen_mop("TEST1", MOP_BIN | MOP_RESTRICTED));
+    mop_print(mogen_mop("TEST3", MOP_REAL | MOP_CONTIGUOUS));
+    mop_print(mogen_mop("TEST4", MOP_DYNAMIC | MOP_BIN | MOP_REAL));
+    mop_print(mogen_mop("TEST15", MOP_RESTRICTED | MOP_REAL | MOP_DYNAMIC));
 
     return 0;
 }
