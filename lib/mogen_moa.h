@@ -17,46 +17,25 @@
  */
 
 
-#ifndef MOGEN_POP_H
-#define MOGEN_POP_H
+#ifndef MOGEN_MOGEN_MOA_H
+#define MOGEN_MOGEN_MOA_H
 
-#include "multi_array.h"
+#include "mogen_moea.h"
 
 struct mop_t;
 
-typedef union multi_data_t {
-    double* real;
-    unsigned short* bin;
-    Multiarray mix;
-} MultiData;
-
-typedef struct moeaz_indv_t {
-    int type;
-    unsigned int xsize;
-    unsigned int fsize;
-    unsigned int gsize;
-    MultiData x; // real, bin, or mixed
-    double* f;
-    double* g;
-} MoeazIndv;
-
-void moeaz_indv_alloc(MoeazIndv *indv, struct mop_t *mop);
-
-void moeaz_indv_init(MoeazIndv *indv, struct mop_t *mop);
-
-void moeaz_indv_free(MoeazIndv *indv);
+typedef union mogen_moa_type_t {
+    Moea moea;
+} MoaType;
 
 
-typedef struct moeaz_pop_t {
-    int size;
-    MoeazIndv* indv;
-    unsigned int *front;
-} MoeazPop;
+typedef struct mogen_moa_t {
+    char name[64];
+    struct mop_t* mop;
+    void (*run)(struct mop_t* mop, int steps);          //!< Moa evaluate step function pointer
+    MoaType algorithm;
+} Moa;
 
-MoeazPop *moeaz_pop_alloc(struct mop_t *mop, unsigned int size);
+Moa* moa_init(struct mop_t *mop, char* name);
 
-void moeaz_pop_init(struct mop_t *mop);
-
-void moeaz_pop_free(MoeazPop* pop);
-
-#endif //MOGEN_POP_H
+#endif //MOGEN_MOGEN_MOA_H

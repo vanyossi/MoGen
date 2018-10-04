@@ -1,3 +1,4 @@
+add_subdirectory(math)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
@@ -8,9 +9,12 @@ set(mogen_mop_SOURCES
     mogen_population.c
     multi_array.c
     crossover.c
-    )
+    rand.c
+    mogen_moea.c mogen_moea.h mogen_moa.h mogen_moa.c)
 
 add_library(mogenmop SHARED ${mogen_mop_SOURCES})
+target_link_libraries(mogenmop moea_math)
+
 set_target_properties(mogenmop PROPERTIES
     VERSION ${MOGEN_VERSION_MAJOR} SOVERSION ${MOGEN_VERSION_MAJOR}
     BUILD_WITH_INSTALL_RPATH TRUE

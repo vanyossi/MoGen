@@ -21,8 +21,28 @@
 #include <assert.h>
 
 #include <math.h>
+#include "rand.h"
 
 #include "mogen_mop.h"
+
+void moead_run(Mop* mop, int steps){
+    do {
+        steps--;
+        for (int i = 0; i < mop->pop->size; ++i) {
+            mop->evaluate(mop, i);
+        }
+    } while (steps > 0);
+}
+
+Moa* mymoead_init(Mop *mop, double cp, double ci, double mp, double mi){
+    MoaType moeat;
+    moeat.moea = (Moea){cp,ci,mp,mi};
+
+    Moa* new_moa = moa_moea(mop, moeat, "MOEAD");
+    new_moa->run = moead_run;
+
+    return new_moa;
+}
 
 void mopeval_zdt1(Mop* mop, unsigned int idx){
 
@@ -74,27 +94,46 @@ Mop* init_zdt(unsigned int nreal, unsigned int nobjs){
 }
 
 
-
 int main(int argc, char const *argv[]) {
 
+    // initialize seed
+    set_random(0.141559);
+
     // declare mop problem
-    Mop* my_mop = init_zdt(14,2);
+    Mop* my_mop = init_zdt(5,2);
     mop_print(my_mop);
 
     // declare algorithm
+    Moa *my_moa = mymoead_init(my_mop, 0.5,0.7,0.3,1);
 
     // initialize population
-    MoeazPop* m_pop = moeaz_pop_init(my_mop, 3);
+    MoeazPop* m_pop = moeaz_pop_alloc(my_mop, 3);
+    moeaz_pop_init(my_mop);
 
-    printf("size of ind %d and type %d", m_pop->indv[0].xsize, m_pop->indv[0].type);
-    printf("size of ind %d and type %d", m_pop->indv[1].xsize, m_pop->indv[1].type);
+    printf("size of ind %d and type %d\n", m_pop->indv[0].xsize, m_pop->indv[0].type);
+    printf("size of ind %d and type %d\n", m_pop->indv[1].xsize, m_pop->indv[1].type);
 
-
+    double *vals;
+    for (int i = 0; i < 2; ++i) {
+        printf("ind %d: ", i);
+        vals = my_mop->pop->indv[i].x.real;
+        for (int j = 0; j < my_mop->pop->indv[i].xsize; ++j) {
+            printf("%d:%.3f, ", j, vals[j]);
+        }
+        puts("\n");
+    }
     // evaluate runs
-
+    my_moa->run(my_mop,1);
 
     // analize pop
-
+    for (int i = 0; i < 2; ++i) {
+        printf("ind %d: ", i);
+        vals = my_mop->pop->indv[i].f;
+        for (int j = 0; j < my_mop->pop->indv[i].fsize; ++j) {
+            printf("%d:%.3f, ",j, vals[j]);
+        }
+        puts("\n");
+    }
 
     // free resources.
     moeaz_pop_free(m_pop);

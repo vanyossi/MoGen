@@ -18,12 +18,13 @@
 
 
 #include "mogen_population.h"
-#include "mogen_mop.h"
-
 #include <stdlib.h>
 #include <memory.h>
 
-void moeaz_indv_init(MoeazIndv *indv, struct mop_t *mop){
+#include "mogen_mop.h"
+#include "rand.h"
+
+void moeaz_indv_alloc(MoeazIndv *indv, struct mop_t *mop){
 //    MoeazIndv* indv = calloc(1,sizeof(MoeazIndv));
     indv->type = mop->set.type;
     memcpy(&indv->xsize, &mop->set.ndec, sizeof(int) * 3);
@@ -45,6 +46,31 @@ void moeaz_indv_init(MoeazIndv *indv, struct mop_t *mop){
 };
 
 
+void moeaz_indv_init(MoeazIndv *indv, struct mop_t *mop){
+
+    if (indv->type == MOP_REAL){
+        for (int i = 0; i < mop->set.ndec; ++i) {
+            indv->x.real[i] = rnd_real(mop->limits.xmin[i], mop->limits.xmax[i]);
+        }
+    } else if (indv->type == MOP_BIN) {
+        for (int i = 0; i < mop->set.ndec; ++i) {
+            indv->x.bin[i] = (short)((rnd_perc() < 0.5) ? 0 : 1);
+        }
+    } else {
+        double value;
+        for (int i = 0; i < mop->set.ndec; ++i) {
+            // bin or real
+            if(rnd_perc() < 0.5) {
+                value = rnd_real(mop->limits.xmin[i], mop->limits.xmax[i]);
+                mua_set_double(&indv->x.mix, i, value);
+            } else {
+                mua_set_int(&indv->x.mix, i, (rnd_perc() < 0.5) ? 0 : 1);
+            }
+        }
+    }
+}
+
+
 void moeaz_indv_free(MoeazIndv *indv){
     if (indv->type == MOP_REAL) {
       free(indv->x.real);
@@ -58,16 +84,23 @@ void moeaz_indv_free(MoeazIndv *indv){
 };
 
 
-MoeazPop* moeaz_pop_init(struct mop_t *mop, unsigned int size) {
+MoeazPop* moeaz_pop_alloc(struct mop_t *mop, unsigned int size) {
     MoeazPop* new_pop = calloc(1,sizeof(MoeazPop));
 
     new_pop->size = size;
     new_pop->indv = calloc(size, sizeof(MoeazIndv));
     for (int i = 0; i < size; ++i) {
-         moeaz_indv_init(&new_pop->indv[i], mop);
+        moeaz_indv_alloc(&new_pop->indv[i], mop);
     }
-
+    mop->pop = new_pop;
     return new_pop;
+}
+
+
+void moeaz_pop_init(struct mop_t *mop){
+    for (int i = 0; i < mop->pop->size; ++i) {
+        moeaz_indv_init(&mop->pop->indv[i], mop);
+    }
 }
 
 void moeaz_pop_free(MoeazPop* pop){

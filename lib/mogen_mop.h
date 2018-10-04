@@ -25,6 +25,7 @@
 #define MOGEN_MOP_H
 
 #include "mogen_population.h"
+#include "mogen_moa.h"
 
 typedef enum mop_specs_e {
     MOP_REAL =          1 << 0,     // 0b00001
@@ -36,7 +37,7 @@ typedef enum mop_specs_e {
 } MopSpecs;
 
 struct mop_t;
-
+struct mogen_moa_t;
 
 typedef struct mop_base_t {
     char name[128];
@@ -65,6 +66,7 @@ typedef struct mop_t {
     Mop_base set;
     Mop_limit limits;
     MoeazPop* pop;
+    struct mogen_moa_t* solver;
     void (*evaluate)(struct mop_t* mop, unsigned int idx);
     void (*cross)(struct mop_t *mop, MoeazIndv* p1, MoeazIndv* p2, MoeazIndv* c1, MoeazIndv* c2);
 } Mop;
