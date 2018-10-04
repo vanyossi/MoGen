@@ -21,6 +21,7 @@
 #define MOGEN_MOGEN_MOA_H
 
 #include "mogen_moea.h"
+#include "crossover.h"
 
 struct mop_t;
 
@@ -37,5 +38,7 @@ typedef struct mogen_moa_t {
 } Moa;
 
 Moa* moa_init(struct mop_t *mop, char* name);
+
+void moa_crossover(Moa* moa, enum moa_cx_types cx_func);
 
 #endif //MOGEN_MOGEN_MOA_H

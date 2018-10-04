@@ -23,12 +23,15 @@
 #include <math.h>
 
 #include "rand.h"
+#include "mogen_mop.h"
 
-void crossover(Mop *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2){
+void crossover(struct mop_t *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2){
     mop->cross(mop, mogen_mop_getindv(mop, p1), mogen_mop_getindv(mop, p2), mogen_mop_getindv(mop, c1), mogen_mop_getindv(mop, c2));
 }
 
-void PNX(Mop *mop, MoeazIndv *p1, MoeazIndv *p2, MoeazIndv *c1, MoeazIndv *c2){
+void PNX(struct mop_t *mop, struct moeaz_indv_t* p1, struct moeaz_indv_t* p2,
+    struct moeaz_indv_t* c1, struct moeaz_indv_t* c2){
+
     if (mop->set.type != 1) {
         // mop is not real, crossover might give unexpected results.
     }

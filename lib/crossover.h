@@ -20,11 +20,23 @@
 #ifndef MOGEN_CROSSOVER_H
 #define MOGEN_CROSSOVER_H
 
-#include "mogen_mop.h"
+#include "mogen_population.h"
 
-void crossover(Mop *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2);
+struct mop_t;
+struct moeaz_indv_t;
 
-void PNX(Mop *mop, MoeazIndv *p1, MoeazIndv *p2, MoeazIndv *c1, MoeazIndv *c2);
+enum moa_cx_types {
+    CX_ONE_POINT,
+    CX_TWO_POINT,
+    CX_UNIFORM,
+    CX_SBX,
+    CX_PNX
+};
+
+void crossover(struct mop_t *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2);
+
+void PNX(struct mop_t *mop, struct moeaz_indv_t* p1, struct moeaz_indv_t* p2,
+    struct moeaz_indv_t* c1, struct moeaz_indv_t* c2);
 
 
 #endif //MOGEN_CROSSOVER_H

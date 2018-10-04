@@ -17,6 +17,7 @@
  */
 
 #include "mogen_moa.h"
+#include "mogen_mop.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -26,6 +27,11 @@ Moa* moa_init(struct mop_t *mop, char* name){
 
     strcpy(new_moa->name, name);
     new_moa->mop = mop;
+    mop->solver = new_moa;
 
     return new_moa;
+}
+
+void moa_crossover(Moa* moa, enum moa_cx_types cx_func){
+    moa->mop->cross = PNX;
 }
