@@ -16,15 +16,5 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <MacTypes.h>
-#include "mogen_mop.h"
 
-int main(int argc, char const *argv[]) {
-
-    mop_print(mogen_mop("TEST1", MOP_BIN | MOP_RESTRICTED, 0));
-    mop_print(mogen_mop("TEST3", MOP_REAL | MOP_CONTIGUOUS, 0));
-    mop_print(mogen_mop("TEST4", MOP_DYNAMIC | MOP_BIN | MOP_REAL, 0));
-    mop_print(mogen_mop("TEST15", MOP_RESTRICTED | MOP_REAL | MOP_DYNAMIC, 0));
-
-    return 0;
-}
+#include "svm.h"

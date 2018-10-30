@@ -16,15 +16,23 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <MacTypes.h>
+
+#ifndef MOGEN_SVM_H
+#define MOGEN_SVM_H
+
 #include "mogen_mop.h"
+#include "mogen_moa.h"
 
-int main(int argc, char const *argv[]) {
+typedef double (moa_svm_kernel*)(double *X, double *Theta)
 
-    mop_print(mogen_mop("TEST1", MOP_BIN | MOP_RESTRICTED, 0));
-    mop_print(mogen_mop("TEST3", MOP_REAL | MOP_CONTIGUOUS, 0));
-    mop_print(mogen_mop("TEST4", MOP_DYNAMIC | MOP_BIN | MOP_REAL, 0));
-    mop_print(mogen_mop("TEST15", MOP_RESTRICTED | MOP_REAL | MOP_DYNAMIC, 0));
+typedef struct moa_svm_t {
+    Moa *moa;
+    moa_svm_kernel kernel;
+};
 
-    return 0;
-}
+moa_svm(Mop* mop, double c);
+
+moa_svm_set_kernel(Moa *moa, moa_svm_kernel kernel);
+
+
+#endif //MOGEN_SVM_H

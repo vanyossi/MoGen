@@ -22,16 +22,54 @@
 #include <stdlib.h>
 #include <string.h>
 
-Moa* moa_init(struct mop_t *mop, char* name){
-    Moa* new_moa = calloc(1, sizeof(Moa));
+Moa *moa_init(struct mop_t *mop, char *name, MoaTypes type, size_t mem_size) {
+    size_t alloc_size = sizeof(Moa);
+    if(mem_size > alloc_size){
+        alloc_size = mem_size;
+    }
+    Moa* new_moa = calloc(1, alloc_size);
 
+    new_moa->type = type;
     strcpy(new_moa->name, name);
     new_moa->mop = mop;
     mop->solver = new_moa;
 
+    mop->solver->stop = moa_stop;
+
     return new_moa;
 }
 
-void moa_crossover(Moa* moa, enum moa_cx_types cx_func){
-    moa->mop->cross = PNX;
+mbool moa_run(struct mop_t *mop){
+    for (int i = 0; i < mop->pop->size; ++i){
+        MoeazIndv* indv = &mop->pop->indv[i];
+        if (!mop_evaluate(mop, indv)){
+            return mfalse;
+        }
+    }
+    return mtrue;
+}
+
+void moa_stopat_gen(Moa *moa, unsigned int gen) {
+    moa->stops.gens = gen;
+}
+
+void moa_stopat_eval(Moa *moa, unsigned int eval){
+    moa->stops.evals = eval;
+}
+
+mbool moa_stop(struct mogen_moa_t* moa, MoaStopCriterion criterion){
+    mbool stop = mfalse;
+    switch (criterion) {
+        case MGN_STOPIF_EXEC:
+            if (moa->stops.evals > 0)
+                stop = (moa->mop->report.total.evals >= moa->stops.evals) ? mtrue : mfalse;
+            break;
+        case MGN_STOPIF_GEN:
+            if (moa->stops.gens > 0)
+                stop = (moa->mop->report.total.gens >= moa->stops.gens) ? mtrue : mfalse;
+            break;
+        default:
+            break;
+    }
+    return stop;
 }

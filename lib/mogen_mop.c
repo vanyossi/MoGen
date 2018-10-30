@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+//#include <stdint.h>
 #include <string.h>
 
 #define CheckSpec(flag) (mop_specs & flag) == flag
@@ -32,9 +33,13 @@
  * @brief
  * @param mop_specs
  */
-Mop *mogen_mop(char *name, MopSpecs mop_specs) {
+Mop *mogen_mop(char *name, MopSpecs mop_specs, size_t mem_size) {
+    size_t alloc_size = sizeof(Mop);
+    if (alloc_size < mem_size) {
+        alloc_size = mem_size;
+    }
+    Mop *nmop = calloc(1, alloc_size);
 
-    Mop *nmop = calloc(1, sizeof(Mop));
     strcpy(nmop->set.name, name);
 
     if (CheckSpec(MOP_CONTIGUOUS)) {
@@ -60,8 +65,65 @@ Mop *mogen_mop(char *name, MopSpecs mop_specs) {
     return nmop;
 }
 
+void mop_set_params(Mop *mop, unsigned int ndec, unsigned int nobjs, unsigned int ncons){
+    mop->set.ndec = ndec;
+    mop->set.nobj = nobjs;
+    mop->set.ncons = ncons;
+}
+
+void mop_set_limits_ndec(Mop *mop, double *min, double *max, unsigned int size) {
+    mop->limits.xmin = (double*) malloc(sizeof(double) * mop->set.ndec);
+    mop->limits.xmax = (double*) malloc(sizeof(double) * mop->set.ndec);
+
+    int j;
+    for (int i = 0; i < mop->set.ndec; i++) {
+        j = i % size;
+        mop->limits.xmin[i] = min[j];
+        mop->limits.xmax[i] = max[j];
+    }
+}
+
 MoeazIndv *mogen_mop_getindv(Mop *mop, unsigned int pos) {
-    return &mop->pop->indv[pos];
+    // @ TODO assert if pos is bigger than size.
+    if (pos < mop->pop->size) {
+        return (MoeazIndv*)((char*)mop->pop->indv + pos * mop->pop->indv_size);
+    } else {
+        return mop->pop->indv;
+    }
+}
+
+mbool mop_evaluate(Mop *mop, MoeazIndv *indv) {
+    mop->evaluate(mop, indv);
+    mop->report.current.evals++;
+    mop->report.total.evals++;
+    // Check if stop condition is met
+    if (moa_stop(mop->solver, MGN_STOPIF_EXEC)){
+        return mfalse;
+    }
+    return mtrue;
+}
+
+void mop_solve(Mop *mop, int steps){
+    mop_restart_stats(&mop->report.current);
+
+    mop_start_timer(&mop->report);
+    do {
+        steps--;
+        // if moa returns false, stop condition is met
+        if (!mop->solver->run(mop))
+            break;
+        mop->report.current.gens++;
+        mop->report.total.gens++;
+
+        if (moa_stop(mop->solver, MGN_STOPIF_GEN)){
+            break;
+        }
+    } while (steps);
+    nanosleep((const struct timespec[]){{1L, 30000000L}}, NULL);
+    mop_stop_timer(&mop->report);
+
+//    mop->report.total.gens += mop->report.current.gens;
+//    mop->report.total.evals += mop->report.current.evals;
 }
 
 void mop_print(Mop *mop){

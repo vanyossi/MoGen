@@ -20,25 +20,61 @@
 #ifndef MOGEN_MOGEN_MOA_H
 #define MOGEN_MOGEN_MOA_H
 
-#include "mogen_moea.h"
-#include "crossover.h"
+#include "global_types.h"
+#include "mogen_population.h"
+#include "mop_report.h"
+
+#define mbool int
+#define mfalse 0
+#define mtrue 1
 
 struct mop_t;
+struct mogen_moa_t;
+struct moeaz_indv_t;
 
-typedef union mogen_moa_type_t {
-    Moea moea;
-} MoaType;
+enum moa_stop_criterion_t {
+    MGN_STOPIF_GEN,
+    MGN_STOPIF_EXEC,
+    MGN_STOP_SIZE_MARKER            // not used, only for extending enum
+};
 
+enum mogen_moa_types_e {
+    MOA_MONO,
+    MOA_DECOMP,
+    MOA_INDIC,
+    MOA_REND,
+    MOA_PARETO
+};
 
-typedef struct mogen_moa_t {
+struct mogen_moa_bias_t {
+    double cxprob;
+    double cxidx;
+};
+
+struct mogen_moa_t {
+    MoaTypes type;
     char name[64];
     struct mop_t* mop;
-    void (*run)(struct mop_t* mop, int steps);          //!< Moa evaluate step function pointer
-    MoaType algorithm;
-} Moa;
+    struct mogen_moa_bias_t bias;
+    MopReportStats stops;
+    indv_init_extra extra_indv_alloc;
+    void* cross;
 
-Moa* moa_init(struct mop_t *mop, char* name);
+    mbool (*stop)(struct mogen_moa_t* moa, MoaStopCriterion criterion);
+    mbool (*run)(struct mop_t* mop);
+};
 
-void moa_crossover(Moa* moa, enum moa_cx_types cx_func);
+
+Moa *moa_init(struct mop_t *mop, char *name, MoaTypes type, size_t mem_size);
+
+mbool moa_run(struct mop_t *mop);
+
+void moa_stopat_gen(Moa *moa, unsigned int gen);
+
+void moa_stopat_eval(Moa *moa, unsigned int eval);
+
+mbool moa_stop(struct mogen_moa_t* moa, MoaStopCriterion criterion);
+
+//void moa_crossover(Moa* moa, enum moa_cx_types cx_func);
 
 #endif //MOGEN_MOGEN_MOA_H

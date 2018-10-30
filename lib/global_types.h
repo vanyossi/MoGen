@@ -16,15 +16,27 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <MacTypes.h>
-#include "mogen_mop.h"
 
-int main(int argc, char const *argv[]) {
+#ifndef MOGEN_GLOBAL_TYPES_H
+#define MOGEN_GLOBAL_TYPES_H
 
-    mop_print(mogen_mop("TEST1", MOP_BIN | MOP_RESTRICTED, 0));
-    mop_print(mogen_mop("TEST3", MOP_REAL | MOP_CONTIGUOUS, 0));
-    mop_print(mogen_mop("TEST4", MOP_DYNAMIC | MOP_BIN | MOP_REAL, 0));
-    mop_print(mogen_mop("TEST15", MOP_RESTRICTED | MOP_REAL | MOP_DYNAMIC, 0));
+typedef enum mop_specs_e MopSpecs;
 
-    return 0;
-}
+typedef struct mop_t Mop;
+typedef struct mop_base_t Mop_base;
+typedef struct mop_extra_t Mop_extra;
+typedef struct mop_limit_t Mop_limit;
+
+
+typedef struct mogen_moa_t Moa;
+typedef enum moa_stop_criterion_t MoaStopCriterion;
+typedef enum mogen_moa_types_e MoaTypes;
+
+
+typedef struct moeaz_indv_t MoeazIndv;
+typedef union multi_data_t MultiData;
+
+typedef struct moeaz_pop_t MoeazPop;
+
+
+#endif //MOGEN_GLOBAL_TYPES_H

@@ -17,23 +17,31 @@
  */
 
 
-#ifndef MOGEN_MOGEN_MOEA_H
-#define MOGEN_MOGEN_MOEA_H
+#ifndef MOGEN_CROSSOVER_H
+#define MOGEN_CROSSOVER_H
 
+#include "global_types.h"
 
-union mogen_moa_type_t;
-struct mop_t;
+typedef enum moa_cx_types {
+    CX_ONE_POINT,
+    CX_TWO_POINT,
+    CX_UNIFORM,
+    CX_SBX,
+    CX_PNX
+} CXType;
 
-typedef struct moea_t {
-    double cross_index; //!< Crossover index
-    double cross_prob;  //!< Crossover probability of happening
-    double mut_index;   //!< Mutation index
-    double mut_prob;    //!< Mutation probability of happening
-} Moea;
+void moa_cross_setup(Moa *moa, CXType cx_type);
 
+/**
+ * @brief PNX CrossOver
+ * @param mop
+ * @param parent1
+ * @param parent2
+ * @param c1
+ * @param c2
+ */
+void PNX_real(Mop* mop, MoeazIndv *parent1, MoeazIndv* parent2, MoeazIndv* c1, MoeazIndv* c2);
+void PNX_bin(Mop* mop, MoeazIndv *parent1, MoeazIndv* parent2, MoeazIndv* c1, MoeazIndv* c2);
+void PNX_mixed(Mop* mop, MoeazIndv *parent1, MoeazIndv* parent2, MoeazIndv* c1, MoeazIndv* c2) ;
 
-struct mogen_moa_t *moa_moea(struct mop_t *mop, union mogen_moa_type_t moea, char *name);
-
-#endif //MOGEN_MOGEN_MOEA_H
-
-
+#endif //MOGEN_CROSSOVER_H

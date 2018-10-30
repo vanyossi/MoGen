@@ -24,39 +24,42 @@
 #include "rand.h"
 
 #include "mogen_mop.h"
-#include "crossover.h"
+#include "lib/operators/crossover.h"
 
-void moead_run(Mop* mop, int steps){
-    do {
-        steps--;
-        for (int i = 0; i < mop->pop->size; ++i) {
-            mop->evaluate(mop, i);
-            crossover(mop, 0, 1, 2, 3);
-        }
-    } while (steps > 0);
+int moead_run(Mop* mop){
+    for (unsigned int i = 0; i < mop->pop->size; ++i) {
+        mop_evaluate(mop, mogen_mop_getindv(mop, i));
+        mop->solver->cross(mop,
+            mogen_mop_getindv(mop, (unsigned) rnd_int(0,mop->pop->size)),
+            mogen_mop_getindv(mop, (unsigned) rnd_int(0,mop->pop->size)),
+            mogen_mop_getindv(mop, (unsigned) rnd_int(0,mop->pop->size)),
+            mogen_mop_getindv(mop, (unsigned) rnd_int(0,mop->pop->size))
+        );
+    }
+    return mtrue;
 }
 
-Moa* mymoead_init(Mop *mop, double cp, double ci, double mp, double mi){
-    MoaType moeat;
-    moeat.moea = (Moea){cp,ci,mp,mi};
+Moa* mymoead_init(Mop *mop, double cp, double ci){
 
-    Moa* new_moa = moa_moea(mop, moeat, "MOEAD");
+    Moa* new_moa = moa_init(mop, "MOEAD", MOA_DECOMP, 0);
+    new_moa->bias.cxprob = cp;
     new_moa->run = moead_run;
 
     return new_moa;
 }
 
-void mopeval_zdt1(Mop* mop, unsigned int idx){
+void mopeval_zdt1(Mop* mop, MoeazIndv* cind){
 
-    MoeazIndv* cind = &mop->pop->indv[idx];
+    indv_real_data *x = cind->x.data;
+
     double f1, f2, g, h, sum;
     unsigned int i;
 
-    f1 = cind->x.real[0];
+    f1 = x[0];
     sum = 0.0;
     for (i = 1; i < cind->xsize; i++)
     {
-        sum += cind->x.real[i];
+        sum += x[i];
     }
     g = 1.0 + 9.0 * sum / (cind->xsize - 1.0);
     h = 1.0 - sqrt(f1 / g);
@@ -70,25 +73,20 @@ void mopeval_zdt1(Mop* mop, unsigned int idx){
 Mop* init_zdt(unsigned int nreal, unsigned int nobjs){
 
     assert(nreal > nobjs);
-    Mop* mop = mogen_mop("ZDT", MOP_REAL | MOP_CONTIGUOUS);
-    mop->set.ndec = nreal;
-    mop->set.nobj = nobjs;
+    Mop* mop = mogen_mop("ZDT", MOP_REAL | MOP_CONTIGUOUS, 0);
+
+    mop_set_params(mop, nreal, nobjs, 0);
+
+    double xmin_limits[5] = {0.1, 0.2, 0.3, 0.4, 0.5};
+    double xmax_limits[5] = {1.0, 2.0, 1.0, 0.5, 1.5};
+
+    mop_set_limits_ndec(mop, xmin_limits, xmax_limits, 5);
 
 //    int n_var[5]; /* number of variables */
 //
 //    enum { zdt1, zdt2, zdt3, zdt4, zdt6 };
 //    n_var[zdt1] = n_var[zdt2] = n_var[zdt3] = 30;
 //    n_var[zdt4] = n_var[zdt6] = 10;
-
-    mop->set.ncons = 0;
-    mop->limits.xmin = (double*) malloc(sizeof(double) * mop->set.ndec);
-    mop->limits.xmax = (double*) malloc(sizeof(double) * mop->set.ndec);
-
-    for (int j = 0; j < mop->set.ndec; j++)
-    {
-        mop->limits.xmin[j] = 0.0;
-        mop->limits.xmax[j] = 1.0;
-    }
 
     mop->evaluate = mopeval_zdt1;
 
@@ -99,39 +97,42 @@ Mop* init_zdt(unsigned int nreal, unsigned int nobjs){
 int main(int argc, char const *argv[]) {
 
     // initialize seed
-    set_random(0.141559);
+    set_random(0.56);
 
     // declare mop problem
     Mop* my_mop = init_zdt(10,2);
     mop_print(my_mop);
 
     // declare algorithm
-    Moa *my_moa = mymoead_init(my_mop, 0.5,0.7,0.3,1);
+    Moa *my_moa = mymoead_init(my_mop, 1.0,1.0);
 
     // initialize population
-    MoeazPop* m_pop = moeaz_pop_alloc(my_mop, 4);
-    moeaz_pop_init(my_mop);
-    moa_crossover(my_moa, CX_PNX);
+    MoeazPop* m_pop = mogen_pop_alloc(my_mop, 20);
+    mogen_pop_init(my_mop);
+
+    moa_cross_setup(my_moa, CX_PNX);
 
     printf("size of ind %d and type %d\n", m_pop->indv[0].xsize, m_pop->indv[0].type);
     printf("size of ind %d and type %d\n", m_pop->indv[1].xsize, m_pop->indv[1].type);
 
     double *vals;
+
     for (int i = 0; i < 3; ++i) {
         printf("ind %d: ", i);
-        vals = my_mop->pop->indv[i].x.real;
+        vals = get_data_real((&my_mop->pop->indv[i]));
         for (int j = 0; j < my_mop->pop->indv[i].xsize; ++j) {
             printf("%d:%.3f, ", j, vals[j]);
         }
         puts("");
     }
+    puts("");
     // evaluate runs
-    my_moa->run(my_mop,1);
+    my_moa->run(my_mop);
 
     // analize pop
     for (int i = 0; i < 3; ++i) {
         printf("ind %d: ", i);
-        vals = my_mop->pop->indv[i].x.real;
+        vals = get_data_real((&my_mop->pop->indv[i]));
         for (int j = 0; j < my_mop->pop->indv[i].xsize; ++j) {
             printf("%d:%.3f, ", j, vals[j]);
         }
@@ -139,7 +140,7 @@ int main(int argc, char const *argv[]) {
     }
 
     for (int i = 0; i < 2; ++i) {
-        printf("ind %d: ", i);
+        printf("zdt ind %d: ", i);
         vals = my_mop->pop->indv[i].f;
         for (int j = 0; j < my_mop->pop->indv[i].fsize; ++j) {
             printf("%d:%.3f, ",j, vals[j]);
@@ -148,7 +149,7 @@ int main(int argc, char const *argv[]) {
     }
 
     // free resources.
-    moeaz_pop_free(m_pop);
+    mogen_pop_free(m_pop);
 
     return 0;
 }

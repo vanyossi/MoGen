@@ -24,22 +24,27 @@
 #ifndef MOGEN_MOP_H
 #define MOGEN_MOP_H
 
+#include <stdbool.h>
+
+#include "global_types.h"
+
 #include "mogen_population.h"
 #include "mogen_moa.h"
+#include "mop_report.h"
 
-typedef enum mop_specs_e {
-    MOP_REAL =          1 << 0,     // 0b00001
-    MOP_BIN =           1 << 1,     // 0b00010
-    MOP_MIX =           11 << 0,    // 0b00011
-    MOP_CONTIGUOUS =    1 << 2,     // 0b00100
-    MOP_RESTRICTED =    1 << 3,     // 0b01000
-    MOP_DYNAMIC =       1 << 4      // 0b10000
-} MopSpecs;
+enum mop_specs_e {
+    MOP_REAL =          1 << 0,     // 0b000000001
+    MOP_BIN =           1 << 1,     // 0b000000010
+    MOP_MIX =           11 << 0,    // 0b000000011
+    MOP_CONTIGUOUS =    1 << 6,     // 0b001000000
+    MOP_RESTRICTED =    1 << 7,     // 0b010000000
+    MOP_DYNAMIC =       1 << 8      // 0b100000000
+};
 
 struct mop_t;
 struct mogen_moa_t;
 
-typedef struct mop_base_t {
+struct mop_base_t {
     char name[128];
     unsigned int type:8;    //!< real, bin or mixed
     unsigned int continuous:8;
@@ -49,32 +54,42 @@ typedef struct mop_base_t {
     unsigned int ndec;     //!< Number of real decision variables
     unsigned int nobj;    //!< Number of objectives
     unsigned int ncons;   //!< Constrain number
-
-    double prob_cross;
-    void (*x_func)(struct mop_t mop, int p1, int p2, int i1, int i2);
-
-} Mop_base;
+};
 
 
-typedef struct mop_limit_t {
+struct mop_limit_t {
     double *xmin;
     double *xmax;
-} Mop_limit;
+};
 
 
-typedef struct mop_t {
+struct mop_extra_t {
+    int size;
+};
+
+struct mop_t {
     Mop_base set;
     Mop_limit limits;
-    MoeazPop* pop;
+    MoeazPop *pop;
+    MoeazPop *ext_pop;
     struct mogen_moa_t* solver;
-    void (*evaluate)(struct mop_t* mop, unsigned int idx);
-    void (*cross)(struct mop_t *mop, MoeazIndv* p1, MoeazIndv* p2, MoeazIndv* c1, MoeazIndv* c2);
-} Mop;
+    void (*evaluate)(struct mop_t *mop, MoeazIndv *indv);
+    MopReport report;
+};
 
+// void (*cross)(struct mop_t *mop, MoeazIndv* p1, MoeazIndv* p2, MoeazIndv* c1, MoeazIndv* c2);
 
-Mop *mogen_mop(char *name, MopSpecs mop_specs);
+Mop *mogen_mop(char *name, MopSpecs mop_specs, size_t mem_size);
+
+void mop_set_params(Mop *mop, unsigned int nreal, unsigned int nobjs, unsigned int ncons);
+
+void mop_set_limits_ndec(Mop *mop, double *min, double *max, unsigned int size);
 
 MoeazIndv *mogen_mop_getindv(Mop *mop, unsigned int pos);
+
+mbool mop_evaluate(Mop *mop, MoeazIndv *indv);
+
+void mop_solve(Mop *mop, int steps);
 
 void mop_print(Mop *mop);
 

@@ -20,43 +20,56 @@
 #ifndef MOGEN_POP_H
 #define MOGEN_POP_H
 
+#include "global_types.h"
 #include "multi_array.h"
+
+#define indv_real_data double
+#define indv_bin_data unsigned short
+#define get_data_real(var) (indv_real_data*)(var->x.data)
+#define get_data_bin(var) (indv_bin_data*)(var.x.data)
 
 struct mop_t;
 
-typedef union multi_data_t {
-    double* real;
-    unsigned short* bin;
-    Multiarray mix;
-} MultiData;
+typedef void(*indv_init_extra)(Mop*, MoeazIndv*);
 
-typedef struct moeaz_indv_t {
-    int type;
+union multi_data_t {
+    void *data;             //!> real and binary
+    Multiarray *mix;  // que sea continuo. alguna cod para cambiar
+};
+
+struct moeaz_indv_t {
+    int type:16;
+    int feasible:16;
+    double CV;
     unsigned int xsize;
     unsigned int fsize;
     unsigned int gsize;
     MultiData x; // real, bin, or mixed
     double* f;
     double* g;
-} MoeazIndv;
+};
 
-void moeaz_indv_alloc(MoeazIndv *indv, struct mop_t *mop);
+void mogen_indv_alloc(MoeazIndv *indv, struct mop_t *mop);
 
-void moeaz_indv_init(MoeazIndv *indv, struct mop_t *mop);
+void mogen_indv_init(MoeazIndv *indv, struct mop_t *mop);
 
-void moeaz_indv_free(MoeazIndv *indv);
+void mogen_indv_init_extra(Mop *mop, MoeazIndv *indv, indv_init_extra init_f);
+
+void mogen_indv_free(MoeazIndv *indv);
 
 
-typedef struct moeaz_pop_t {
+struct moeaz_pop_t {
     int size;
+    size_t indv_size;
     MoeazIndv* indv;
-    unsigned int *front;
-} MoeazPop;
+};
 
-MoeazPop *moeaz_pop_alloc(struct mop_t *mop, unsigned int size);
+MoeazPop *mogen_pop_alloc(Moa *moa, unsigned int size, size_t indv_size);
 
-void moeaz_pop_init(struct mop_t *mop);
+void mogen_pop_init(Moa *moa);
 
-void moeaz_pop_free(MoeazPop* pop);
+void mogen_pop_init_extra(Moa *moa, indv_init_extra init_f);
+
+void mogen_pop_free(MoeazPop *pop);
 
 #endif //MOGEN_POP_H

@@ -4,4 +4,4 @@ include_directories(
 )
 
 add_executable(moeadzdt1 moead_zdt1.c)
-target_link_libraries(moeadzdt1 mogenmop)
+target_link_libraries(moeadzdt1 mogenmop mogenops)

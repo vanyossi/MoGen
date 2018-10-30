@@ -17,13 +17,29 @@
  */
 
 
-#include "mogen_moea.h"
+#ifndef MOGEN_TIME_TOOLS_H
+#define MOGEN_TIME_TOOLS_H
 
-#include "mogen_moa.h"
+#include <time.h>
 
-Moa *moa_moea(struct mop_t *mop, union mogen_moa_type_t moea, char *name) {
-    Moa* n_moea = moa_init(mop, name);
-    n_moea->algorithm = moea;
+#if defined(__MACH__)
+#include <sys/time.h>
+#endif
 
-    return n_moea;
-}
+#if !defined(CLOCK_REALTIME)
+#define CLOCK_REALTIME 0
+#endif
+
+void mogen_time_to(struct timespec *ts);
+
+long mogen_cac_elapsed_time_ts(struct timespec *start, struct timespec *end);
+
+long mogen_cac_elapsed_time_l(long start, long end);
+
+void mogen_add_timeto(struct timespec *t1, struct timespec *t2);
+
+long mogen_timespec2long(struct timespec *t);
+
+double mogen_time_ms2sec(long time);
+
+#endif //MOGEN_TIME_TOOLS_H

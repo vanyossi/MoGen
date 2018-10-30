@@ -17,26 +17,23 @@
  */
 
 
-#ifndef MOGEN_CROSSOVER_H
-#define MOGEN_CROSSOVER_H
+#include "mop_report.h"
 
-#include "mogen_population.h"
+void mop_start_timer(MopReport *report){
+    struct timespec now;
+    mogen_time_to(&now);
+    report->current.t_elapsed = mogen_timespec2long(&now);
+}
 
-struct mop_t;
-struct moeaz_indv_t;
+void mop_stop_timer(MopReport *report){
+    struct timespec stop;
+    mogen_time_to(&stop);
 
-enum moa_cx_types {
-    CX_ONE_POINT,
-    CX_TWO_POINT,
-    CX_UNIFORM,
-    CX_SBX,
-    CX_PNX
-};
+    report->current.t_elapsed = mogen_cac_elapsed_time_l(report->current.t_elapsed, mogen_timespec2long(&stop));
+    report->total.t_elapsed += report->current.t_elapsed;
+}
 
-void crossover(struct mop_t *mop, unsigned int p1, unsigned int p2, unsigned int c1, unsigned int c2);
-
-void PNX(struct mop_t *mop, struct moeaz_indv_t* p1, struct moeaz_indv_t* p2,
-    struct moeaz_indv_t* c1, struct moeaz_indv_t* c2);
-
-
-#endif //MOGEN_CROSSOVER_H
+void mop_restart_stats(MopReportStats *stats){
+    stats->gens = 0;
+    stats->evals = 0;
+}
