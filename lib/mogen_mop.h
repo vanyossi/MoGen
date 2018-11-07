@@ -28,7 +28,7 @@
 
 #include "global_types.h"
 
-#include "mogen_population.h"
+#include "mgf_population.h"
 #include "mogen_moa.h"
 #include "mop_report.h"
 
@@ -73,11 +73,11 @@ struct mop_t {
     MoeazPop *pop;
     MoeazPop *ext_pop;
     struct mogen_moa_t* solver;
-    void (*evaluate)(struct mop_t *mop, MoeazIndv *indv);
+    void (*evaluate)(struct mop_t *mop, Individual *indv);
     MopReport report;
 };
 
-// void (*cross)(struct mop_t *mop, MoeazIndv* p1, MoeazIndv* p2, MoeazIndv* c1, MoeazIndv* c2);
+// void (*cross)(struct mop_t *mop, Individual* p1, Individual* p2, Individual* c1, Individual* c2);
 
 Mop *mogen_mop(char *name, MopSpecs mop_specs, size_t mem_size);
 
@@ -85,9 +85,9 @@ void mop_set_params(Mop *mop, unsigned int nreal, unsigned int nobjs, unsigned i
 
 void mop_set_limits_ndec(Mop *mop, double *min, double *max, unsigned int size);
 
-MoeazIndv *mogen_mop_getindv(Mop *mop, unsigned int pos);
+Individual *mogen_mop_getindv(Mop *mop, unsigned int pos);
 
-mbool mop_evaluate(Mop *mop, MoeazIndv *indv);
+mbool mop_evaluate(Mop *mop, Individual *indv);
 
 void mop_solve(Mop *mop, int steps);
 

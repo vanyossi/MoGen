@@ -21,7 +21,7 @@
 #define MOGEN_MOGEN_MOA_H
 
 #include "global_types.h"
-#include "mogen_population.h"
+#include "mgf_population.h"
 #include "mop_report.h"
 
 #define mbool int
@@ -57,7 +57,6 @@ struct mogen_moa_t {
     struct mop_t* mop;
     struct mogen_moa_bias_t bias;
     MopReportStats stops;
-    indv_init_extra extra_indv_alloc;
     void* cross;
 
     mbool (*stop)(struct mogen_moa_t* moa, MoaStopCriterion criterion);

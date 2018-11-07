@@ -48,7 +48,7 @@ Moa* mymoead_init(Mop *mop, double cp, double ci){
     return new_moa;
 }
 
-void mopeval_zdt1(Mop* mop, MoeazIndv* cind){
+void mopeval_zdt1(Mop* mop, Individual* cind){
 
     indv_real_data *x = cind->x.data;
 
@@ -108,7 +108,7 @@ int main(int argc, char const *argv[]) {
 
     // initialize population
     MoeazPop* m_pop = mogen_pop_alloc(my_mop, 20);
-    mogen_pop_init(my_mop);
+    mgf_pop_init(my_mop);
 
     moa_cross_setup(my_moa, CX_PNX);
 
@@ -149,7 +149,7 @@ int main(int argc, char const *argv[]) {
     }
 
     // free resources.
-    mogen_pop_free(m_pop);
+    mgf_pop_free(m_pop);
 
     return 0;
 }

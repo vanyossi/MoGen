@@ -17,31 +17,9 @@
  */
 
 
-#ifndef MOGEN_CROSSOVER_H
-#define MOGEN_CROSSOVER_H
+#ifndef MOGEN_RANK_H
+#define MOGEN_RANK_H
 
-#include "global_types.h"
 
-typedef enum moa_cx_types {
-    CX_ONE_POINT,
-    CX_TWO_POINT,
-    CX_UNIFORM,
-    CX_SBX,
-    CX_PNX
-} CXType;
 
-void moa_cross_setup(Moa *moa, CXType cx_type);
-
-/**
- * @brief PNX CrossOver
- * @param mop
- * @param parent1
- * @param parent2
- * @param c1
- * @param c2
- */
-void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2);
-void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2);
-void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) ;
-
-#endif //MOGEN_CROSSOVER_H
+#endif //MOGEN_RANK_H

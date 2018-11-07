@@ -1,5 +1,6 @@
 add_subdirectory(math)
 add_subdirectory(operators)
+add_subdirectory(tests)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
@@ -7,7 +8,8 @@ include_directories(
 
 set(mogen_mop_SOURCES
     mogen_mop.c
-    mogen_population.c
+    mgf_population.c
+    mgf_individual.c
     multi_array.c
     operators/crossover.c
     rand.c

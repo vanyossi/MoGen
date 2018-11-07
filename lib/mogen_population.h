@@ -30,7 +30,7 @@
 
 struct mop_t;
 
-typedef void(*indv_init_extra)(Mop*, MoeazIndv*);
+typedef void(*indv_init_extra)(Mop*, Individual*);
 
 union multi_data_t {
     void *data;             //!> real and binary
@@ -49,19 +49,19 @@ struct moeaz_indv_t {
     double* g;
 };
 
-void mogen_indv_alloc(MoeazIndv *indv, struct mop_t *mop);
+void mogen_indv_alloc(Individual *indv, struct mop_t *mop);
 
-void mogen_indv_init(MoeazIndv *indv, struct mop_t *mop);
+void mogen_indv_init(Individual *indv, struct mop_t *mop);
 
-void mogen_indv_init_extra(Mop *mop, MoeazIndv *indv, indv_init_extra init_f);
+void mogen_indv_init_extra(Mop *mop, Individual *indv, indv_init_extra init_f);
 
-void mogen_indv_free(MoeazIndv *indv);
+void mogen_indv_free(Individual *indv);
 
 
 struct moeaz_pop_t {
     int size;
     size_t indv_size;
-    MoeazIndv* indv;
+    Individual* indv;
 };
 
 MoeazPop *mogen_pop_alloc(Moa *moa, unsigned int size, size_t indv_size);

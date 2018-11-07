@@ -41,7 +41,7 @@ Moa *moa_init(struct mop_t *mop, char *name, MoaTypes type, size_t mem_size) {
 
 mbool moa_run(struct mop_t *mop){
     for (int i = 0; i < mop->pop->size; ++i){
-        MoeazIndv* indv = &mop->pop->indv[i];
+        Individual* indv = mgf_pop_get_indv(mop->pop,i);
         if (!mop_evaluate(mop, indv)){
             return mfalse;
         }

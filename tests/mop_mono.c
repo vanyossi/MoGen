@@ -50,14 +50,14 @@ int main(int argc, char const *argv[]) {
 
 //    printf("epsilon = %.6f", ((MoaSecant*)mypolin->solver)->epsilon );
 
-    mogen_pop_alloc(mypolin->solver, 10, sizeof(MgnIndvMono));
+    mgf_pop_alloc(mypolin->solver, 10, mgf_indvtype_mono(mypolin->solver));
 
-    mono_fx eval_funcs[3] =  {polinom, cuadratic, polinom3};
+    mono_fx eval_funcs[3] =  {cuadratic, polinom, polinom3};
 
     for (int j = 0; j < 3; ++j) {
         mono_fx eval_func = eval_funcs[j];
 
-        mogen_pop_init(mypolin->solver);
+        mgf_pop_init(mypolin->solver);
         mop_secant_assign_fx(mypolin, eval_func);
         moa_stopat_eval(mypolin->solver, 900);
 

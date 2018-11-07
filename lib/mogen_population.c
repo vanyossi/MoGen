@@ -24,8 +24,8 @@
 #include "mogen_mop.h"
 #include "rand.h"
 
-void mogen_indv_alloc(MoeazIndv *indv, struct mop_t *mop){
-//    MoeazIndv* indv = calloc(1,sizeof(MoeazIndv));
+void mogen_indv_alloc(Individual *indv, struct mop_t *mop){
+//    Individual* indv = calloc(1,sizeof(Individual));
     indv->type = mop->set.type;
     indv->feasible = 1;
     memcpy(&indv->xsize, &mop->set.ndec, sizeof(int) * 3); // copy sizes
@@ -49,7 +49,7 @@ void mogen_indv_alloc(MoeazIndv *indv, struct mop_t *mop){
 };
 
 
-void mogen_indv_init(MoeazIndv *indv, struct mop_t *mop){
+void mogen_indv_init(Individual *indv, struct mop_t *mop){
 
     if (indv->type == MOP_REAL){
         indv_real_data *data = (indv_real_data*) indv->x.data;
@@ -79,11 +79,11 @@ void mogen_indv_init(MoeazIndv *indv, struct mop_t *mop){
     }
 }
 
-void mogen_indv_init_extra(Mop *mop, MoeazIndv *indv, indv_init_extra init_f) {
+void mogen_indv_init_extra(Mop *mop, Individual *indv, indv_init_extra init_f) {
     init_f(mop, indv);
 }
 
-void mogen_indv_free(MoeazIndv *indv){
+void mogen_indv_free(Individual *indv){
     if (indv->type != MOP_MIX) {
         free(indv->x.data);
     }
@@ -96,7 +96,7 @@ void mogen_indv_free(MoeazIndv *indv){
 MoeazPop* mogen_pop_alloc(Moa *moa, unsigned int size, size_t indv_size) {
     MoeazPop* new_pop = calloc(1,sizeof(MoeazPop));
 
-    size_t alloc_size = sizeof(MoeazIndv);
+    size_t alloc_size = sizeof(Individual);
     if (indv_size > alloc_size) {
         alloc_size = indv_size;
     }
@@ -107,7 +107,7 @@ MoeazPop* mogen_pop_alloc(Moa *moa, unsigned int size, size_t indv_size) {
 
     char *indv_adress = (char*)new_pop->indv;
     for (int i = 0; i < size; ++i) {
-        mogen_indv_alloc((MoeazIndv*)indv_adress, moa->mop);
+        mogen_indv_alloc((Individual*)indv_adress, moa->mop);
         indv_adress += alloc_size;
     }
     moa->mop->pop = new_pop;
@@ -119,34 +119,34 @@ MoeazPop* mogen_pop_alloc(Moa *moa, unsigned int size, size_t indv_size) {
 }
 
 
-#define mgn_pop_preploop(pop) \
+#define mogen_pop_preploop(pop) \
     char *indv = (char*)(pop->indv); \
     size_t indvsize = pop->indv_size; \
     int size = pop->size;
 
 void mogen_pop_init(Moa *moa){
-    mgn_pop_preploop(moa->mop->pop);
+    mogen_pop_preploop(moa->mop->pop);
 
     for (int i = 0; i < size; ++i) {
-        mogen_indv_init( (MoeazIndv*)indv, moa->mop);
+        mogen_indv_init( (Individual*)indv, moa->mop);
         indv += indvsize;
     }
 }
 
 void mogen_pop_init_extra(Moa *moa, indv_init_extra init_f){
-    mgn_pop_preploop(moa->mop->pop);
+    mogen_pop_preploop(moa->mop->pop);
 
     for (int i = 0; i < size; ++i) {
-        mogen_indv_init_extra(moa->mop, (MoeazIndv *) indv, init_f);
+        mogen_indv_init_extra(moa->mop, (Individual *) indv, init_f);
         indv += indvsize;
     }
 }
 
 void mogen_pop_free(MoeazPop *pop){
-    mgn_pop_preploop(pop);
+    mogen_pop_preploop(pop);
 
     for (int i = 0; i < size; ++i) {
-        mogen_indv_free((MoeazIndv*)indv);
+        mogen_indv_free((Individual*)indv);
         indv += indvsize;
     }
     free(pop->indv);

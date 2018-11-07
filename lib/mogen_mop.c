@@ -83,16 +83,16 @@ void mop_set_limits_ndec(Mop *mop, double *min, double *max, unsigned int size) 
     }
 }
 
-MoeazIndv *mogen_mop_getindv(Mop *mop, unsigned int pos) {
+Individual *mogen_mop_getindv(Mop *mop, unsigned int pos) {
     // @ TODO assert if pos is bigger than size.
     if (pos < mop->pop->size) {
-        return (MoeazIndv*)((char*)mop->pop->indv + pos * mop->pop->indv_size);
+        return mgf_pop_get_indv(mop->pop, pos);
     } else {
-        return mop->pop->indv;
+        return (void*) 0;
     }
 }
 
-mbool mop_evaluate(Mop *mop, MoeazIndv *indv) {
+mbool mop_evaluate(Mop *mop, Individual *indv) {
     mop->evaluate(mop, indv);
     mop->report.current.evals++;
     mop->report.total.evals++;

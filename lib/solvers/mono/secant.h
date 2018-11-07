@@ -38,8 +38,14 @@ typedef struct moa_secant_t {
     double epsilon;
 } MoaSecant;
 
+struct indv_t_mono_type {
+    double error;
+};
+
+struct indv_type_t* mgf_indvtype_mono(Moa *moa);
+
 typedef struct mgn_indv_mono_t {
-    MoeazIndv indv;
+    Individual indv;
     double error;
 } MgnIndvMono;
 
@@ -54,9 +60,7 @@ Moa *moa_secant(Mop *mop, double epsilon);
 
 mbool moa_secant_run(Mop *mop);
 
-void moa_secant_solver(Mop *mop, MoeazIndv *indv);
-
-void moa_mono_indv_alloc(Mop* mop, MoeazIndv *indv);
+void moa_secant_solver(Mop *mop, Individual *indv);
 
 //mbool moa_mono_stop(Moa *moa, MoaStopCriterion criterion);
 

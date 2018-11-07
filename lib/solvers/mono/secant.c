@@ -23,13 +23,22 @@
 
 
 #include <stdio.h>
+
+void indv_mono_alloc(Mop *mop, struct indv_t *indv) {
+    ((struct indv_t_mono_type*)mgf_indv_buffer(indv))->error = MAXFLOAT;
+}
+
+struct indv_type_t* mgf_indvtype_mono(Moa *moa){
+    return mgf_indvtype_new(moa, sizeof(struct indv_t_mono_type), indv_mono_alloc, mgf_indv_free_std);
+}
+
 Moa *moa_secant(Mop *mop, double epsilon) {
     MoaSecant* secant = (MoaSecant*) moa_init(mop, "Secant", MOA_MONO, sizeof(MoaSecant));
 
     secant->moa.run = moa_secant_run;
-    secant->moa.extra_indv_alloc = moa_mono_indv_alloc;
+//    secant->moa.extra_indv_alloc = moa_mono_indv_alloc;
 
-    secant->error = malloc(sizeof(double) * mop->set.nobj);
+//    secant->error = malloc(sizeof(double) * mop->set.nobj);
     secant->epsilon = epsilon;
 
     mop->evaluate = moa_secant_solver;
@@ -63,14 +72,16 @@ void mop_secant_assign_fx(Mop *mop, mono_fx f){
 // to mop mono_run
 mbool moa_secant_run(Mop *mop) {
     MoaSecant* secant = (MoaSecant*)(mop->solver);
-    MgnIndvMono *indvs = (MgnIndvMono*)mop->pop->indv;
 
+    struct indv_t_mono_type* indv_data;
+    Individual* indv;
     int ev = 0;
     for (int i = 0; i < mop->pop->size; ++i){
-
-        if ( indvs[i].error > secant->epsilon) {
+        indv = mgf_pop_get_indv(mop->pop, i);
+        indv_data = mgf_indv_buffer(indv);
+        if ( indv_data->error > secant->epsilon) {
             ev++;
-            if (!mop_evaluate(mop, (MoeazIndv*)&indvs[i])){
+            if (!mop_evaluate(mop, indv)){
                 return mfalse;
             }
         }
@@ -82,10 +93,9 @@ mbool moa_secant_run(Mop *mop) {
 }
 
 //#include <stdio.h>
-void moa_secant_solver(Mop* mop, MoeazIndv *indv){
-    MgnIndvMono *indvsp = (MgnIndvMono*)indv;
+void moa_secant_solver(Mop* mop, Individual *indv){
     MopMono *sec_mop = (MopMono*)mop;
-    indv_real_data *x = get_data_real(indv);
+    double *x = mgf_indv_get_realdatapointer(indv);
 
     mono_fx fx = sec_mop->fx;
     double xn = solve(fx, x);
@@ -97,14 +107,9 @@ void moa_secant_solver(Mop* mop, MoeazIndv *indv){
         x[1] = xn;
     }
     // calculate error
-    indvsp->error = fabs(fx(xn));
+    ((struct indv_t_mono_type*)mgf_indv_buffer(indv))->error = fabs(fx(xn));
 }
 
-void moa_mono_indv_alloc(Mop* mop, MoeazIndv *indv){
-    printf("value of type %d", indv->type);
-    MgnIndvMono* indvmono = (MgnIndvMono*)indv;
-    indvmono->error = INT8_MAX;
-}
 
 //mbool moa_mono_stop(Moa *moa, MoaStopCriterion criterion){
 //    if (criterion == MGN_STOPIF_EPSILON){

@@ -32,11 +32,14 @@ typedef struct mogen_moa_t Moa;
 typedef enum moa_stop_criterion_t MoaStopCriterion;
 typedef enum mogen_moa_types_e MoaTypes;
 
+typedef struct indv_type_t IndvidualType;
 
-typedef struct moeaz_indv_t MoeazIndv;
-typedef union multi_data_t MultiData;
+typedef struct indv_t Individual;
 
-typedef struct moeaz_pop_t MoeazPop;
+typedef struct mgf_pop_t MoeazPop;
 
+
+// Useful defines
+#define UNUSED(expr) do { (void)(expr); } while (0)
 
 #endif //MOGEN_GLOBAL_TYPES_H

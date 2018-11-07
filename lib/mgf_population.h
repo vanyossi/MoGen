@@ -17,31 +17,34 @@
  */
 
 
-#ifndef MOGEN_CROSSOVER_H
-#define MOGEN_CROSSOVER_H
+#ifndef MOGEN_MGF_POPULATION_H
+#define MOGEN_MGF_POPULATION_H
+
+#include <stdlib.h>
 
 #include "global_types.h"
+#include "mgf_individual.h"
 
-typedef enum moa_cx_types {
-    CX_ONE_POINT,
-    CX_TWO_POINT,
-    CX_UNIFORM,
-    CX_SBX,
-    CX_PNX
-} CXType;
+struct mgf_pop_t {
+    int size;
+    unsigned int current;
+    size_t indv_size;
+    Individual* indv;
+};
 
-void moa_cross_setup(Moa *moa, CXType cx_type);
+MoeazPop *mgf_pop_alloc(Moa *moa, unsigned int size, IndvidualType *indvtype);
 
-/**
- * @brief PNX CrossOver
- * @param mop
- * @param parent1
- * @param parent2
- * @param c1
- * @param c2
- */
-void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2);
-void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2);
-void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) ;
+void mgf_pop_init(Moa *moa);
 
-#endif //MOGEN_CROSSOVER_H
+void mgf_pop_free(MoeazPop *pop);
+
+Individual* mgf_pop_get_indv(MoeazPop *pop, unsigned int pos);
+
+Individual* mgf_pop_current_indv(MoeazPop *pop);
+
+// void until NULL
+void * mgf_pop_next(MoeazPop *pop);
+
+void mgf_pop_reset_cursor(MoeazPop *pop);
+
+#endif //MOGEN_MGF_POPULATION_H
