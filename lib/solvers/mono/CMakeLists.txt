@@ -5,6 +5,7 @@ include_directories(
 
 set(mono_SOURCES
     secant.c
+    mgf_mono_solver.c
     )
 
 add_library(mopmono SHARED ${mono_SOURCES})

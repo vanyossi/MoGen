@@ -17,20 +17,39 @@
  */
 
 
-#ifndef MOGEN_SECANT_H
-#define MOGEN_SECANT_H
+#ifndef MOGEN_MGF_MONO_SOLVER_H
+#define MOGEN_MGF_MONO_SOLVER_H
 
-#include "mgf_mono_solver.h"
+#include "mogen_mop.h"
+#include <math.h>
 
-/**
- * @brief Define secant solver method
- */
-#define solve(fx, x) x[1] - ((fx(x[1]) * (x[1] - x[0])) / (fx(x[1]) - fx(x[0] + .00000001)))
+typedef double(*mono_fx)(double);
 
+typedef enum moa_stop_criterion_mono_t {
+    MGN_STOPIF_EPSILON = MGN_STOP_SIZE_MARKER,
+} MoaStopCriterionMono;
 
-Moa *moa_secant(Mop *mop, double epsilon);
+typedef struct mop_mono_f {
+    Mop mop;
+    mono_fx fx;
+} MopMono;
 
-void moa_secant_solver(Mop *mop, Individual *indv);
+typedef struct moa_mono_t {
+    Moa moa;
+    double *error;
+    double epsilon;
+} MoaMono;
 
+struct indv_t_mono_type {
+    double error;
+};
 
-#endif //MOGEN_SECANT_H
+struct indv_type_t* mgf_indvtype_mono(Moa *moa);
+
+void mop_mono_assign_fx(Mop *mop, mono_fx f);
+
+mbool moa_mono_run(Mop *mop);
+
+//mbool moa_mono_stop(Moa *moa, MoaStopCriterion criterion);
+
+#endif //MOGEN_MGF_MONO_SOLVER_H

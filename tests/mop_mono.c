@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]) {
     mop_set_limits_ndec(mypolin, &xmin, &xmax, 1);
     moa_secant(mypolin, .000001);
 
-//    printf("epsilon = %.6f", ((MoaSecant*)mypolin->solver)->epsilon );
+//    printf("epsilon = %.6f", ((MoaMono*)mypolin->solver)->epsilon );
 
     mgf_pop_alloc(mypolin->solver, 10, mgf_indvtype_mono(mypolin->solver));
 
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]) {
         mono_fx eval_func = eval_funcs[j];
 
         mgf_pop_init(mypolin->solver);
-        mop_secant_assign_fx(mypolin, eval_func);
+        mop_mono_assign_fx(mypolin, eval_func);
         moa_stopat_eval(mypolin->solver, 900);
 
         mop_solve(mypolin,50);

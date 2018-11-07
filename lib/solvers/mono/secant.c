@@ -18,24 +18,12 @@
 
 #include "secant.h"
 
-#include <stdlib.h>
-#include <math.h>
-
-
 #include <stdio.h>
 
-void indv_mono_alloc(Mop *mop, struct indv_t *indv) {
-    ((struct indv_t_mono_type*)mgf_indv_buffer(indv))->error = MAXFLOAT;
-}
-
-struct indv_type_t* mgf_indvtype_mono(Moa *moa){
-    return mgf_indvtype_new(moa, sizeof(struct indv_t_mono_type), indv_mono_alloc, mgf_indv_free_std);
-}
-
 Moa *moa_secant(Mop *mop, double epsilon) {
-    MoaSecant* secant = (MoaSecant*) moa_init(mop, "Secant", MOA_MONO, sizeof(MoaSecant));
+    MoaMono* secant = (MoaMono*) moa_init(mop, "Secant", MOA_MONO, sizeof(MoaMono));
 
-    secant->moa.run = moa_secant_run;
+    secant->moa.run = moa_mono_run;
 //    secant->moa.extra_indv_alloc = moa_mono_indv_alloc;
 
 //    secant->error = malloc(sizeof(double) * mop->set.nobj);
@@ -45,51 +33,6 @@ Moa *moa_secant(Mop *mop, double epsilon) {
     mop->solver = (Moa*)secant;
 
     return (Moa*)secant;
-}
-
-//#include <stdio.h>
-//Moa *moa_secant(Mop *mop, double epsilon) {
-//    MoaSecant* secant = malloc(sizeof(MoaSecant));
-//    secant->moa = moa_init(mop, "Secant", MOA_MONO);
-//
-//    secant->moa->run = moa_secant_run;
-//
-//    secant->error = malloc(sizeof(double) * mop->set.nobj);
-//    secant->epsilon = epsilon;
-//
-//    mop->evaluate = moa_secant_solver;
-//    mop->solver = (Moa*)secant;
-//
-//    return (Moa*)secant;
-//}
-
-
-// to mop_monoobj assign fx
-void mop_secant_assign_fx(Mop *mop, mono_fx f){
-    ((MopMono*)mop)->fx = f;
-}
-
-// to mop mono_run
-mbool moa_secant_run(Mop *mop) {
-    MoaSecant* secant = (MoaSecant*)(mop->solver);
-
-    struct indv_t_mono_type* indv_data;
-    Individual* indv;
-    int ev = 0;
-    for (int i = 0; i < mop->pop->size; ++i){
-        indv = mgf_pop_get_indv(mop->pop, i);
-        indv_data = mgf_indv_buffer(indv);
-        if ( indv_data->error > secant->epsilon) {
-            ev++;
-            if (!mop_evaluate(mop, indv)){
-                return mfalse;
-            }
-        }
-    }
-    if (!ev) {
-        return mfalse;
-    }
-    return mtrue;
 }
 
 //#include <stdio.h>
@@ -113,7 +56,7 @@ void moa_secant_solver(Mop* mop, Individual *indv){
 
 //mbool moa_mono_stop(Moa *moa, MoaStopCriterion criterion){
 //    if (criterion == MGN_STOPIF_EPSILON){
-//        return ( ((MoaSecant*)moa)->epsilon >= (unsigned int) criterion) ? mtrue : mfalse;
+//        return ( ((MoaMono*)moa)->epsilon >= (unsigned int) criterion) ? mtrue : mfalse;
 //    }
 //    return moa_stop(moa, criterion);
 //}
