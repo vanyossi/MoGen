@@ -71,6 +71,6 @@ int main(int argc, char const *argv[]) {
         printf("total eval/runs: %d, %d \n", mypolin->report.total.evals, mypolin->report.total.gens);
         printf("end. %d\n\n", j);
     }
-    printf("time taken %.3f, %ld\n", mogen_time_ms2sec(mypolin->report.total.t_elapsed), mypolin->report.total.t_elapsed);
+    printf("time taken %s: %.8f, %ld\n", mypolin->solver->name, mogen_time_ms2sec(mypolin->report.total.t_elapsed), mypolin->report.total.t_elapsed);
     return 0;
 }

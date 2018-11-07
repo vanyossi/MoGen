@@ -48,6 +48,8 @@ struct indv_type_t* mgf_indvtype_mono(Moa *moa);
 
 void mop_mono_assign_fx(Mop *mop, mono_fx f);
 
+Moa *moa_mono(Mop *mop, char *name, double epsilon, void (*evaluate)(Mop*, Individual*));
+
 mbool moa_mono_run(Mop *mop);
 
 //mbool moa_mono_stop(Moa *moa, MoaStopCriterion criterion);

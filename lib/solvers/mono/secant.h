@@ -27,7 +27,6 @@
  */
 #define solve(fx, x) x[1] - ((fx(x[1]) * (x[1] - x[0])) / (fx(x[1]) - fx(x[0] + .00000001)))
 
-
 Moa *moa_secant(Mop *mop, double epsilon);
 
 void moa_secant_solver(Mop *mop, Individual *indv);

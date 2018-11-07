@@ -21,21 +21,9 @@
 #include <stdio.h>
 
 Moa *moa_secant(Mop *mop, double epsilon) {
-    MoaMono* secant = (MoaMono*) moa_init(mop, "Secant", MOA_MONO, sizeof(MoaMono));
-
-    secant->moa.run = moa_mono_run;
-//    secant->moa.extra_indv_alloc = moa_mono_indv_alloc;
-
-//    secant->error = malloc(sizeof(double) * mop->set.nobj);
-    secant->epsilon = epsilon;
-
-    mop->evaluate = moa_secant_solver;
-    mop->solver = (Moa*)secant;
-
-    return (Moa*)secant;
+    return moa_mono(mop, "Secant", epsilon, moa_secant_solver);
 }
 
-//#include <stdio.h>
 void moa_secant_solver(Mop* mop, Individual *indv){
     MopMono *sec_mop = (MopMono*)mop;
     double *x = mgf_indv_get_realdatapointer(indv);
@@ -52,7 +40,6 @@ void moa_secant_solver(Mop* mop, Individual *indv){
     // calculate error
     ((struct indv_t_mono_type*)mgf_indv_buffer(indv))->error = fabs(fx(xn));
 }
-
 
 //mbool moa_mono_stop(Moa *moa, MoaStopCriterion criterion){
 //    if (criterion == MGN_STOPIF_EPSILON){

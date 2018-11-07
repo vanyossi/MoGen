@@ -33,6 +33,20 @@ void mop_mono_assign_fx(Mop *mop, mono_fx f){
     ((MopMono*)mop)->fx = f;
 }
 
+Moa *moa_mono(Mop *mop, char *name, double epsilon, void (*evaluate)(Mop*, Individual*)) {
+    MoaMono* moamono = (MoaMono*) moa_init(mop, name, MOA_MONO, sizeof(MoaMono));
+
+    moamono->moa.run = moa_mono_run;
+
+//    moamono->error = malloc(sizeof(double) * mop->set.nobj);
+    moamono->epsilon = epsilon;
+
+    mop->evaluate = evaluate;
+    mop->solver = (Moa*)moamono;
+
+    return (Moa*)moamono;
+}
+
 // to mop mono_run
 mbool moa_mono_run(Mop *mop) {
     MoaMono* secant = (MoaMono*)(mop->solver);

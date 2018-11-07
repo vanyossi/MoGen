@@ -119,7 +119,7 @@ void mop_solve(Mop *mop, int steps){
             break;
         }
     } while (steps);
-    nanosleep((const struct timespec[]){{1L, 30000000L}}, NULL);
+//    nanosleep((const struct timespec[]){{1L, 30000000L}}, NULL);
     mop_stop_timer(&mop->report);
 
 //    mop->report.total.gens += mop->report.current.gens;
