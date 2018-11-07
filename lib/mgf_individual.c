@@ -120,6 +120,30 @@ void mgf_indv_free(struct indv_t* indv){
 }
 
 /** MixedData API **/
+#define DOUBLE_NAN __builtin_nan("0xFFF0000000000000")
+
+union mixed {
+    double val;
+    int data[sizeof(double)/sizeof(int)];
+    unsigned long long i;
+};
+
+double mgf_indv_get_double(struct indv_t *indv, unsigned int pos){
+    if (pos >= indv->type->xsize) {
+        union mixed ret = {DOUBLE_NAN};
+        ret.data[0] = 1;
+        return ret.val;
+    }
+    return indv->real[pos];
+}
+
+int mgf_indv_get_bin(struct indv_t *indv, unsigned int pos){
+    int bitpos = pos / INT_BITSIZE;
+    int shift = pos % INT_BITSIZE;
+
+    return (indv->bin[bitpos] >> shift & 1)? INDV_TRUE : INDV_FALSE;
+}
+
 void mgf_indv_set_double(struct indv_t *indv, unsigned int pos, double value){
     if (pos < indv->type->xsize) {
         indv->real[pos] = value;
@@ -139,20 +163,23 @@ void mgf_indv_set_bin(struct indv_t *indv, unsigned int pos, int value){
     }
 }
 
-void* mgf_indv_value_at(struct indv_t *indv, unsigned int pos){
-    void* value = NULL;
+
+
+double mgf_indv_value_at(struct indv_t *indv, unsigned int pos){
+    union mixed value = {DOUBLE_NAN};
+    value.data[0] = 1; // regular NaN this data is 0
 
     int bitpos = pos / INT_BITSIZE;
     int shift = pos % INT_BITSIZE;
 
     if (pos < indv->type->xsize) {
         if((indv->type_idx[bitpos] >> shift) & 1) {
-            value = ((indv->bin[bitpos] >> shift & 1)? (void*) &INDV_TRUE: (void*) &INDV_FALSE);
+            value.val = ((indv->bin[bitpos] >> shift & 1)? INDV_TRUE: INDV_FALSE);
         } else {
-            value = (void*) &indv->real[pos];
+            value.val = indv->real[pos];
         }
     }
-    return value;
+    return value.val;
 }
 
 int mgf_indv_value_isbin(struct indv_t *indv, unsigned int pos){

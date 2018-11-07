@@ -85,17 +85,12 @@ void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1
 
 void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) {
     //    assert(mop->set.type != 2);
-//    unsigned int j;
-//    double s;
-//    double eta = 0.5;
-//
-//    double *low_bound = mop->limits.xmin;
-//    double *up_bound = mop->limits.xmax;
+    unsigned int j;
+    double s;
+    double eta = 0.5;
 
-//    indv_bin_data *par1 = parent1->x.data;
-//    indv_bin_data *par2 = parent2->x.data;
-//    indv_bin_data *chi1 = c1->x.data;
-//    indv_bin_data *chi2 = c2->x.data;
+    double *low_bound = mop->limits.xmin;
+    double *up_bound = mop->limits.xmax;
 
     if (rnd_perc() > mop->solver->bias.cxprob)
     {
@@ -104,30 +99,31 @@ void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1,
         return;
     }
 
-//    for (j = 0; j < mop->set.ndec; j++)
-//    {
-//        /* crossover */
-//        s = (indv_bin_data) abs(par2[j] - par1[j]) / eta;
-//        chi1[j] = (indv_bin_data)((rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s));
-//        chi2[j] = (indv_bin_data)((rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s));
-//
-//        /* child1 bounds */
-//        chi1[j] = (indv_bin_data)((chi1[j] < low_bound[j]) ? low_bound[j] : chi1[j]);
-//        chi1[j] = (indv_bin_data)((chi1[j] > up_bound[j]) ? up_bound[j] : chi1[j]);
-//
-//        /* child2 bounds */
-//        chi2[j] = (indv_bin_data)((chi2[j] < low_bound[j]) ? low_bound[j] : chi2[j]);
-//        chi2[j] = (indv_bin_data)((chi2[j] > up_bound[j]) ? up_bound[j] : chi2[j]);
-//    }
+    for (j = 0; j < mop->set.ndec; j++)
+    {
+        /* crossover */
+        s = abs(mgf_indv_get_bin(parent2, j) - mgf_indv_get_bin(parent1, j)) / eta;
+        mgf_indv_set_bin(c1,j, (rnd_perc() < .5) ? (int)rnd_normal(mgf_indv_get_bin(parent1, j), s) : (int)rnd_normal(mgf_indv_get_bin(parent2, j), s) );
+        mgf_indv_set_bin(c2,j, (rnd_perc() < .5) ? (int)rnd_normal(mgf_indv_get_bin(parent1, j), s) : (int)rnd_normal(mgf_indv_get_bin(parent2, j), s) );
+
+        /* child1 bounds */
+        mgf_indv_set_bin(c1,j, (mgf_indv_get_bin(c1, j) < low_bound[j]) ? (int)low_bound[j] : mgf_indv_get_bin(c1, j) );
+        mgf_indv_set_bin(c1,j, (mgf_indv_get_bin(c1, j) > up_bound[j]) ? (int)up_bound[j] : mgf_indv_get_bin(c1, j) );
+
+        /* child2 bounds */
+        mgf_indv_set_bin(c2,j, (mgf_indv_get_bin(c2, j) < low_bound[j]) ? (int)low_bound[j] : mgf_indv_get_bin(c2, j) );
+        mgf_indv_set_bin(c2,j, (mgf_indv_get_bin(c2, j) > up_bound[j]) ? (int)up_bound[j] : mgf_indv_get_bin(c2, j) );
+    }
 }
 
 void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) {
     //    assert(mop->set.type != 3);
-//    double s;
-//    double eta = 0.5;
-//
-//    double *low_bound = mop->limits.xmin;
-//    double *up_bound = mop->limits.xmax;
+    unsigned int j;
+    double s;
+    double eta = 0.5;
+
+    double *low_bound = mop->limits.xmin;
+    double *up_bound = mop->limits.xmax;
 
     if (rnd_perc() > mop->solver->bias.cxprob)
     {
@@ -135,34 +131,20 @@ void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c
         memcpy(c2->type_idx, parent2->type_idx, (2 * mop->set.ndec / WORD_BIT) + sizeof(double) * mop->set.ndec);
         return;
     }
+    // @TODO after crossing all variables are real!
+    for (j = 0; j < mop->set.ndec; j++)
+    {
+        /* crossover */
+        s = fabs(mgf_indv_value_at(parent2, j) - mgf_indv_value_at(parent1, j)) / eta;
+        mgf_indv_set_double(c1,j, (rnd_perc() < .5) ? rnd_normal(mgf_indv_value_at(parent1, j), s) : rnd_normal(mgf_indv_value_at(parent2, j), s) );
+        mgf_indv_set_double(c2,j, (rnd_perc() < .5) ? rnd_normal(mgf_indv_value_at(parent1, j), s) : rnd_normal(mgf_indv_value_at(parent2, j), s) );
 
-//    double m_p1;
-//    double m_p2;
-//    double m_c1;
-//    double m_c2;
-//    for (unsigned int j = 0; j < mop->set.ndec; j++)
-//    {
-//        // Generalize to double to work with GSL funcs.
-//        m_p1 = *(double*)mua_value_at(par1, j);
-//        m_p2 = *(double*)mua_value_at(par2, j);
-//        /* crossover */
-//        s = fabs(m_p2 - m_p1) / eta;
-//        m_c1 = (rnd_perc() < .5) ? rnd_normal(m_p1, s) : rnd_normal(m_p2, s);
-//        m_c2 = (rnd_perc() < .5) ? rnd_normal(m_p1, s) : rnd_normal(m_p2, s);
-//
-//        /* child1 bounds */
-//        m_c1 = (m_c1 < low_bound[j]) ? low_bound[j] : m_c1;
-//        m_c1 = (m_c1 > up_bound[j]) ? up_bound[j] : m_c1;
-//
-//        /* child2 bounds */
-//        m_c2 = (m_c2 < low_bound[j]) ? low_bound[j] : m_c2;
-//        m_c2 = (m_c2 > up_bound[j]) ? up_bound[j] : m_c2;
-//
-//        // After cross all are double, as no Bin/Real cross is defined yet
-//        // possibly depending on cross op, a flag must be set.
-//        mua_set_double(par1, j, m_p1);
-//        mua_set_double(par2, j, m_p2);
-//        mua_set_double(chi1, j, m_c1);
-//        mua_set_double(chi1, j, m_c2);
-//    }
+        /* child1 bounds */
+        mgf_indv_set_double(c1,j, (mgf_indv_get_bin(c1, j) < low_bound[j]) ? low_bound[j] : mgf_indv_value_at(c1, j) );
+        mgf_indv_set_double(c1,j, (mgf_indv_get_bin(c1, j) > up_bound[j]) ? up_bound[j] : mgf_indv_value_at(c1, j) );
+
+        /* child2 bounds */
+        mgf_indv_set_double(c2,j, (mgf_indv_get_bin(c2, j) < low_bound[j]) ? low_bound[j] : mgf_indv_value_at(c2, j) );
+        mgf_indv_set_double(c2,j, (mgf_indv_get_bin(c2, j) > up_bound[j]) ? up_bound[j] : mgf_indv_value_at(c2, j) );
+    }
 }

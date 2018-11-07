@@ -61,11 +61,15 @@ struct indv_type_t *mgf_indvtype_new(
 
 struct indv_type_t* mgf_indvtype_std();
 
+double mgf_indv_get_double(struct indv_t *indv, unsigned int pos);
+
+int mgf_indv_get_bin(struct indv_t *indv, unsigned int pos);
+
 void mgf_indv_set_double(struct indv_t *indv, unsigned int pos, double value);
 
 void mgf_indv_set_bin(struct indv_t *indv, unsigned int pos, int value);
 
-void* mgf_indv_value_at(struct indv_t *indv, unsigned int pos);
+double mgf_indv_value_at(struct indv_t *indv, unsigned int pos);
 
 int mgf_indv_value_isbin(struct indv_t *indv, unsigned int pos);
 
