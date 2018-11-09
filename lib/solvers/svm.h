@@ -20,8 +20,8 @@
 #ifndef MOGEN_SVM_H
 #define MOGEN_SVM_H
 
+#include "mgf_moa.h"
 #include "mogen_mop.h"
-#include "mogen_moa.h"
 
 typedef double (moa_svm_kernel*)(double *X, double *Theta)
 

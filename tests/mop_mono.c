@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]) {
     mop_set_limits_ndec(mypolin, &xmin, &xmax, 1);
     moa_secant(mypolin, .000001);
 
-//    printf("epsilon = %.6f", ((MoaMono*)mypolin->solver)->epsilon );
+//    printf("epsilon = %.6f", mgf_moa_get_mono_buffer(mypolin->solver)->epsilon );
 
     mgf_pop_alloc(mypolin->solver, 10, mgf_indvtype_mono(mypolin->solver));
 

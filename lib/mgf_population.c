@@ -21,7 +21,7 @@
 
 #include <memory.h>
 
-#include "mogen_moa.h"
+#include "mgf_moa.h"
 #include "mogen_mop.h"
 
 #include <stdio.h> // @TODO remove

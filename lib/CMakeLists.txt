@@ -13,8 +13,7 @@ set(mogen_mop_SOURCES
     multi_array.c
     operators/crossover.c
     rand.c
-    mogen_moa.h
-    mogen_moa.c
+    mgf_moa.c
     mop_report.c
     time_tools.c
     )

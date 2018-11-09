@@ -20,6 +20,10 @@
 #ifndef MOGEN_GLOBAL_TYPES_H
 #define MOGEN_GLOBAL_TYPES_H
 
+#define mbool int
+#define mfalse 0
+#define mtrue 1
+
 typedef enum mop_specs_e MopSpecs;
 
 typedef struct mop_t Mop;
@@ -28,7 +32,7 @@ typedef struct mop_extra_t Mop_extra;
 typedef struct mop_limit_t Mop_limit;
 
 
-typedef struct mogen_moa_t Moa;
+typedef struct moa_t Moa;
 typedef enum moa_stop_criterion_t MoaStopCriterion;
 typedef enum mogen_moa_types_e MoaTypes;
 
@@ -38,6 +42,9 @@ typedef struct indv_t Individual;
 
 typedef struct mgf_pop_t MoeazPop;
 
+static struct mgf_operators {
+    void (*cross)(Mop*, Individual*, Individual*, Individual*, Individual*);
+} operators;
 
 // Useful defines
 #define UNUSED(expr) do { (void)(expr); } while (0)

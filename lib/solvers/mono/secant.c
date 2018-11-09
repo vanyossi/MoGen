@@ -21,7 +21,10 @@
 #include <stdio.h>
 
 Moa *moa_secant(Mop *mop, double epsilon) {
-    return moa_mono(mop, "Secant", epsilon, moa_secant_solver);
+    Moa *moa = mgf_moa_new(mop, "Secant", mgf_moatype_mono());
+    mgf_moa_mono_set_solver(moa, moa_secant_solver);
+    mgf_moa_mono_set_epsilon(moa, epsilon);
+    return moa;
 }
 
 void moa_secant_solver(Mop* mop, Individual *indv){
@@ -31,19 +34,18 @@ void moa_secant_solver(Mop* mop, Individual *indv){
     mono_fx fx = sec_mop->fx;
     double xn = solve(fx, x);
 
-
     if( !isnan(xn) || isfinite(xn)) {
         indv->f[0] = xn;
         x[0] = x[1];
         x[1] = xn;
     }
     // calculate error
-    ((struct indv_t_mono_type*)mgf_indv_buffer(indv))->error = fabs(fx(xn));
+    mgf_indv_get_mono_buffer(indv)->error = fabs(fx(xn));
 }
 
 //mbool moa_mono_stop(Moa *moa, MoaStopCriterion criterion){
 //    if (criterion == MGN_STOPIF_EPSILON){
-//        return ( ((MoaMono*)moa)->epsilon >= (unsigned int) criterion) ? mtrue : mfalse;
+//        return ( (mgf_moa_get_mono_buffer(moa)->epsilon >= (unsigned int) criterion) ? mtrue : mfalse;
 //    }
 //    return moa_stop(moa, criterion);
 //}

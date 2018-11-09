@@ -24,6 +24,18 @@ void indv_mono_alloc(Mop *mop, struct indv_t *indv) {
     mgf_indv_get_mono_buffer(indv)->error = MAXFLOAT;
 }
 
+void moa_mono_alloc(Moa *moa){
+    mgf_moa_get_mono_buffer(moa)->epsilon = 1e-5;
+}
+
+struct moa_mono_type* mgf_moa_get_mono_buffer(struct moa_t *moa){
+    return mgf_moa_buffer(moa);
+}
+
+struct moa_type_t* mgf_moatype_mono(){
+    return mgf_moatype_new(sizeof(struct moa_mono_type), moa_mono_alloc, 0, moa_mono_run, 0);
+}
+
 struct indv_t_mono_type* mgf_indv_get_mono_buffer(struct indv_t *indv){
     return mgf_indv_buffer(indv);
 }
@@ -37,23 +49,17 @@ void mop_mono_assign_fx(Mop *mop, mono_fx f){
     ((MopMono*)mop)->fx = f;
 }
 
-Moa *moa_mono(Mop *mop, char *name, double epsilon, void (*evaluate)(Mop*, Individual*)) {
-    MoaMono* moamono = (MoaMono*) moa_init(mop, name, MOA_MONO, sizeof(MoaMono));
+void mgf_moa_mono_set_solver(Moa* moa, void (*evaluate)(Mop*, Individual*)){
+    moa->mop->evaluate = evaluate;
+}
 
-    moamono->moa.run = moa_mono_run;
-
-//    moamono->error = malloc(sizeof(double) * mop->set.nobj);
-    moamono->epsilon = epsilon;
-
-    mop->evaluate = evaluate;
-    mop->solver = (Moa*)moamono;
-
-    return (Moa*)moamono;
+void mgf_moa_mono_set_epsilon(Moa *moa, double epsilon){
+    mgf_moa_get_mono_buffer(moa)->epsilon = epsilon;
 }
 
 // to mop mono_run
 mbool moa_mono_run(Mop *mop) {
-    MoaMono* secant = (MoaMono*)(mop->solver);
+    MoaMono* secant = mgf_moa_get_mono_buffer(mop->solver);
 
     struct indv_t_mono_type* indv_data;
     Individual* indv;

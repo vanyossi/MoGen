@@ -17,20 +17,13 @@
  */
 
 
-#ifndef MOGEN_MOGEN_MOA_H
-#define MOGEN_MOGEN_MOA_H
+#ifndef MOGEN_MGF_MOA_H
+#define MOGEN_MGF_MOA_H
 
 #include "global_types.h"
-#include "mgf_population.h"
 #include "mop_report.h"
 
-#define mbool int
-#define mfalse 0
-#define mtrue 1
-
-struct mop_t;
-struct mogen_moa_t;
-struct moeaz_indv_t;
+struct moa_t;
 
 enum moa_stop_criterion_t {
     MGN_STOPIF_GEN,
@@ -38,33 +31,50 @@ enum moa_stop_criterion_t {
     MGN_STOP_SIZE_MARKER            // not used, only for extending enum
 };
 
-enum mogen_moa_types_e {
-    MOA_MONO,
-    MOA_DECOMP,
-    MOA_INDIC,
-    MOA_REND,
-    MOA_PARETO
+struct moa_type_t {
+    int data_size;
+    // interface
+    void (*typealloc)(struct moa_t*);
+    mbool (*stop)(struct moa_t* moa, MoaStopCriterion criterion);
+    mbool (*run)(struct mop_t* mop);
+    void (*free)(struct moa_t*);
+    // traits: initialized null
 };
 
-struct mogen_moa_bias_t {
-    double cxprob;
-    double cxidx;
-};
-
-struct mogen_moa_t {
-    MoaTypes type;
+struct moa_t {
+    struct moa_type_t *type;
     char name[64];
     struct mop_t* mop;
-    struct mogen_moa_bias_t bias;
     MopReportStats stops;
-    void* cross;
-
-    mbool (*stop)(struct mogen_moa_t* moa, MoaStopCriterion criterion);
-    mbool (*run)(struct mop_t* mop);
+    char buffer_start;      //!< Custom Moa start address
 };
 
 
-Moa *moa_init(struct mop_t *mop, char *name, MoaTypes type, size_t mem_size);
+struct moa_type_t *mgf_moatype_new(
+    int data_size,
+    void (*typealloc)(struct moa_t *),
+    mbool (*stop)(struct moa_t* moa, MoaStopCriterion criterion),
+    mbool (*run)(struct mop_t* mop),
+    void (*free)(struct moa_t *));
+
+struct moa_type_t* mgf_moa_std();
+
+struct moa_t *mgf_moa_new(Mop *mop, char *name, struct moa_type_t *type);
+//Moa *moa_init(struct mop_t *mop, char *name, MoaTypes type, size_t mem_size);
+
+//void mgf_moa_init(struct moa_t *moa, Mop *mop);
+
+struct moa_type_t* mgf_moa_type(struct moa_t* self);
+
+mbool mgf_moa_run(Moa* moa);
+
+void* mgf_moa_buffer(struct moa_t* self);
+
+void mgf_moa_free_std(struct moa_t* moa);
+
+void mgf_moa_free(struct moa_t* moa);
+
+
 
 mbool moa_run(struct mop_t *mop);
 
@@ -72,8 +82,7 @@ void moa_stopat_gen(Moa *moa, unsigned int gen);
 
 void moa_stopat_eval(Moa *moa, unsigned int eval);
 
-mbool moa_stop(struct mogen_moa_t* moa, MoaStopCriterion criterion);
+mbool moa_stop(Moa *moa, MoaStopCriterion criterion);
 
-//void moa_crossover(Moa* moa, enum moa_cx_types cx_func);
 
-#endif //MOGEN_MOGEN_MOA_H
+#endif //MOGEN_MGF_MOA_H

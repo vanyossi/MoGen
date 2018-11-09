@@ -20,7 +20,7 @@
 #include "crossover.h"
 
 #include "mogen_mop.h"
-#include "mogen_moa.h"
+#include "mgf_moa.h"
 
 #include <memory.h>
 #include <limits.h>
@@ -37,7 +37,7 @@ static void (*cross_PNX[3])(Mop* mop, Individual *parent1, Individual* parent2, 
 void moa_cross_setup(Moa *moa, CXType cx_type) {
     switch(cx_type){
         case CX_PNX:
-            moa->cross = cross_PNX[moa->mop->set.type - 1];
+            operators.cross = cross_PNX[moa->mop->set.type - 1];
             break;
         default:
             break;
@@ -59,7 +59,8 @@ void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1
     double *chi1 = mgf_indv_get_realdatapointer(c1);
     double *chi2 = mgf_indv_get_realdatapointer(c2);
 
-    if (rnd_perc() > mop->solver->bias.cxprob)
+    // @TODO add moa type for cxprob
+    if (rnd_perc() > .5)
     {
         memcpy(chi1, par1, sizeof(double) * mop->set.ndec);
         memcpy(chi2, par2, sizeof(double) * mop->set.ndec);
@@ -92,7 +93,8 @@ void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1,
     double *low_bound = mop->limits.xmin;
     double *up_bound = mop->limits.xmax;
 
-    if (rnd_perc() > mop->solver->bias.cxprob)
+    // @TODO add moa type for cxprob and change perc > cxprob
+    if (rnd_perc() > 0.5)
     {
         memcpy(c1->bin, parent1->bin, mop->set.ndec / WORD_BIT);
         memcpy(c2->bin, parent2->bin, mop->set.ndec / WORD_BIT);
@@ -125,7 +127,8 @@ void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c
     double *low_bound = mop->limits.xmin;
     double *up_bound = mop->limits.xmax;
 
-    if (rnd_perc() > mop->solver->bias.cxprob)
+    // @TODO add moa type for cxprob and change perc > cxprob
+    if (rnd_perc() > 0.5)
     {
         memcpy(c1->type_idx, parent1->type_idx, (2 * mop->set.ndec / WORD_BIT) + sizeof(double) * mop->set.ndec);
         memcpy(c2->type_idx, parent2->type_idx, (2 * mop->set.ndec / WORD_BIT) + sizeof(double) * mop->set.ndec);

@@ -16,28 +16,76 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "mogen_moa.h"
-#include "mogen_mop.h"
 
-#include <stdlib.h>
+#include "mgf_moa.h"
+
 #include <string.h>
 
-Moa *moa_init(struct mop_t *mop, char *name, MoaTypes type, size_t mem_size) {
-    size_t alloc_size = sizeof(Moa);
-    if(mem_size > alloc_size){
-        alloc_size = mem_size;
-    }
-    Moa* new_moa = calloc(1, alloc_size);
+#include "mogen_mop.h"
 
-    new_moa->type = type;
-    strcpy(new_moa->name, name);
-    new_moa->mop = mop;
-    mop->solver = new_moa;
+struct moa_type_t *mgf_moatype_new(
+    int data_size,
+    void (*typealloc)(struct moa_t *),
+    mbool (*stop)(struct moa_t* moa, MoaStopCriterion criterion),
+    mbool (*run)(struct mop_t* mop),
+    void (*free)(struct moa_t *))
+{
+    struct moa_type_t *moat = calloc(1, sizeof(struct moa_type_t));
 
-    mop->solver->stop = moa_stop;
+    moat->data_size = data_size;
+    moat->typealloc = (typealloc)? typealloc : 0;
+    moat->stop = (stop)? stop : moa_stop;
+    moat->run = (run)? run : moa_run;
+    moat->free = (free)? free : mgf_moa_free;
 
-    return new_moa;
+    return moat;
 }
+
+struct moa_type_t* mgf_moa_std(){
+    return mgf_moatype_new(0, 0, moa_stop, moa_run, mgf_moa_free_std);
+}
+
+struct moa_t *mgf_moa_new(Mop *mop, char *name, struct moa_type_t *type) {
+    int size = sizeof(struct moa_t) + type->data_size;
+    struct moa_t* moa = calloc(1,size);
+
+    moa->type = type;
+
+    strcpy(moa->name, name);
+    moa->mop = mop;
+    mop->solver = moa;
+
+    if (moa->type->typealloc) {
+        moa->type->typealloc(moa);
+    }
+
+    return moa;
+}
+
+//void mgf_moa_init(struct moa_t *moa, Mop *mop);
+
+struct moa_type_t* mgf_moa_type(struct moa_t* self){
+    return self->type;
+}
+
+mbool mgf_moa_run(Moa* moa){
+    return moa->type->run(moa->mop);
+}
+
+void* mgf_moa_buffer(struct moa_t* self){
+    return (void*) &(self->buffer_start);
+}
+
+void mgf_moa_free(struct moa_t* moa){
+    if (moa) {
+        moa->type->free(moa);
+    }
+}
+
+void mgf_moa_free_std(struct moa_t* moa){
+    return;
+}
+
 
 mbool moa_run(struct mop_t *mop){
     for (int i = 0; i < mop->pop->size; ++i){
@@ -49,7 +97,7 @@ mbool moa_run(struct mop_t *mop){
     return mtrue;
 }
 
-void moa_stopat_gen(Moa *moa, unsigned int gen) {
+void moa_stopat_gen(Moa *moa, unsigned int gen){
     moa->stops.gens = gen;
 }
 
@@ -57,7 +105,7 @@ void moa_stopat_eval(Moa *moa, unsigned int eval){
     moa->stops.evals = eval;
 }
 
-mbool moa_stop(struct mogen_moa_t* moa, MoaStopCriterion criterion){
+mbool moa_stop(Moa *moa, MoaStopCriterion criterion){
     mbool stop = mfalse;
     switch (criterion) {
         case MGN_STOPIF_EXEC:

@@ -110,7 +110,7 @@ void mop_solve(Mop *mop, int steps){
     do {
         steps--;
         // if moa returns false, stop condition is met
-        if (!mop->solver->run(mop))
+        if (!mgf_moa_run(mop->solver))
             break;
         mop->report.current.gens++;
         mop->report.total.gens++;

@@ -23,7 +23,7 @@
 #include <memory.h>
 #include <limits.h>
 
-#include "mogen_moa.h"
+#include "mgf_moa.h"
 #include "mogen_mop.h"
 #include "rand.h"
 
@@ -73,6 +73,7 @@ struct indv_t* mgf_indv_new(struct indv_type_t *type){
 
     return indv;
 };
+
 
 void mgf_indv_init(struct indv_t *indv, Mop *mop){
 

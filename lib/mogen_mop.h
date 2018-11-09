@@ -29,7 +29,7 @@
 #include "global_types.h"
 
 #include "mgf_population.h"
-#include "mogen_moa.h"
+#include "mgf_moa.h"
 #include "mop_report.h"
 
 enum mop_specs_e {
@@ -42,7 +42,7 @@ enum mop_specs_e {
 };
 
 struct mop_t;
-struct mogen_moa_t;
+struct moa_t;
 
 struct mop_base_t {
     char name[128];
@@ -72,7 +72,7 @@ struct mop_t {
     Mop_limit limits;
     MoeazPop *pop;
     MoeazPop *ext_pop;
-    struct mogen_moa_t* solver;
+    Moa *solver;
     void (*evaluate)(struct mop_t *mop, Individual *indv);
     MopReport report;
 };

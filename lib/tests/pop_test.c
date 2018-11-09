@@ -20,7 +20,7 @@
 
 #include "rand.h"  // @TODO integrar main api
 
-#include "mogen_moa.h"
+#include "mgf_moa.h"
 #include "mogen_mop.h"
 #include "mgf_population.h"
 
@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]) {
     double min = 0.2;
     double max = 0.8;
     mop_set_limits_ndec(mop, &min, &max, 1);
-    Moa* moa = moa_init(mop,"tests_moa_pop", MOA_MONO, 0);
+    Moa* moa = mgf_moa_new(NULL, mop, "tests_moa_pop");
 
     mgf_pop_alloc(moa, 5, mgf_indvtype_std(moa));
     mgf_pop_init(moa);

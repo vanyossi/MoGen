@@ -20,6 +20,7 @@
 #ifndef MOGEN_MGF_MONO_SOLVER_H
 #define MOGEN_MGF_MONO_SOLVER_H
 
+#include "mgf_moa.h"
 #include "mogen_mop.h"
 #include <math.h>
 
@@ -34,8 +35,7 @@ typedef struct mop_mono_f {
     mono_fx fx;
 } MopMono;
 
-typedef struct moa_mono_t {
-    Moa moa;
+typedef struct moa_mono_type {
     double *error;
     double epsilon;
 } MoaMono;
@@ -44,13 +44,19 @@ struct indv_t_mono_type {
     double error;
 };
 
+struct moa_mono_type* mgf_moa_get_mono_buffer(struct moa_t *moa);
+
+struct moa_type_t* mgf_moatype_mono();
+
 struct indv_t_mono_type* mgf_indv_get_mono_buffer(struct indv_t *indv);
 
 struct indv_type_t* mgf_indvtype_mono(Moa *moa);
 
 void mop_mono_assign_fx(Mop *mop, mono_fx f);
 
-Moa *moa_mono(Mop *mop, char *name, double epsilon, void (*evaluate)(Mop*, Individual*));
+void mgf_moa_mono_set_solver(Moa* moa, void (*evaluate)(Mop*, Individual*));
+
+void mgf_moa_mono_set_epsilon(Moa *moa, double epsilon);
 
 mbool moa_mono_run(Mop *mop);
 
