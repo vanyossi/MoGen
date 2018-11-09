@@ -17,32 +17,17 @@
  */
 
 
-#ifndef MOGEN_GLOBAL_TYPES_H
-#define MOGEN_GLOBAL_TYPES_H
+#ifndef MOGEN_MGF_OPERATORS_H
+#define MOGEN_MGF_OPERATORS_H
 
-#define mbool int
-#define mfalse 0
-#define mtrue 1
+#include "mogen_mop.h"
 
-typedef enum mop_specs_e MopSpecs;
+typedef void (*mgf_op_crossover)(Mop*, Individual*, Individual*, Individual*, Individual*);
 
-typedef struct mop_t Mop;
-typedef struct mop_base_t Mop_base;
-typedef struct mop_extra_t Mop_extra;
-typedef struct mop_limit_t Mop_limit;
+typedef struct mgf_operators {
+    mgf_op_crossover crossover;
+} Operators;
 
+void mgf_opset_crossover(mgf_op_crossover crossover);
 
-typedef struct moa_t Moa;
-typedef enum moa_stop_criterion_t MoaStopCriterion;
-typedef enum mogen_moa_types_e MoaTypes;
-
-typedef struct indv_type_t IndvidualType;
-
-typedef struct indv_t Individual;
-
-typedef struct mgf_pop_t MoeazPop;
-
-// Useful defines
-#define UNUSED(expr) do { (void)(expr); } while (0)
-
-#endif //MOGEN_GLOBAL_TYPES_H
+#endif //MOGEN_MGF_OPERATORS_H
