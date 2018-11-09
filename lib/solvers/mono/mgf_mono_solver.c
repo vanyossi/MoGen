@@ -28,6 +28,9 @@ void moa_mono_alloc(Moa *moa){
     mgf_moa_get_mono_buffer(moa)->epsilon = 1e-5;
 }
 
+// @TODO add missisng moa to moa_mono and back
+// @TODO data access to epsilon should take moa_mono as arg
+
 struct moa_mono_type* mgf_moa_get_mono_buffer(struct moa_t *moa){
     return mgf_moa_buffer(moa);
 }
