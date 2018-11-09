@@ -35,8 +35,7 @@ struct indv_type_t {
     void (*typealloc)(Mop *mop, struct indv_t *);
     void (*free)(struct indv_t*);
     // traits: initialized null
-    void (*get_decomp)(struct indv_t*);
-    void (*get_crossindex)(struct indv_t*);
+    void (*get_rank)(struct indv_t*);
 };
 
 struct indv_t {

@@ -44,6 +44,8 @@ struct indv_t_mono_type {
     double error;
 };
 
+struct indv_t_mono_type* mgf_indv_get_mono_buffer(struct indv_t *indv);
+
 struct indv_type_t* mgf_indvtype_mono(Moa *moa);
 
 void mop_mono_assign_fx(Mop *mop, mono_fx f);

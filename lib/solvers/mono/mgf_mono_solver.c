@@ -21,7 +21,11 @@
 
 
 void indv_mono_alloc(Mop *mop, struct indv_t *indv) {
-    ((struct indv_t_mono_type*)mgf_indv_buffer(indv))->error = MAXFLOAT;
+    mgf_indv_get_mono_buffer(indv)->error = MAXFLOAT;
+}
+
+struct indv_t_mono_type* mgf_indv_get_mono_buffer(struct indv_t *indv){
+    return mgf_indv_buffer(indv);
 }
 
 struct indv_type_t* mgf_indvtype_mono(Moa *moa){

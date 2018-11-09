@@ -33,9 +33,8 @@ static int INDV_FALSE = 0;
 
 //#define indv_standard mgf_indvtype_new(0, mgf_indv_free_std);
 
-
 struct indv_type_t *mgf_indvtype_new(
-    Moa *moa,
+    Moa *moa, // @TODO remove need for moa
     int data_size,
     void (*typealloc)(Mop *mop, struct indv_t *),
     void (*free)(struct indv_t *))
