@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]) {
     double min = 0.2;
     double max = 0.8;
     mop_set_limits_ndec(mop, &min, &max, 1);
-    Moa* moa = mgf_moa_new(NULL, mop, "tests_moa_pop");
+    Moa* moa = mgf_moa_new(mop, "tests_moa_pop", mgf_moa_std());
 
     mgf_pop_alloc(moa, 5, mgf_indvtype_std(moa));
     mgf_pop_init(moa);
