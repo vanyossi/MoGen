@@ -19,14 +19,15 @@
 
 #include "crossover.h"
 
-#include "mogen_mop.h"
-#include "mgf_moa.h"
-
 #include <memory.h>
 #include <limits.h>
 #include <math.h>
 
 #include "rand.h"
+
+#include "mogen_mop.h"
+#include "mgf_moa.h"
+#include "mgf_operators.h"
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
@@ -37,7 +38,7 @@ static void (*cross_PNX[3])(Mop* mop, Individual *parent1, Individual* parent2, 
 void moa_cross_setup(Moa *moa, CXType cx_type) {
     switch(cx_type){
         case CX_PNX:
-            operators.cross = cross_PNX[moa->mop->set.type - 1];
+            mgf_opset_crossover(cross_PNX[moa->mop->set.type - 1]);
             break;
         default:
             break;
@@ -104,7 +105,7 @@ void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1,
     for (j = 0; j < mop->set.ndec; j++)
     {
         /* crossover */
-        s = abs(mgf_indv_get_bin(parent2, j) - mgf_indv_get_bin(parent1, j)) / eta;
+        s = mgf_indv_get_bin(parent2, j) - mgf_indv_get_bin(parent1, j) / eta;
         mgf_indv_set_bin(c1,j, (rnd_perc() < .5) ? (int)rnd_normal(mgf_indv_get_bin(parent1, j), s) : (int)rnd_normal(mgf_indv_get_bin(parent2, j), s) );
         mgf_indv_set_bin(c2,j, (rnd_perc() < .5) ? (int)rnd_normal(mgf_indv_get_bin(parent1, j), s) : (int)rnd_normal(mgf_indv_get_bin(parent2, j), s) );
 

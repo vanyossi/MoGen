@@ -16,38 +16,41 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "mops/zdt.h"
+#include "solvers/mgf_nsga2.h"
+#include "operators/mgf_operators.h"
+
+#include "rand.h"
+
 #include <stdio.h>
-
-#include "rand.h"  // @TODO integrar main api
-
-#include "mgf_moa.h"
-#include "mogen_mop.h"
-#include "mgf_population.h"
 
 int main(int argc, char const *argv[]) {
     set_random(0.141559);
 
-    Mop* mop = mogen_mop("test_pop", MOP_REAL,0);
-    mop_set_params(mop, 5,1,0);
-    double min = 0.2;
-    double max = 0.8;
-    mop_set_limits_ndec(mop, &min, &max, 1);
-    Moa* moa = mgf_moa_new(mop, "tests_moa_pop", mgf_moa_std());
 
-    mgf_moa_new_pop(moa, 5, mgf_indvtype_std(moa));
-    mgf_pop_init(moa);
+    Mop *zdt = mop_zdt(ZDT1, MOP_REAL | MOP_CONTIGUOUS);
+    Moa *nsga2 = moa_nsga2(zdt);
 
-    printf("xsize %d, indv type %d\n", mop->pop->indv->type->xsize, mop->pop->indv->xtype);
+    mgf_moa_new_pop(nsga2, 40, mgf_indvtype_nsga2(nsga2));
+    mgf_pop_init(nsga2);
 
-    for (int j = 0; j < mop->pop->size; ++j) {
-        printf("indv %d:\n", j);
-        for (int i = 0; i < mop->set.ndec; ++i) {
-            printf("x%d: %0.5f, ", i, mgf_pop_get_indv(mop->pop, j)->real[i]);
-        }
-        puts("\n");
+    double res[2];
+
+    moa_cross_setup(nsga2, CX_PNX);
+    moa_mutation_setup(nsga2, MUT_PBM);
+
+    mop_solve(zdt, 100);
+
+    for (int i = 0; i < zdt->pop->size; ++i) {
+        res[0] = mogen_mop_getindv(zdt,i)->real[0];
+        res[1] = mogen_mop_getindv(zdt,i)->f[1];
+        printf("%.10f, %.10f\n", res[0], res[1]);
     }
 
-    mgf_pop_free(mop->pop);
-
+    printf("total eval/runs: %d, %d \n", zdt->report.total.evals, zdt->report.total.gens);
+    printf("time taken %s: %.8f, %ld\n",
+        zdt->solver->name,
+        mogen_time_ms2sec(zdt->report.total.t_elapsed),
+        zdt->report.total.t_elapsed);
     return 0;
 }

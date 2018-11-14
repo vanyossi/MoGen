@@ -26,17 +26,22 @@
 #include "mgf_individual.h"
 
 struct mgf_pop_t {
-    int size;
+    unsigned int size;
     unsigned int current;
     size_t indv_size;
+    IndvidualType *indv_type;
     Individual* indv;
 };
 
-MoeazPop *mgf_pop_alloc(Moa *moa, unsigned int size, IndvidualType *indvtype);
+MoeazPop *mgf_pop_alloc(unsigned int size, IndvidualType *indvtype);
+
+void mgf_moa_new_pop(Moa *moa, unsigned int size, IndvidualType *indvtype);
 
 void mgf_pop_init(Moa *moa);
 
 void mgf_pop_free(MoeazPop *pop);
+
+mbool mgf_pop_evaluate(MoeazPop *pop, Mop *mop);
 
 Individual* mgf_pop_get_indv(MoeazPop *pop, unsigned int pos);
 
@@ -46,5 +51,8 @@ Individual* mgf_pop_current_indv(MoeazPop *pop);
 void * mgf_pop_next(MoeazPop *pop);
 
 void mgf_pop_reset_cursor(MoeazPop *pop);
+
+void mgf_pop_merge(MoeazPop *from1, MoeazPop *from2, MoeazPop *to);
+
 
 #endif //MOGEN_MGF_POPULATION_H

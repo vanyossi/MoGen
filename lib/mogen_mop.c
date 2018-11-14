@@ -104,6 +104,7 @@ mbool mop_evaluate(Mop *mop, Individual *indv) {
 }
 
 void mop_solve(Mop *mop, int steps){
+    int stop = 0;
     mop_restart_stats(&mop->report.current);
 
     mop_start_timer(&mop->report);
@@ -111,14 +112,17 @@ void mop_solve(Mop *mop, int steps){
         steps--;
         // if moa returns false, stop condition is met
         if (!mgf_moa_run(mop->solver))
-            break;
+            stop = 1;
         mop->report.current.gens++;
         mop->report.total.gens++;
 
         if (moa_stop(mop->solver, MGN_STOPIF_GEN)){
-            break;
+            stop = 1;
         }
+        if (stop) break;
     } while (steps);
+
+//    printf("status of run %d", stop);
 //    nanosleep((const struct timespec[]){{1L, 30000000L}}, NULL);
     mop_stop_timer(&mop->report);
 

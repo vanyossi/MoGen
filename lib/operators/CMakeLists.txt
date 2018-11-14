@@ -5,7 +5,14 @@ include_directories(
 
 set(MOGEN_OP_SOURCES
     crossover.c
-    rank.c rank.h mgf_operators.c mgf_operators.h)
+    mgf_rank.c
+    mgf_rank.h
+    mgf_operators.c
+    mgf_operators.h
+    mgf_mutation.c
+    mgf_mutation.h
+    mgf_dominance.c
+    )
 
 add_library(mogenops SHARED ${MOGEN_OP_SOURCES})
 target_link_libraries(mogenops mogenmop)

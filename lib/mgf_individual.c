@@ -28,29 +28,13 @@
 #include "rand.h"
 
 static const unsigned int INT_BITSIZE = WORD_BIT;
-static int INDV_TRUE = 1;
-static int INDV_FALSE = 0;
+static unsigned int INDV_TRUE = 1;
+static unsigned int INDV_FALSE = 0;
 
 //#define indv_standard mgf_indvtype_new(0, mgf_indv_free_std);
 
-struct indv_type_t *mgf_indvtype_new(
-    Moa *moa, // @TODO remove need for moa
-    int data_size,
-    void (*typealloc)(Mop *mop, struct indv_t *),
-    void (*free)(struct indv_t *))
-{
-    struct indv_type_t *indv = calloc(1, sizeof(struct indv_type_t));
-    memcpy(&indv->xsize, &moa->mop->set.ndec, sizeof(int) * 3);
-    indv->mop_type = moa->mop->set.type;
-    indv->data_size = data_size;
-    indv->typealloc = typealloc;
-    indv->free = (!free)? free : mgf_indv_free_std;
-
-    return indv;
-};
-
 struct indv_type_t* mgf_indvtype_std(Moa *moa){
-    return mgf_indvtype_new(moa, 0, 0, mgf_indv_free_std);
+    return mgf_indvtype_new(moa, 0, 0, NULL, mgf_indv_free_std);
 }
 
 // alloc
@@ -137,7 +121,7 @@ double mgf_indv_get_double(struct indv_t *indv, unsigned int pos){
     return indv->real[pos];
 }
 
-int mgf_indv_get_bin(struct indv_t *indv, unsigned int pos){
+unsigned int mgf_indv_get_bin(struct indv_t *indv, unsigned int pos){
     int bitpos = pos / INT_BITSIZE;
     int shift = pos % INT_BITSIZE;
 
@@ -192,6 +176,10 @@ double* mgf_indv_get_realdatapointer(struct indv_t *indv){
     return indv->real;
 }
 
+double* mgf_indv_get_solution_pointer(struct indv_t *indv){
+    return indv->f;
+}
+
 /** Standard individual functions **/
 void mgf_indv_free_std(struct indv_t* indv){
     if (indv->real) free(indv->real);
@@ -199,3 +187,29 @@ void mgf_indv_free_std(struct indv_t* indv){
     if (indv->type_idx)  free(indv->type_idx);
 }
 
+void mgf_indv_copy(struct indv_t *to, struct indv_t *from){
+    struct indv_type_t *type = mgf_indv_type(from);
+    size_t indv_size = sizeof(IndvidualType) + type->data_size;
+    type->copy(to,from, indv_size);
+}
+
+static void mgf_indv_cpy_std(struct indv_t *to, struct indv_t *from, int indv_size){
+    memcpy(to, from , indv_size);
+}
+
+struct indv_type_t *mgf_indvtype_new(
+    Moa *moa, int data_size,
+        void (*typealloc)(Mop *, struct indv_t *),
+        void (*copy)(Individual *, Individual *, int),
+        void (*free)(struct indv_t *))
+{
+    struct indv_type_t *indv = calloc(1, sizeof(struct indv_type_t));
+    memcpy(&indv->xsize, &moa->mop->set.ndec, sizeof(int) * 3);
+    indv->mop_type = moa->mop->set.type;
+    indv->data_size = data_size;
+    indv->typealloc = typealloc;
+    indv->copy = (copy)? copy: mgf_indv_cpy_std;
+    indv->free = (free)? free : mgf_indv_free_std;
+
+    return indv;
+};

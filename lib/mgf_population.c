@@ -26,16 +26,17 @@
 
 #include <stdio.h> // @TODO remove
 
-MoeazPop* mgf_pop_alloc(Moa *moa, unsigned int size, IndvidualType *indvtype) {
+MoeazPop *mgf_pop_alloc(unsigned int size, IndvidualType *indvtype) {
     MoeazPop* new_pop = calloc(1,sizeof(MoeazPop));
 
     size_t alloc_size = sizeof(Individual);
-    if (indvtype->data_size > alloc_size) {
-        alloc_size = indvtype->data_size;
+    if (indvtype->data_size > 0) {
+        alloc_size += indvtype->data_size;
     }
 
     new_pop->size = size;
     new_pop->indv_size = alloc_size;
+    new_pop->indv_type = indvtype;
     new_pop->indv = calloc(size, alloc_size);
 
     char *indv_adress = (char*)new_pop->indv;
@@ -44,6 +45,16 @@ MoeazPop* mgf_pop_alloc(Moa *moa, unsigned int size, IndvidualType *indvtype) {
         memcpy(indv_adress, mgf_indv_new(indvtype), alloc_size);
         indv_adress += alloc_size;
     }
+    return new_pop;
+}
+
+void mgf_moa_new_pop(Moa *moa, unsigned int size, IndvidualType *indvtype){
+    MoeazPop *new_pop = mgf_pop_alloc(size, indvtype);
+
+    if(moa->mop->pop) {
+        mgf_pop_free(moa->mop->pop);
+    }
+
     moa->mop->pop = new_pop;
 
     Individual* new_indv;
@@ -51,7 +62,6 @@ MoeazPop* mgf_pop_alloc(Moa *moa, unsigned int size, IndvidualType *indvtype) {
         new_indv = mgf_pop_get_indv(new_pop, i);
         printf("%p, %d\n", new_indv, new_indv->xtype);
     }
-    return new_pop;
 }
 
 
@@ -81,6 +91,15 @@ void mgf_pop_free(MoeazPop *pop){
     free(pop);
 }
 
+mbool mgf_pop_evaluate(MoeazPop *pop, Mop *mop) {
+    Individual *indv;
+    for (int i = 0; i < pop->size; ++i){
+        indv = mgf_pop_get_indv(pop, i);
+            if (!mop_evaluate(mop, indv)) return mfalse;
+    }
+    return mtrue;
+}
+
 Individual* mgf_pop_get_indv(MoeazPop *pop, unsigned int pos){
     mgf_pop_preploop(pop);
     UNUSED(size);
@@ -105,6 +124,22 @@ void * mgf_pop_next(MoeazPop *pop){
     }
 }
 
-void mgf_pop_reset_cursor(MoeazPop *pop){
+void mgf_pop_reset_cursor(MoeazPop *pop)
+{
     pop->current = 0;
 }
+
+void mgf_pop_merge(MoeazPop *from1, MoeazPop *from2, MoeazPop *to)
+{
+
+    unsigned int i;
+//    assert((pop1->size + pop2->size) == pop3->size);
+
+    for (i = 0; i < from1->size; i++) {
+        mgf_indv_copy(mgf_pop_get_indv(to,i),mgf_pop_get_indv(from1,i));
+    }
+    for (int k = 0; k < from2->size; i++, k++) {
+        mgf_indv_copy(mgf_pop_get_indv(to,i),mgf_pop_get_indv(from2,k));
+    }
+}
+

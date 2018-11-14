@@ -44,7 +44,7 @@ struct indv_t_mono_type* mgf_indv_get_mono_buffer(struct indv_t *indv){
 }
 
 struct indv_type_t* mgf_indvtype_mono(Moa *moa){
-    return mgf_indvtype_new(moa, sizeof(struct indv_t_mono_type), indv_mono_alloc, mgf_indv_free_std);
+    return mgf_indvtype_new(moa, sizeof(struct indv_t_mono_type), indv_mono_alloc, NULL, mgf_indv_free_std);
 }
 
 // to mop_monoobj assign fx

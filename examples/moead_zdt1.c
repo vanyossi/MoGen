@@ -25,6 +25,7 @@
 
 #include "mogen_mop.h"
 #include "lib/operators/crossover.h"
+#include "lib/operators/mgf_mutation.h"
 
 int moead_run(Mop* mop){
     for (unsigned int i = 0; i < mop->pop->size; ++i) {
@@ -111,6 +112,7 @@ int main(int argc, char const *argv[]) {
     mgf_pop_init(my_mop);
 
     moa_cross_setup(my_moa, CX_PNX);
+    moa_mutation_setup(my_moa, MUT_PBM);
 
     printf("size of ind %d and type %d\n", m_pop->indv[0].xsize, m_pop->indv[0].type);
     printf("size of ind %d and type %d\n", m_pop->indv[1].xsize, m_pop->indv[1].type);

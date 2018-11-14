@@ -17,9 +17,11 @@
  */
 
 
-#ifndef MOGEN_RANK_H
-#define MOGEN_RANK_H
+#ifndef MOGEN_MGF_DOMINANCE_H
+#define MOGEN_MGF_DOMINANCE_H
 
+int weak_dominance(double *x, double *y, int dim);
 
+int dominance(double *A, double *B, int dim);
 
-#endif //MOGEN_RANK_H
+#endif //MOGEN_MGF_DOMINANCE_H

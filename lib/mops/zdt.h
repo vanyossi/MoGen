@@ -17,4 +17,20 @@
  */
 
 
-#include "rank.h"
+#ifndef MOGEN_ZDT_H
+#define MOGEN_ZDT_H
+
+#include "global_types.h"
+#include "mogen_mop.h"
+
+typedef enum mop_zdt_e {
+    ZDT1,
+    ZDT2,
+    ZDT3,
+    ZDT4,
+    ZDT6
+} ZDTVariant;
+
+Mop *mop_zdt(ZDTVariant zdt, MopSpecs specs);
+
+#endif //MOGEN_ZDT_H

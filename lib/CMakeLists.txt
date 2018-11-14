@@ -1,9 +1,12 @@
 add_subdirectory(math)
 add_subdirectory(operators)
+add_subdirectory(mops)
+
 add_subdirectory(tests)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/lib/operators
 )
 
 set(mogen_mop_SOURCES
@@ -11,12 +14,10 @@ set(mogen_mop_SOURCES
     mgf_population.c
     mgf_individual.c
     multi_array.c
-    operators/crossover.c
     rand.c
     mgf_moa.c
     mop_report.c
-    time_tools.c
-    )
+    time_tools.c)
 
 add_library(mogenmop SHARED ${mogen_mop_SOURCES})
 target_link_libraries(mogenmop moea_math)
@@ -28,4 +29,4 @@ set_target_properties(mogenmop PROPERTIES
     INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME};@loader_path/lib/mogen"
     )
 
-add_subdirectory(solvers/mono)
+add_subdirectory(solvers)

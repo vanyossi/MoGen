@@ -33,9 +33,13 @@ struct indv_type_t {
     unsigned int gsize;
     // interface
     void (*typealloc)(Mop *mop, struct indv_t *);
+    void (*copy)(struct indv_t*, struct indv_t*, int);
     void (*free)(struct indv_t*);
     // traits: initialized null
-    void (*get_rank)(struct indv_t*);
+    int (*get_rank)(struct indv_t *);
+    void (*set_rank)(struct indv_t *, int rank);
+    double (*get_crowdist)(struct indv_t*);
+    void (*set_crowdist)(struct indv_t*, double crowdist);
 };
 
 struct indv_t {
@@ -53,16 +57,14 @@ struct indv_t {
 
 
 struct indv_type_t *mgf_indvtype_new(
-    Moa *moa,
-    int data_size,
-    void (*typealloc)(Mop *mop, struct indv_t *),
-    void (*free)(struct indv_t *));
+    Moa *moa, int data_size, void (*typealloc)(Mop *, struct indv_t *), void (*copy)(
+    Individual *, Individual *, int), void (*free)(struct indv_t *));
 
 struct indv_type_t* mgf_indvtype_std();
 
 double mgf_indv_get_double(struct indv_t *indv, unsigned int pos);
 
-int mgf_indv_get_bin(struct indv_t *indv, unsigned int pos);
+unsigned int mgf_indv_get_bin(struct indv_t *indv, unsigned int pos);
 
 void mgf_indv_set_double(struct indv_t *indv, unsigned int pos, double value);
 
@@ -73,6 +75,8 @@ double mgf_indv_value_at(struct indv_t *indv, unsigned int pos);
 int mgf_indv_value_isbin(struct indv_t *indv, unsigned int pos);
 
 double* mgf_indv_get_realdatapointer(struct indv_t *indv);
+
+double* mgf_indv_get_solution_pointer(struct indv_t *indv);
 
 
 struct indv_t* mgf_indv_new(struct indv_type_t *type);
@@ -86,6 +90,8 @@ void* mgf_indv_buffer(struct indv_t* self);
 void mgf_indv_free_std(struct indv_t* indv);
 
 void mgf_indv_free(struct indv_t* indv);
+
+void mgf_indv_copy(struct indv_t *to, struct indv_t *from);
 
 
 #endif //MOGEN_MGF_INDIVIDUAL_H

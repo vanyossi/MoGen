@@ -21,13 +21,20 @@
 #define MOGEN_MGF_OPERATORS_H
 
 #include "mogen_mop.h"
+#include "mgf_mutation.h"
+#include "crossover.h"
 
 typedef void (*mgf_op_crossover)(Mop*, Individual*, Individual*, Individual*, Individual*);
+typedef void (*mgf_op_mutation)(Individual*, MutationSettings, Mop_limit);
 
 typedef struct mgf_operators {
     mgf_op_crossover crossover;
+    mgf_op_mutation mutation;
 } Operators;
 
+Operators* mgf_operator();
+
+void mgf_opset_mutation(mgf_op_mutation mutation);
 void mgf_opset_crossover(mgf_op_crossover crossover);
 
 #endif //MOGEN_MGF_OPERATORS_H

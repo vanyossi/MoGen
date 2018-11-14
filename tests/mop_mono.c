@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #include "rand.h"
-#include "secant.h"
+#include "solvers/mono/secant.h"
 
 double cuadratic(double x) {
     return (x*x) - 6;
@@ -50,7 +50,7 @@ int main(int argc, char const *argv[]) {
 
 //    printf("epsilon = %.6f", mgf_moa_get_mono_buffer(mypolin->solver)->epsilon );
 
-    mgf_pop_alloc(mypolin->solver, 10, mgf_indvtype_mono(mypolin->solver));
+    mgf_moa_new_pop(mypolin->solver, 10, mgf_indvtype_mono(mypolin->solver));
 
     mono_fx eval_funcs[3] =  {cuadratic, polinom, polinom3};
 

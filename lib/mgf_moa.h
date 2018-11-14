@@ -25,6 +25,11 @@
 
 struct moa_t;
 
+struct moa_cm_container {
+    double prob;
+    double eta;
+};
+
 enum moa_stop_criterion_t {
     MGN_STOPIF_GEN,
     MGN_STOPIF_EXEC,
@@ -39,6 +44,8 @@ struct moa_type_t {
     mbool (*run)(struct mop_t* mop);
     void (*free)(struct moa_t*);
     // traits: initialized null
+    struct moa_cm_container (*get_crossover_vals)(Moa*);
+    struct moa_cm_container (*get_mutation_vals)(Moa*);
 };
 
 struct moa_t {

@@ -24,3 +24,11 @@ static Operators operators;
 void mgf_opset_crossover(mgf_op_crossover crossover){
     operators.crossover = crossover;
 }
+
+void mgf_opset_mutation(mgf_op_mutation mutation){
+    operators.mutation = mutation;
+}
+
+Operators* mgf_operator(){
+    return &operators;
+}
