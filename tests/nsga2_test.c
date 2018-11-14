@@ -31,7 +31,7 @@ int main(int argc, char const *argv[]) {
     Mop *zdt = mop_zdt(ZDT1, MOP_REAL | MOP_CONTIGUOUS);
     Moa *nsga2 = moa_nsga2(zdt);
 
-    mgf_moa_new_pop(nsga2, 40, mgf_indvtype_nsga2(nsga2));
+    mgf_moa_new_pop(nsga2, 100, mgf_indvtype_nsga2(nsga2));
     mgf_pop_init(nsga2);
 
     double res[2];
@@ -39,10 +39,10 @@ int main(int argc, char const *argv[]) {
     moa_cross_setup(nsga2, CX_PNX);
     moa_mutation_setup(nsga2, MUT_PBM);
 
-    mop_solve(zdt, 100);
+    mop_solve(zdt, 1000);
 
     for (int i = 0; i < zdt->pop->size; ++i) {
-        res[0] = mogen_mop_getindv(zdt,i)->real[0];
+        res[0] = mogen_mop_getindv(zdt,i)->f[0];
         res[1] = mogen_mop_getindv(zdt,i)->f[1];
         printf("%.10f, %.10f\n", res[0], res[1]);
     }
