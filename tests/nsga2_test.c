@@ -27,7 +27,6 @@
 int main(int argc, char const *argv[]) {
     set_random(0.141559);
 
-
     Mop *zdt = mop_zdt(ZDT1, MOP_REAL | MOP_CONTIGUOUS);
     Moa *nsga2 = moa_nsga2(zdt);
 
@@ -39,7 +38,7 @@ int main(int argc, char const *argv[]) {
     moa_cross_setup(nsga2, CX_PNX);
     moa_mutation_setup(nsga2, MUT_PBM);
 
-    mop_solve(zdt, 1000);
+    mop_solve(zdt, 30);
 
     for (int i = 0; i < zdt->pop->size; ++i) {
         res[0] = mogen_mop_getindv(zdt,i)->f[0];

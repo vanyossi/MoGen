@@ -24,7 +24,7 @@
 
 #include "mogen_mop.h"
 
-static void mgf_zdt1(Mop *mop, Individual *indv)
+void mgf_zdt1(Mop *mop, Individual *indv)
 {
     IndvidualType *indv_type = mgf_indv_type(indv);
     double *F = mgf_indv_get_solution_pointer(indv);

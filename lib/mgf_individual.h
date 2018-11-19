@@ -60,7 +60,7 @@ struct indv_type_t *mgf_indvtype_new(
     Moa *moa, int data_size, void (*typealloc)(Mop *, struct indv_t *), void (*copy)(
     Individual *, Individual *, int), void (*free)(struct indv_t *));
 
-struct indv_type_t* mgf_indvtype_std();
+struct indv_type_t* mgf_indvtype_std(Moa *moa);
 
 double mgf_indv_get_double(struct indv_t *indv, unsigned int pos);
 

@@ -71,6 +71,7 @@ void mgf_indv_init(struct indv_t *indv, Mop *mop){
             mgf_indv_set_bin(indv, i, ((rnd_perc() < 0.5) ? 0 : 1));
         }
     } else {
+        // @TODO mix values must use type position array
         double value;
         for (unsigned int i = 0; i < mop->set.ndec; ++i) {
             // bin or real

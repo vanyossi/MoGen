@@ -62,13 +62,13 @@ struct mgf_indv_crowdist_a *mgf_front_to_objidx_array(struct mgf_pop_front_t *fr
 
     for (int i = 0; i < front->size; ++i) {
         new_crowd[i].index = front->idx[i];
-        new_crowd[i].objs = mgf_indv_get_realdatapointer(mgf_pop_get_indv(pop, front->idx[i]));
+        new_crowd[i].objs = mgf_indv_get_solution_pointer(mgf_pop_get_indv(pop, front->idx[i]));
     }
     return new_crowd;
 }
 
 
-static void mgf_crowdist_a_set_obj(struct mgf_indv_crowdist_a *cd, int size, int obj){
+void mgf_crowdist_a_set_obj(struct mgf_indv_crowdist_a *cd, int size, int obj){
     for (int i = 0; i < size; ++i) {
         cd[i].obj = obj;
     }
@@ -82,7 +82,8 @@ static void mgf_crowdist_a_set_obj(struct mgf_indv_crowdist_a *cd, int size, int
 void pop_fast_non_dominated_sort(struct mgf_pop_ranks_t *pop_ranks)
 {
     MoeazPop *pop = pop_ranks->pop;
-    IndvidualType *indv_type = mgf_pop_get_indv(pop,0)->type;
+    IndvidualType *indv_type = pop->indv_type;
+
     int qq, pp;
     int p, q, j;
     int dominance_flag;
@@ -125,9 +126,9 @@ void pop_fast_non_dominated_sort(struct mgf_pop_ranks_t *pop_ranks)
             if (q != p)
             {   // @TODO make dominance for bin a mixed
                 dominance_flag = dominance(
-                    mgf_indv_get_realdatapointer(mgf_pop_get_indv(pop,p)),
-                    mgf_indv_get_realdatapointer(mgf_pop_get_indv(pop,q)),
-                    indv_type->xsize);
+                    mgf_indv_get_solution_pointer(mgf_pop_get_indv(pop,p)),
+                    mgf_indv_get_solution_pointer(mgf_pop_get_indv(pop,q)),
+                    indv_type->fsize);
                 if (dominance_flag == 1) /* p dominates q */
                 {
                     nS[p]++;
@@ -233,9 +234,11 @@ int qsort_compare_crowd(const void *a_, const void *b_)
     return 0;
 }
 
-void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks){
+void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks)
+{
     MoeazPop *pop = pop_ranks->pop;
     IndvidualType *indv_type = pop->indv_type;
+
     struct mgf_pop_front_t *F = pop_ranks->front;
 
     double f_max, f_min;
@@ -268,7 +271,7 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks){
     }
     if (F->size > 2) {
         struct mgf_indv_crowdist_a *crowdists = mgf_front_to_objidx_array(F, pop);
-        for (int obj = 0; obj < indv_type->xsize; obj++) {
+        for (int obj = 0; obj < indv_type->fsize; obj++) {
             mgf_crowdist_a_set_obj(crowdists, F->size, obj);
 
             qsort(crowdists, F->size, sizeof(struct mgf_indv_crowdist_a), qsort_compare_obj);
@@ -276,15 +279,16 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks){
 //            obj = crw_struct.obj;
 
             mgf_crowdist_array_to_front(crowdists, F);
+
             id_min = F->idx[0];
             id_max = F->idx[F->size - 1];
-
             // @TODO convert to general, bin mixed int op.
-            f_min = mgf_pop_get_indv(pop,id_min)->real[obj];
-            f_max = mgf_pop_get_indv(pop,id_max)->real[obj];
+            f_min = mgf_pop_get_indv(pop,id_min)->f[obj];
+            f_max = mgf_pop_get_indv(pop,id_max)->f[obj];
 
             indv_type->set_crowdist(mgf_pop_get_indv(pop,id_min), 1.0e14);
             indv_type->set_crowdist(mgf_pop_get_indv(pop,id_max), 1.0e14);
+
             for (int i = 1; i < F->size - 1; ++i) {
                 id_cur = F->idx[i];
                 if (indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) != 1.0e14) {
@@ -292,8 +296,8 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks){
                     id_next = F->idx[i + 1];
                     indv_type->set_crowdist(mgf_pop_get_indv(pop,id_cur),
                         indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) + (
-                        (mgf_pop_get_indv(pop,id_next)->real[obj] -
-                        mgf_pop_get_indv(pop,id_prev)->real[obj]) / (f_max - f_min))
+                        (mgf_pop_get_indv(pop,id_next)->f[obj] -
+                        mgf_pop_get_indv(pop,id_prev)->f[obj]) / (f_max - f_min))
                     );
                 }
             }
@@ -304,7 +308,7 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks){
             id_cur = F->idx[i];
             if (indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) != 1.0e14) {
                 indv_type->set_crowdist(mgf_pop_get_indv(pop, id_cur),
-                    indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) / indv_type->xsize
+                    indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) / indv_type->fsize
                 );
             }
         }

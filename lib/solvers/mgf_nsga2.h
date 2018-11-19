@@ -82,7 +82,7 @@ unsigned int mgf_nsga2_binary_tournament(MoeazPop *P, unsigned int p1, unsigned 
 
 void mgf_nsga2_parent_selection(MoeazPop *P, unsigned int *parent, unsigned int n_parent);
 
-int mgf_nsga2_offspring(Mop *mop, struct moa_nsga2_t *moa);
+int mgf_nsga2_offspring(Mop *mop, struct moa_nsga2_t *moa_data);
 
 void mgf_nsga2_offspring_generation(Mop *mop, struct moa_nsga2_t *moa);
 

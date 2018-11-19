@@ -245,12 +245,15 @@ void mgf_nsga2_parent_selection(MoeazPop *P, unsigned int *parent, unsigned int 
     free(p);
 }
 
-int mgf_nsga2_offspring(Mop *mop, struct moa_nsga2_t *moa) {
+int mgf_nsga2_offspring(Mop *mop, struct moa_nsga2_t *moa_data) {
     Individual *p1 = 0, *p2 = 0, *tmp_ind = 0;
     MoeazPop *P = mop->pop;
-    MoeazPop *Q = moa->Q;
+    MoeazPop *Q = moa_data->Q;
 
-    MutationSettings mutset = mop->solver->type->get_mutation_vals(mop->solver);
+    MutationSettings mutset;
+    mutset.prob = moa_data->mut_prob;
+    mutset.eta = moa_data->mut_eta;
+//    mop->solver->type->get_mutation_vals(mop->solver);
 
     int j = 0;
     unsigned int *parent1, *parent2;
@@ -396,14 +399,14 @@ mbool moa_nsga2_first_run(Mop *mop) {
     nsga2->mix = mgf_pop_alloc(ori_pop->size * 2, ori_pop->indv_type);
     nsga2->pop_ranks = mgf_new_pop_ranks(ori_pop);
 
-    struct mgf_pop_ranks_t *p_rank = mgf_moa_nsga2_data(mop->solver)->pop_ranks;
+//    struct mgf_pop_ranks_t *p_rank = mgf_moa_nsga2_data(mop->solver)->pop_ranks;
 
     mgf_pop_evaluate(mop->pop, mop);
     // we need ranks and Front
     // rank is integer number
     // Front is int array.
-    pop_fast_non_dominated_sort(p_rank);
-    pop_crowding_assignment(p_rank);
+    pop_fast_non_dominated_sort(nsga2->pop_ranks);
+    pop_crowding_assignment(nsga2->pop_ranks);
 
     mop->solver->type->run = moa_nsga2_run;
     return mtrue;
