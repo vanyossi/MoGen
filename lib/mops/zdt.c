@@ -39,14 +39,30 @@ void mgf_zdt1(Mop *mop, Individual *indv)
     h = 1.0 - sqrt(f1 / g);
     f2 = g * h;
 
-   F[0] = f1;
-   F[1] = f2;
+    F[0] = f1;
+    F[1] = f2;
 
     return;
 }
 
 static void mgf_zdt2(Mop *mop, Individual *indv){
+    IndvidualType *indv_type = mgf_indv_type(indv);
+    double *F = mgf_indv_get_solution_pointer(indv);
+    double f1, f2, g, h, sum;
 
+    f1 = mgf_indv_get_double(indv, 0);
+    sum = 0.0;
+    for (int i = 1; i < indv_type->xsize; i++) {
+        sum += mgf_indv_get_double(indv, i);
+    }
+    g = 1.0 + 9.0 * sum / (indv_type->xsize - 1.0);
+    h = 1.0 - pow(f1 / g, 2);
+    f2 = g * h;
+
+    F[0] = f1;
+    F[1] = f2;
+
+    return;
 }
 
 static void mgf_zdt3(Mop *mop, Individual *indv){
