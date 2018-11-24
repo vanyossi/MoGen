@@ -129,16 +129,14 @@ void mgf_pop_reset_cursor(MoeazPop *pop)
     pop->current = 0;
 }
 
-void mgf_pop_merge(MoeazPop *from1, MoeazPop *from2, MoeazPop *to)
+void mgf_pop_merge(MoeazPop *to, MoeazPop *from1, MoeazPop *from2)
 {
-
-    unsigned int i;
+    unsigned int i, k;
 //    assert((pop1->size + pop2->size) == pop3->size);
-
     for (i = 0; i < from1->size; i++) {
         mgf_indv_copy(mgf_pop_get_indv(to,i),mgf_pop_get_indv(from1,i));
     }
-    for (int k = 0; k < from2->size; i++, k++) {
+    for (k = 0; k < from2->size; i++, k++) {
         mgf_indv_copy(mgf_pop_get_indv(to,i),mgf_pop_get_indv(from2,k));
     }
 }

@@ -52,7 +52,7 @@ void * mgf_pop_next(MoeazPop *pop);
 
 void mgf_pop_reset_cursor(MoeazPop *pop);
 
-void mgf_pop_merge(MoeazPop *from1, MoeazPop *from2, MoeazPop *to);
+void mgf_pop_merge(MoeazPop *to, MoeazPop *from1, MoeazPop *from2);
 
 
 #endif //MOGEN_MGF_POPULATION_H
