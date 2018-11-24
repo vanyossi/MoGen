@@ -31,7 +31,7 @@
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
-static void (*cross_PNX[3])(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) = {
+static void (*cross_PNX[3])(Mop*, Individual*, Individual*, Individual*, Individual*) = {
     PNX_real, PNX_bin, PNX_mixed
 };
 
@@ -45,12 +45,13 @@ void moa_cross_setup(Moa *moa, CXType cx_type) {
     }
 }
 
-
 void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2){
+    struct moa_cm_container cross = mop->solver->type->get_crossover_vals(mop->solver);
 //    assert(mop->set.type != 1);
     unsigned int j;
     double s;
-    double eta = 0.5;
+    double eta = (cross.eta == 0)? 0.5 : cross.eta;
+    double cprob = (cross.prob == 0)? 0.5 : cross.prob;
 
     double *low_bound = mop->limits.xmin;
     double *up_bound = mop->limits.xmax;
@@ -60,9 +61,7 @@ void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1
     double *chi1 = mgf_indv_get_realdatapointer(c1);
     double *chi2 = mgf_indv_get_realdatapointer(c2);
 
-    // @TODO add moa type for cxprob
-    if (rnd_perc() > .5)
-    {
+    if (rnd_perc() > cprob) {
         memcpy(chi1, par1, sizeof(double) * mop->set.ndec);
         memcpy(chi2, par2, sizeof(double) * mop->set.ndec);
         return;
@@ -71,7 +70,7 @@ void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1
     for (j = 0; j < mop->set.ndec; j++)
     {
         /* crossover */
-        s = fabs(par2[j] - par1[j]) / eta;
+        s = fabs(par2[j] - par1[j] + 1e-14) / eta;
         chi1[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
         chi2[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
 
@@ -86,16 +85,16 @@ void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1
 }
 
 void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) {
+    struct moa_cm_container cross = mop->solver->type->get_crossover_vals(mop->solver);
     //    assert(mop->set.type != 2);
     unsigned int j;
     double s;
-    double eta = 0.5;
+    double eta = (cross.eta == 0)? 0.5 : cross.eta;
 
     double *low_bound = mop->limits.xmin;
     double *up_bound = mop->limits.xmax;
 
-    // @TODO add moa type for cxprob and change perc > cxprob
-    if (rnd_perc() > 0.5)
+    if (rnd_perc() > cross.prob)
     {
         memcpy(c1->bin, parent1->bin, mop->set.ndec / WORD_BIT);
         memcpy(c2->bin, parent2->bin, mop->set.ndec / WORD_BIT);
@@ -120,16 +119,16 @@ void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1,
 }
 
 void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) {
+    struct moa_cm_container cross = mop->solver->type->get_crossover_vals(mop->solver);
     //    assert(mop->set.type != 3);
     unsigned int j;
     double s;
-    double eta = 0.5;
+    double eta = (cross.eta == 0)? 0.5 : cross.eta;
 
     double *low_bound = mop->limits.xmin;
     double *up_bound = mop->limits.xmax;
 
-    // @TODO add moa type for cxprob and change perc > cxprob
-    if (rnd_perc() > 0.5)
+    if (rnd_perc() > cross.prob)
     {
         memcpy(c1->type_idx, parent1->type_idx, (2 * mop->set.ndec / WORD_BIT) + sizeof(double) * mop->set.ndec);
         memcpy(c2->type_idx, parent2->type_idx, (2 * mop->set.ndec / WORD_BIT) + sizeof(double) * mop->set.ndec);
