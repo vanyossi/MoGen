@@ -33,7 +33,7 @@ struct indv_type_t {
     unsigned int gsize;
     // interface
     void (*typealloc)(Mop *mop, struct indv_t *);
-    void (*copy)(struct indv_t*, struct indv_t*, int);
+    void (*copy)(struct indv_t*, struct indv_t*);
     void (*free)(struct indv_t*);
     // traits: initialized null
     int (*get_rank)(struct indv_t *);
@@ -58,7 +58,7 @@ struct indv_t {
 
 struct indv_type_t *mgf_indvtype_new(
     Moa *moa, int data_size, void (*typealloc)(Mop *, struct indv_t *), void (*copy)(
-    Individual *, Individual *, int), void (*free)(struct indv_t *));
+    Individual *, Individual *), void (*free)(struct indv_t *));
 
 struct indv_type_t* mgf_indvtype_std(Moa *moa);
 
