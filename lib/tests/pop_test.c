@@ -24,6 +24,8 @@
 #include "mogen_mop.h"
 #include "mgf_population.h"
 
+#include "solvers/mgf_nsga2.h"
+
 int main(int argc, char const *argv[]) {
     set_random(0.141559);
 
@@ -32,21 +34,45 @@ int main(int argc, char const *argv[]) {
     double min = 0.2;
     double max = 0.8;
     mop_set_limits_ndec(mop, &min, &max, 1);
-    Moa* moa = mgf_moa_new(mop, "tests_moa_pop", mgf_moa_std());
+    Moa* moa = mgf_moa_new(mop, "tests_moa_pop", mgf_moatype_nsga2());
 
-    mgf_moa_new_pop(moa, 5, mgf_indvtype_std(moa));
+    mgf_moa_new_pop(moa, 20, mgf_indvtype_nsga2(moa));
     mgf_pop_init(moa);
+
+    MoeazPop *copy_pop = mgf_pop_alloc(20, mgf_indvtype_nsga2(moa));
+    for (int i = 0; i < mop->pop->size; ++i) {
+        mgf_indv_copy(
+            mgf_pop_get_indv(copy_pop, i),
+            mgf_pop_get_indv(mop->pop, i)
+        );
+    }
 
     printf("xsize %d, indv type %d\n", mop->pop->indv->type->xsize, mop->pop->indv->xtype);
 
-    for (int j = 0; j < mop->pop->size; ++j) {
-        printf("indv %d:\n", j);
-        for (int i = 0; i < mop->set.ndec; ++i) {
-            printf("x%d: %0.5f, ", i, mgf_pop_get_indv(mop->pop, j)->real[i]);
-        }
-        puts("\n");
-    }
+    Individual *indv;
+    Individual *indv2;
+    IndvidualType *type;
+    int non_equal = 1;
+    for (int j = 0; j < copy_pop->size - 1; ++j) {
+        indv = mgf_pop_get_indv(copy_pop, j);
+        indv2 = mgf_pop_get_indv(mop->pop, j);
+        type = indv->type;
 
+        non_equal += (indv->real[1] != indv2->real[1])? 1 : 0;
+        non_equal += (indv->type != indv2->type)? 10: 0;
+        non_equal += (indv->buffer_start != indv2->buffer_start)? 100: 0;
+        non_equal += (indv_nsga2_crowdist(indv) != indv_nsga2_crowdist(indv2))? 1000: 0;
+        non_equal += (indv->xtype != indv2->xtype)? 10000: 0;
+
+        if(non_equal){
+            printf("Copy %d, %d is not perfect %0.15f %0.15f\n", j, non_equal, indv->real[1], indv2->real[1]);
+        }
+
+        if(type == NULL){
+            printf("indv %d is null crowd = %p %g\n", j, type, type->get_crowdist(indv));
+        }
+    }
+    mgf_pop_free(copy_pop);
     mgf_pop_free(mop->pop);
 
     return 0;

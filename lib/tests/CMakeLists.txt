@@ -4,4 +4,4 @@ include_directories(
 )
 
 add_executable(poptest pop_test.c)
-target_link_libraries(poptest mogenmop)
+target_link_libraries(poptest mogenmop moa mogenops)

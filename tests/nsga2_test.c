@@ -25,7 +25,7 @@
 #include <stdio.h>
 
 int main(int argc, char const *argv[]) {
-    set_random(0.141559);
+    set_random(0.123452);
 
     Mop *zdt = mop_zdt(ZDT1, MOP_REAL | MOP_CONTIGUOUS);
     Moa *nsga2 = moa_nsga2(zdt);
@@ -33,13 +33,13 @@ int main(int argc, char const *argv[]) {
     mgf_moa_new_pop(nsga2, 100, mgf_indvtype_nsga2(nsga2));
     mgf_pop_init(nsga2);
 
-    double res[2];
-
     moa_cross_setup(nsga2, CX_PNX);
     moa_mutation_setup(nsga2, MUT_PBM);
+    moa_nsga2_cross_eta(mgf_moa_nsga2_data(nsga2), 10);
 
-    mop_solve(zdt, 30);
+    mop_solve(zdt, 300);
 
+    double res[2];
     for (int i = 0; i < zdt->pop->size; ++i) {
         res[0] = mogen_mop_getindv(zdt,i)->f[0];
         res[1] = mogen_mop_getindv(zdt,i)->f[1];
