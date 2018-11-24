@@ -107,9 +107,9 @@ void mop_solve(Mop *mop, int steps){
     int stop = 0;
     mop_restart_stats(&mop->report.current);
 
-    mop_start_timer(&mop->report);
     do {
         steps--;
+        mop_start_timer(&mop->report);
         // if moa returns false, stop condition is met
         if (!mgf_moa_run(mop->solver))
             stop = 1;
@@ -119,12 +119,14 @@ void mop_solve(Mop *mop, int steps){
         if (moa_stop(mop->solver, MGN_STOPIF_GEN)){
             stop = 1;
         }
+        mop_stop_timer(&mop->report);
+        // one gen done, now report
+        
         if (stop) break;
     } while (steps);
 
 //    printf("status of run %d", stop);
 //    nanosleep((const struct timespec[]){{1L, 30000000L}}, NULL);
-    mop_stop_timer(&mop->report);
 
 //    mop->report.total.gens += mop->report.current.gens;
 //    mop->report.total.evals += mop->report.current.evals;
