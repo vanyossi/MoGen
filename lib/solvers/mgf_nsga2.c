@@ -28,11 +28,17 @@
 void indv_nsga_alloc(Mop *mop, struct indv_t *indv) {
     UNUSED(mop);
     mgf_indv_nsga2_data(indv)->rank = 0;
+    mgf_indv_nsga2_data(indv)->crow_dist = 0.0;
+}
+
+void mgf_indv_nsga2_copy(struct indv_t *to, struct indv_t *from){
+    indv_nsga2_set_crowdist(to, indv_nsga2_crowdist(from));
+    indv_nsga2_set_rank(to, indv_nsga2_rank(from));
 }
 
 struct indv_type_t* mgf_indvtype_nsga2(Moa *moa){
     struct indv_type_t* new_indv = mgf_indvtype_new(
-        moa, sizeof(struct indv_t_nsga2_type), indv_nsga_alloc, NULL, mgf_indv_free_std);
+        moa, sizeof(struct indv_t_nsga2_type), indv_nsga_alloc, mgf_indv_nsga2_copy, mgf_indv_free_std);
     new_indv->get_rank = indv_nsga2_rank;
     new_indv->set_rank = indv_nsga2_set_rank;
     new_indv->get_crowdist = indv_nsga2_crowdist;
