@@ -24,8 +24,6 @@
 #include "mgf_moa.h"
 #include "mogen_mop.h"
 
-#include <stdio.h> // @TODO remove
-
 MoeazPop *mgf_pop_alloc(unsigned int size, IndvidualType *indvtype) {
     MoeazPop* new_pop = calloc(1,sizeof(MoeazPop));
 
@@ -56,12 +54,6 @@ void mgf_moa_new_pop(Moa *moa, unsigned int size, IndvidualType *indvtype){
     }
 
     moa->mop->pop = new_pop;
-
-    Individual* new_indv;
-    for (int i = 1; i < 3; ++i) {
-        new_indv = mgf_pop_get_indv(new_pop, i);
-        printf("%p, %d\n", new_indv, new_indv->xtype);
-    }
 }
 
 
