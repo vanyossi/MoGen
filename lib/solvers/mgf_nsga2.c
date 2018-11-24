@@ -19,6 +19,8 @@
 
 #include "mgf_nsga2.h"
 
+#include <assert.h>
+
 #include "rand.h"
 
 #include "mogen_mop.h"
@@ -223,9 +225,9 @@ static void set_integer_sequence(int *dest, int from, int to) {
     }
 }
 
-#include <stdio.h>
 
-void mgf_nsga2_parent_selection(MoeazPop *P, unsigned int *parent, unsigned int n_parent){
+void mgf_nsga2_parent_selection(MoeazPop *P, unsigned int *parent, unsigned int n_parent)
+{
     unsigned int *p;
     unsigned int p1, p2;
     int j = 0;
@@ -234,11 +236,10 @@ void mgf_nsga2_parent_selection(MoeazPop *P, unsigned int *parent, unsigned int 
     UNUSED(n_parent);
     // @TODO check if only even pop is still necessary
     // only: even population
-    //assert(n_parent == (int )(P->size / 2));
+    assert(n_parent == (int )(P->size / 2));
 
     p = calloc(P->size, sizeof(int));
     set_integer_sequence((int*)p, 0, P->size);
-
     rnd_shuffle_vector(p, P->size, sizeof(int));
 
     for (unsigned int i = 0; i < N; i += 2)
@@ -246,27 +247,34 @@ void mgf_nsga2_parent_selection(MoeazPop *P, unsigned int *parent, unsigned int 
         p1 = p[i];
         p2 = p[i + 1];
 
-        parent[j++] = mgf_nsga2_binary_tournament(P, p1, p2);
+        parent[j] = mgf_nsga2_binary_tournament(P, p1, p2);
+        j++;
     }
     free(p);
 }
 
+// #include <stdio.h>
 int mgf_nsga2_offspring(Mop *mop, struct moa_nsga2_t *moa_data) {
-    Individual *p1 = 0, *p2 = 0, *tmp_ind = 0;
+    Individual *p1 = 0, *p2 = 0, tmp_ind;
     MoeazPop *P = mop->pop;
     MoeazPop *Q = moa_data->Q;
 
-    MutationSettings mutset;
-    mutset.prob = moa_data->mut_prob;
-    mutset.eta = moa_data->mut_eta;
-//    mop->solver->type->get_mutation_vals(mop->solver);
+    MutationSettings mutset = mop->solver->type->get_mutation_vals(mop->solver);
+//     for (int k = 0; k < P->size; ++k) {
+//         if ( mgf_pop_get_indv(P,k)->type == NULL) {
+//             printf("type %d, %d, %p\n", P->size, k, mgf_pop_get_indv(P,k)->type);
+//         }
+//     }
+// //    mutset.prob = moa_data->mut_prob;
+// //    mutset.eta = moa_data->mut_eta;
 
     int j = 0;
     unsigned int *parent1, *parent2;
-    unsigned int n_parent = P->size / 2;
+    unsigned int n_parent;
     unsigned int N;
 
     /* Even population */
+    n_parent = P->size / 2;
     parent1 = malloc(sizeof(int) * n_parent);
     parent2 = malloc(sizeof(int) * n_parent);
     N = ((P->size % 2) == 0) ? (P->size) : (P->size - 1);
@@ -274,10 +282,10 @@ int mgf_nsga2_offspring(Mop *mop, struct moa_nsga2_t *moa_data) {
     mgf_nsga2_parent_selection(P, parent1, n_parent);
     mgf_nsga2_parent_selection(P, parent2, n_parent);
 
-    for (unsigned int i = 0; i < N; i += 2)
+    for (unsigned int i = 0; i < N; i += 2, j++)
     {
         p1 = mgf_pop_get_indv(P, parent1[j]);
-        p2 = mgf_pop_get_indv(P, parent2[j++]);
+        p2 = mgf_pop_get_indv(P, parent2[j]);
 
         mgf_operator()->crossover(mop,
             p1, p2,
@@ -297,21 +305,21 @@ int mgf_nsga2_offspring(Mop *mop, struct moa_nsga2_t *moa_data) {
     if (N != Q->size)
     {
         // @TODO add error message asserts
-//        assert(N == (Q->size - 1));
-        tmp_ind = mgf_indv_new(P->indv_type);
+        assert(N == (Q->size - 1));
+        tmp_ind = *mgf_indv_new(P->indv_type);
         p1 = mgf_pop_get_indv(P, (unsigned int)rnd_int(0, P->size - 1)); // no tournament
         p2 = mgf_pop_get_indv(P, (unsigned int)rnd_int(0, P->size - 1)); // no tournament
 
         mgf_operator()->crossover(mop,
             p1, p2,
             mgf_pop_get_indv(Q, N),
-            tmp_ind);
+            &tmp_ind);
 
-        mgf_operator()->mutation(mgf_pop_get_indv(Q,N), mutset , mop->limits);
+        mgf_operator()->mutation(mgf_pop_get_indv(Q,N), mutset, mop->limits);
         mop_evaluate(mop, mgf_pop_get_indv(Q, N));
 
 //        ELITE_update_ind_list_continuous(&elite, &Q->ind[N], NULL, NULL, NULL);
-        mgf_indv_free(tmp_ind);
+        mgf_indv_free(&tmp_ind);
     }
     free(parent1);
     free(parent2);
@@ -333,7 +341,7 @@ void mgf_nsga2_reduce(MoeazPop *P, Moa *moa)
     struct mgf_pop_ranks_t *mix_ranks = mgf_new_pop_ranks(mixed_pop);
 
     int rank;
-    int i, j, selection_count;
+    int j, selection_count;
     int delete;
     int sol, id_cur;
 
@@ -342,30 +350,29 @@ void mgf_nsga2_reduce(MoeazPop *P, Moa *moa)
     selection_count = 0;
     for (rank = 0; rank < mix_ranks->ranks; rank++)
     {
-        pop_crowding_assignment(mix_ranks);
+        pop_crowding_assignment(mix_ranks, rank);
         selection_count += mix_ranks->front[rank].size;
 
-        if (selection_count >= P->size) {
+        if (selection_count >= (P->size)) {
             break;
         }
     }
     delete = selection_count - P->size;
-//    assert(delete >= 0);
+    assert(delete >= 0);
 
     sol = 0;
     /* Copying the first ranks */
-    for (i = 0; i < rank; i++)
+    for (int i = 0; i < rank; i++)
     {
         for (j = 0; j < mix_ranks->front[i].size; j++)
         {
-//            assert(sol <= P->size);
+            assert(sol <= P->size);
             id_cur = mix_ranks->front[i].idx[j];
-//            mixed_pop->F[i].idx[j];
             mgf_indv_copy(mgf_pop_get_indv(P,sol), mgf_pop_get_indv(mixed_pop, id_cur));
-//            (&(P->ind[sol]), &(mixed_pop->ind[id_cur]), NULL);
             sol++;
         }
     }
+
     struct mgf_indv_crowdist_a *crowdists = mgf_front_to_crowdist_array(&(mix_ranks->front[rank]), mixed_pop);
     crowding_sort(crowdists, mix_ranks->front[rank].size);
     mgf_crowdist_array_to_front(crowdists, &(mix_ranks->front[rank]));
@@ -375,24 +382,13 @@ void mgf_nsga2_reduce(MoeazPop *P, Moa *moa)
     {
         id_cur = mix_ranks->front[rank].idx[j];
         mgf_indv_copy(mgf_pop_get_indv(P,sol), mgf_pop_get_indv(mixed_pop, id_cur));
-//        cpy_ind(&(P->ind[sol]), &(mixed_pop->ind[id_cur]), NULL);
         sol++;
     }
-//    assert(sol == P->size);
+    assert(sol == P->size);
 
-    // @TODO create free ranks function
-    if (mix_ranks->front != NULL)
-    {
-//        assert(mixed_pop->F != NULL && mixed_pop->ranks > 0);
-        for (j = 0; j < mix_ranks->ranks; ++j)
-        {
-            free(mix_ranks->front[j].idx);
-            mix_ranks->front[j].size = 0;
-        }
-        free(mix_ranks->front);
-        mix_ranks->front = NULL;
-        mix_ranks->ranks = 0;
-    }
+
+    free(crowdists);
+    mgf_free_pop_ranks(mix_ranks);
 }
 
 // run step
@@ -412,7 +408,9 @@ mbool moa_nsga2_first_run(Mop *mop) {
     // rank is integer number
     // Front is int array.
     pop_fast_non_dominated_sort(nsga2->pop_ranks);
-    pop_crowding_assignment(nsga2->pop_ranks);
+    for (int i = 0; i < nsga2->pop_ranks->ranks; ++i) {
+        pop_crowding_assignment(nsga2->pop_ranks, i);
+    }
 
     mop->solver->type->run = moa_nsga2_run;
     return mtrue;
@@ -423,8 +421,8 @@ mbool moa_nsga2_run(Mop *mop){
     // We assume moa is of type nsga2
     struct moa_nsga2_t *nsga2_data =  mgf_moa_nsga2_data(mop->solver);
 
-    mgf_nsga2_offspring_generation(mop, mgf_moa_nsga2_data(mop->solver));
-    mgf_pop_merge(mop->pop, nsga2_data->Q, nsga2_data->mix);
+    mgf_nsga2_offspring_generation(mop, nsga2_data);
+    mgf_pop_merge(nsga2_data->mix, mop->pop, nsga2_data->Q);
     mgf_nsga2_reduce(mop->pop, mop->solver);
 
     return mtrue;

@@ -37,10 +37,8 @@ struct mgf_pop_ranks_t {
 struct mgf_indv_crowdist_a {
     unsigned int index;
     double *objs; //!> NULL by default
-    union {
-        double crowdist;
-        int obj;
-    };
+    double crowdist;
+    int obj;
 };
 
 struct mgf_pop_ranks_t* mgf_new_pop_ranks(MoeazPop *pop);
@@ -59,7 +57,7 @@ struct mgf_indv_crowdist_a *mgf_front_to_objidx_array(struct mgf_pop_front_t *fr
  */
 void pop_fast_non_dominated_sort(struct mgf_pop_ranks_t *pop_ranks);
 
-void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks);
+void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks, int front_idx);
 
 void crowding_sort(struct mgf_indv_crowdist_a *pop_crowdist, int size);
 

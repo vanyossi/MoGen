@@ -3,11 +3,12 @@ add_subdirectory(mono)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/lib/math
 )
 
 set(MGF_MOA_SOURCES
     mgf_nsga2.c
-    )
+    mgf_moead.c mgf_moead.h decomposition/mgf_weights.c decomposition/mgf_weights.h decomposition/mgf_scalarization.c decomposition/mgf_scalarization.h)
 
 add_library(moa ${MGF_MOA_SOURCES})
 target_link_libraries(moa mogenmop)

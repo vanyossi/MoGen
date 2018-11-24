@@ -19,7 +19,12 @@
 
 #include "mgf_rank.h"
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+
+#include <math.h>
+
 #include "lib/mgf_population.h"
 #include "mgf_dominance.h"
 
@@ -31,16 +36,22 @@ struct mgf_pop_ranks_t* mgf_new_pop_ranks(MoeazPop *pop){
 
 
 void mgf_free_pop_ranks(struct mgf_pop_ranks_t* pop_ranks){
+    if (pop_ranks->front != NULL) {
+        for (int j = 0; j < pop_ranks->ranks; ++j) {
+            free(pop_ranks->front[j].idx);
+        }
+        free(pop_ranks->front);
+    }
     free(pop_ranks);
 }
 
 
 struct mgf_indv_crowdist_a *mgf_front_to_crowdist_array(struct mgf_pop_front_t *front, MoeazPop *pop) {
     IndvidualType *indv_type = pop->indv_type;
-    int size = front->size;
+    size_t size = (size_t)front->size;
     struct mgf_indv_crowdist_a* new_crowd = calloc(size, sizeof(struct mgf_indv_crowdist_a));
 
-    for (int i = 0; i < front->size; ++i) {
+    for (int i = 0; i < size; ++i) {
         new_crowd[i].index = front->idx[i];
         new_crowd[i].crowdist = indv_type->get_crowdist(mgf_pop_get_indv(pop, front->idx[i]));
     }
@@ -56,14 +67,15 @@ void mgf_crowdist_array_to_front(struct mgf_indv_crowdist_a *cd, struct mgf_pop_
 }
 
 
-struct mgf_indv_crowdist_a *mgf_front_to_objidx_array(struct mgf_pop_front_t *front, MoeazPop *pop) {
-    int size = front->size;
-    struct mgf_indv_crowdist_a* new_crowd = calloc((size_t)size, sizeof(struct mgf_indv_crowdist_a));
+struct mgf_indv_crowdist_a* mgf_front_to_objidx_array(struct mgf_pop_front_t *front, MoeazPop *pop) {
+    size_t size = (size_t) front->size;
+    struct mgf_indv_crowdist_a* new_crowd = calloc(size, sizeof(struct mgf_indv_crowdist_a));
 
-    for (int i = 0; i < front->size; ++i) {
+    for (int i = 0; i < size; ++i) {
         new_crowd[i].index = front->idx[i];
         new_crowd[i].objs = mgf_indv_get_solution_pointer(mgf_pop_get_indv(pop, front->idx[i]));
     }
+
     return new_crowd;
 }
 
@@ -85,7 +97,7 @@ void pop_fast_non_dominated_sort(struct mgf_pop_ranks_t *pop_ranks)
     IndvidualType *indv_type = pop->indv_type;
 
     int qq, pp;
-    int p, q, j;
+    int p, q;
     int dominance_flag;
     int rank;
     int **S, *nS;
@@ -96,16 +108,16 @@ void pop_fast_non_dominated_sort(struct mgf_pop_ranks_t *pop_ranks)
 
     /* Getting the ranks of the population (fast non-dominated sort) ******** */
     //printf("size: %d\n", pop->ranks);
-    if (pop_ranks->front != NULL) {
-        //vprint("\n\n Clean memory in fast nondominated sort\n");
+//    if (pop_ranks->front != NULL) {
+//        //vprint("\n\n Clean memory in fast nondominated sort\n");
 //        assert(pop_ranks->front != NULL && pop_ranks->ranks > 0);
-        for (j = 0; j < pop_ranks->ranks; ++j) {
-            free(&pop_ranks->front[j]);
-        }
-        free(pop_ranks->front);
-        pop_ranks->front = NULL;
-        pop_ranks->ranks = 0;
-    }
+//        for (j = 0; j < pop_ranks->ranks; ++j) {
+//            free(&pop_ranks->front[j]);
+//        }
+//        free(pop_ranks->front);
+//        pop_ranks->front = NULL;
+//        pop_ranks->ranks = 0;
+//    }
 
     rank = 1;
     S = (int**) malloc(sizeof(int*) * pop->size);
@@ -113,7 +125,7 @@ void pop_fast_non_dominated_sort(struct mgf_pop_ranks_t *pop_ranks)
     n = (int*) malloc(sizeof(int) * pop->size);
 
     pop_ranks->ranks = rank;
-    pop_ranks->front = realloc(pop_ranks->front, sizeof(struct mgf_pop_front_t) * pop_ranks->ranks);
+    pop_ranks->front = calloc((size_t)pop_ranks->ranks, sizeof(struct mgf_pop_front_t));
     pop_ranks->front[0].size = 0;
     pop_ranks->front[0].idx = NULL;
 
@@ -141,6 +153,8 @@ void pop_fast_non_dominated_sort(struct mgf_pop_ranks_t *pop_ranks)
                 }
             }
         }
+        // no one dominates a
+        // add to rank
         if (n[p] == 0) {
             indv_type->set_rank(mgf_pop_get_indv(pop,p),rank);
             pop_ranks->front[rank - 1].size++;
@@ -207,6 +221,7 @@ int qsort_compare_obj(const void *a_, const void *b_)
     b = (struct mgf_indv_crowdist_a*) b_;
 
     int obj = a->obj;
+//    printf("obj: %d a = %g, b %g\n", obj, a->objs[obj], b->objs[obj]);
 
     if (a->objs[obj] < b->objs[obj])
     {
@@ -226,20 +241,33 @@ int qsort_compare_crowd(const void *a_, const void *b_)
     b = (struct mgf_indv_crowdist_a*) b_;
 
     if (a->crowdist < b->crowdist) {
-        return -1;
+        return 1;
 
     } else if (a->crowdist > b->crowdist) {
-        return 1;
+        return -1;
     }
     return 0;
 }
 
-void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks)
+#include <stdio.h>
+
+void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks, int front_idx)
 {
     MoeazPop *pop = pop_ranks->pop;
     IndvidualType *indv_type = pop->indv_type;
 
-    struct mgf_pop_front_t *F = pop_ranks->front;
+    struct mgf_pop_front_t *F = &pop_ranks->front[front_idx];
+    struct mgf_indv_crowdist_a *crowdists = NULL;
+
+//    char filename[34];
+//    sprintf(filename,"FRONT-%d.obj", front_idx);
+//    FILE *out = fopen(filename, "w");
+//    double *f;
+//    for (int j = 0; j < F->size; ++j) {
+//        f = mgf_indv_get_solution_pointer(mgf_pop_get_indv(pop, F->idx[j]));
+//        fprintf(out, "%0.10f\t%0.10f\n", f[0], f[1]);
+//    }
+//    fclose(out);
 
     double f_max, f_min;
     unsigned int id_max, id_min;
@@ -264,20 +292,26 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks)
         return;
     }
 
-    /* Cleaning crowding distance */
-    for (int i = 0; i < F->size; ++i) {
-        id_cur = F->idx[i];
-        indv_type->set_crowdist(mgf_pop_get_indv(pop,id_cur), 0.0);
-    }
     if (F->size > 2) {
-        struct mgf_indv_crowdist_a *crowdists = mgf_front_to_objidx_array(F, pop);
+        /* Cleaning crowding distance */
+        for (int i = 0; i < F->size; ++i) {
+            id_cur = F->idx[i];
+            indv_type->set_crowdist(mgf_pop_get_indv(pop,id_cur), 0.0);
+        }
+
+        crowdists = mgf_front_to_objidx_array(F, pop);
+
         for (int obj = 0; obj < indv_type->fsize; obj++) {
+
+            for (int kl = 0; kl < F->size; ++kl) {
+                if ( isnan(indv_type->get_crowdist(mgf_pop_get_indv(pop, F->idx[kl]))) ) {
+                    printf("befrem indv %d, %d, %p is nan\n", F->idx[kl], kl, crowdists);
+//                indv_type->set_crowdist(indv, 1.0e14);
+                }
+            }
+
             mgf_crowdist_a_set_obj(crowdists, F->size, obj);
-
-            qsort(crowdists, F->size, sizeof(struct mgf_indv_crowdist_a), qsort_compare_obj);
-//            qsort(F->idx, F->size, sizeof(F->idx[0]), _compare_obj);
-//            obj = crw_struct.obj;
-
+            qsort(crowdists, (size_t)F->size, sizeof(struct mgf_indv_crowdist_a), qsort_compare_obj);
             mgf_crowdist_array_to_front(crowdists, F);
 
             id_min = F->idx[0];
@@ -304,14 +338,15 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks)
 
         }
         /* Following lines are like the original implementation of NSGA-II */
+        Individual *indv;
         for (int i = 1; i < F->size - 1; ++i) {
             id_cur = F->idx[i];
-            if (indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) != 1.0e14) {
-                indv_type->set_crowdist(mgf_pop_get_indv(pop, id_cur),
-                    indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) / indv_type->fsize
-                );
+            indv = mgf_pop_get_indv(pop,id_cur);
+            if (indv_type->get_crowdist(indv) != 1.0e14) {
+                indv_type->set_crowdist(indv, indv_type->get_crowdist(indv) / indv_type->fsize);
             }
         }
+        free(crowdists);
     }
 }
 
