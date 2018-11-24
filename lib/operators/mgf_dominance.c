@@ -51,7 +51,7 @@ int dominance(double *A, double *B, int dim)
 {
     int j, countA = 0, countB = 0;
 
-    for (j = 0; j < dim; j++) {
+    for (j = 0; j < dim; j++){
         if (A[j] < B[j]) {
             countA++;
 
