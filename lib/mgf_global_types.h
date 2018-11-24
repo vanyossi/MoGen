@@ -45,6 +45,9 @@ typedef struct indv_t Individual;
 
 typedef struct mgf_pop_t MoeazPop;
 
+
+typedef double (*scalarization)(double *, double *, double *, double *);
+
 // Useful defines
 #define UNUSED(expr) do { (void)(expr); } while (0)
 

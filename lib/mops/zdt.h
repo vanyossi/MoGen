@@ -20,7 +20,7 @@
 #ifndef MOGEN_ZDT_H
 #define MOGEN_ZDT_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 #include "mogen_mop.h"
 
 typedef enum mop_zdt_e {

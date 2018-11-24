@@ -26,7 +26,7 @@
 
 #include <stdbool.h>
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 
 #include "mgf_population.h"
 #include "mgf_moa.h"

@@ -20,7 +20,7 @@
 #ifndef MOGEN_MGF_INDIVIDUAL_H
 #define MOGEN_MGF_INDIVIDUAL_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 
 struct indv_t;
 struct indv_type_t;

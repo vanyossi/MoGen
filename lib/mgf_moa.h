@@ -20,7 +20,7 @@
 #ifndef MOGEN_MGF_MOA_H
 #define MOGEN_MGF_MOA_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 #include "mop_report.h"
 
 struct moa_t;

@@ -20,7 +20,7 @@
 #ifndef MOGEN_RANK_H
 #define MOGEN_RANK_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 
 struct mgf_pop_front_t {
     int size;

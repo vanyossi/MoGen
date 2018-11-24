@@ -20,7 +20,7 @@
 #ifndef MOGEN_POP_H
 #define MOGEN_POP_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 #include "multi_array.h"
 
 #define indv_real_data double

@@ -20,7 +20,7 @@
 #ifndef MOGEN_MGF_NSGA2_H
 #define MOGEN_MGF_NSGA2_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 
 #include "mgf_moa.h"
 #include "operators/mgf_rank.h"

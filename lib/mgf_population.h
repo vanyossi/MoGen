@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 #include "mgf_individual.h"
 
 struct mgf_pop_t {

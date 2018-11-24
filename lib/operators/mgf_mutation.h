@@ -20,7 +20,7 @@
 #ifndef MOGEN_MGF_MUTATION_H
 #define MOGEN_MGF_MUTATION_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 #include "mogen_mop.h"
 
 typedef enum moa_mut_types {

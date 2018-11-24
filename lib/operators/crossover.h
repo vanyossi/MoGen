@@ -20,7 +20,7 @@
 #ifndef MOGEN_CROSSOVER_H
 #define MOGEN_CROSSOVER_H
 
-#include "global_types.h"
+#include "mgf_global_types.h"
 
 typedef enum moa_cx_types {
     CX_ONE_POINT,
