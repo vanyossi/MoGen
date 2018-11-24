@@ -62,10 +62,10 @@ void indv_nsga2_set_crowdist(struct indv_t *indv, double crowdist){
 
 static void moa_nsga2_alloc(Moa *moa){
     struct moa_nsga2_t *nsga2 = mgf_moa_nsga2_data(moa);
-    nsga2->cross_eta = 50;
-    nsga2->cross_prob = 0.5;
-    nsga2->mut_eta = 30;
-    nsga2->mut_prob = 0.5;
+    nsga2->cross_eta = 20;
+    nsga2->cross_prob = 0.9;
+    nsga2->mut_eta = 20;
+    nsga2->mut_prob = 1.0 / moa->mop->set.ndec;
 }
 
 static void moa_nsga2_free(Moa *moa){
@@ -133,7 +133,7 @@ double moa_nsga2_mut_prob(struct moa_nsga2_t *nsga2, double value) {
 
 Moa *moa_nsga2(Mop *mop){
     Moa *moa = mgf_moa_new(mop, "NSGA2", mgf_moatype_nsga2());
-    moa_nsga2_setparams(mgf_moa_nsga2_data(moa), 0.5, 20, 0.5, 30);
+//    moa_nsga2_setparams(mgf_moa_nsga2_data(moa), 20, 0.5, 30, 0.5);
     return moa;
 }
 //void mgf_nsga2_settings(char *moea_name, int max_gen, double seed){}
