@@ -106,7 +106,7 @@ Mop *mop_zdt(ZDTVariant zdt, MopSpecs specs)
 {
     struct mgf_zdt_ops_t z_ops = mgf_zdt_ops(zdt);
     Mop *mop = mogen_mop(z_ops.name, specs, 0);
-    mop_set_params(mop, z_ops.ndec, 1, 0); // default params
+    mop_set_params(mop, z_ops.ndec, 2, 0); // default params
 
     double xmin = 0.0;
     double xmax = 1.0;
