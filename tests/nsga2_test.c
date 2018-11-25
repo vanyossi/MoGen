@@ -27,7 +27,7 @@
 int main(int argc, char const *argv[]) {
     set_random(0.123452);
 
-    Mop *zdt = mop_zdt(ZDT1, MOP_REAL | MOP_CONTIGUOUS);
+    Mop *zdt = mop_zdt(ZDTM1, MOP_MIX | MOP_CONTIGUOUS);
     Moa *nsga2 = moa_nsga2(zdt);
 
     mgf_moa_new_pop(nsga2, 100, mgf_indvtype_nsga2(nsga2));

@@ -48,7 +48,7 @@ struct indv_t* mgf_indv_new(struct indv_type_t *type){
         indv->real = malloc(sizeof (double) * indv->type->xsize);
     }
     if (CheckFlag(indv->xtype, MOP_INT)) {
-        indv->integer = malloc(sizeof (int) * indv->type->isize);
+        indv->integer = calloc(indv->type->isize, sizeof (int));
     }
     if (CheckFlag(indv->xtype, MOP_BIN)) {
         // assign 1 bit for each element in variables

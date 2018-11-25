@@ -28,7 +28,8 @@ typedef enum mop_zdt_e {
     ZDT2,
     ZDT3,
     ZDT4,
-    ZDT6
+    ZDT6,
+    ZDTM1
 } ZDTVariant;
 
 Mop *mop_zdt(ZDTVariant zdt, MopSpecs specs);
