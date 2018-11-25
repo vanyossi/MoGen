@@ -96,7 +96,7 @@ double rnd_perc(void)
 int rnd_int(int low, int high)
 {
     assert(low <= high);
-    return (int) (low + (rnd_perc() * (high - low)));
+    return (int) (low + (rnd_perc() * (high - low + 1)));
 }
 
 /**
