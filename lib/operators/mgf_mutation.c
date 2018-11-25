@@ -23,18 +23,19 @@
 
 #include "mgf_operators.h"
 
-mgf_op_mutation mut_PBM[3] = {
-    PBM_real, mut_bitwise, PBM_mut
-};
+//mgf_op_mutation mut_PBM[3] = {
+//    PBM_real, mut_bitwise, PBM_mut
+//};
 
 static double PBM_real_on_x(double y, MutationSettings mutation, double xmin, double xmax);
 static inline unsigned int mut_bitwise_on_x(unsigned int x);
 
 void moa_mutation_setup(Moa *moa, MutType mut_type) {
+    UNUSED(moa);
     switch(mut_type){
         case MUT_PBM:
         default:
-            mgf_opset_mutation(mut_PBM[moa->mop->set.type - 1]);
+            mgf_opset_mutation(PBM_mut);
             break;
     }
 }
@@ -43,11 +44,22 @@ void PBM_mut(Individual *indv, MutationSettings mutation, Mop_limit limits) {
     IndvidualType *indv_type = mgf_indv_type(indv);
 
     for (unsigned int j = 0; j < indv_type->xsize; j++) {
-        mgf_indv_set_double( indv, j, PBM_real_on_x(
-            mgf_indv_get_double(indv, j), mutation, limits.xmin[j], limits.xmax[j]));
+        if (rnd_perc() <= mutation.prob) {
+            mgf_indv_set_double(
+                indv, j, PBM_real_on_x(
+                    mgf_indv_get_double(indv, j), mutation, limits.xmin[j], limits.xmax[j]));
+        }
     }
     for (unsigned int j = 0; j < indv_type->bsize; j++) {
-        mgf_indv_get_bin( indv, mut_bitwise_on_x(mgf_indv_get_bin(indv, j)) );
+        if (rnd_perc() <= mutation.prob) {
+            mgf_indv_get_bin( indv, mut_bitwise_on_x(mgf_indv_get_bin(indv, j)) );
+        }
+    }
+    for (unsigned int j = 0; j < indv_type->isize; j++) {
+        int *ints = mgf_indv_get_integerdatapointer(indv);
+        if (rnd_perc() <= mutation.prob) {
+            ints[j] = (int) round(PBM_real_on_x(ints[j], mutation, limits.imin[j], limits.imax[j]));
+        }
     }
 }
 
