@@ -40,7 +40,7 @@ int main(int argc, char const *argv[]) {
     int fail = 0;
 
     Mop *mop = mogen_mop("test_zdt", MOP_REAL | MOP_CONTIGUOUS, 0);
-    mop_set_params(mop, 4, 2, 0);
+    mop_set_params(mop, 4, 0, 0, 2, 0);
     Moa *moa = mgf_moa_new(mop, "zdt_testmoa", mgf_moa_std());
 
     MoeazPop *pop = mgf_pop_alloc(POP_SIZE, mgf_indvtype_std(moa));
@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]) {
     // manual init
     double *F;
     for (int i = 0; i < pop->size; ++i) {
-        for (int j = 0; j < mop->set.ndec; ++j) {
+        for (int j = 0; j < mop->set.xsize; ++j) {
             mgf_indv_set_double(mgf_pop_get_indv(pop, i), j, (i+j+1));
 //            printf("val %d is %.7f\n", j, mgf_indv_get_double(mgf_pop_get_indv(pop, i),j));
         }

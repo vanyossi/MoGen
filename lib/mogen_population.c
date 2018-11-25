@@ -28,7 +28,7 @@ void mogen_indv_alloc(Individual *indv, struct mop_t *mop){
 //    Individual* indv = calloc(1,sizeof(Individual));
     indv->type = mop->set.type;
     indv->feasible = 1;
-    memcpy(&indv->xsize, &mop->set.ndec, sizeof(int) * 3); // copy sizes
+    memcpy(&indv->xsize, &mop->set.ndec, sizeof(int) * 5); // copy sizes
 
     if (mop->set.type == MOP_REAL) {
         indv->x.data = malloc(sizeof(indv_real_data) * mop->set.ndec);

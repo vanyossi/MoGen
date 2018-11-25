@@ -73,7 +73,7 @@ static void moa_nsga2_alloc(Moa *moa){
     nsga2->cross_eta = 20;
     nsga2->cross_prob = 0.9;
     nsga2->mut_eta = 20;
-    nsga2->mut_prob = 1.0 / moa->mop->set.ndec;
+    nsga2->mut_prob = 1.0 / moa->mop->set.xsize;
 }
 
 static void moa_nsga2_free(Moa *moa){

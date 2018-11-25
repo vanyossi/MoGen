@@ -43,15 +43,11 @@ void PBM_mut(Individual *indv, MutationSettings mutation, Mop_limit limits) {
     IndvidualType *indv_type = mgf_indv_type(indv);
 
     for (unsigned int j = 0; j < indv_type->xsize; j++) {
-        if (rnd_perc() <= mutation.prob) {
-            if (mgf_indv_value_isbin(indv, j)) {
-                mgf_indv_get_bin( indv, mut_bitwise_on_x(mgf_indv_get_bin(indv, j)) );
-
-            } else {
-                mgf_indv_set_double( indv, j, PBM_real_on_x(
-                    mgf_indv_get_double(indv, j), mutation, limits.xmin[j], limits.xmax[j]));
-            }
-        }
+        mgf_indv_set_double( indv, j, PBM_real_on_x(
+            mgf_indv_get_double(indv, j), mutation, limits.xmin[j], limits.xmax[j]));
+    }
+    for (unsigned int j = 0; j < indv_type->bsize; j++) {
+        mgf_indv_get_bin( indv, mut_bitwise_on_x(mgf_indv_get_bin(indv, j)) );
     }
 }
 

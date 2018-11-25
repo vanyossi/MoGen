@@ -29,11 +29,14 @@
 int main(int argc, char const *argv[]) {
     set_random(0.141559);
 
-    Mop* mop = mogen_mop("test_pop", MOP_REAL,0);
-    mop_set_params(mop, 5,1,0);
+    Mop* mop = mogen_mop("test_pop", MOP_REAL | MOP_INT,0);
+    mop_set_params(mop, 5, 0, 5, 1, 0);
+
     double min = 0.2;
     double max = 0.8;
-    mop_set_limits_ndec(mop, &min, &max, 1);
+    int imin = 2;
+    int imax = 120;
+    mop_set_limits_ndec(mop, &min, &max, 1, &imin, &imax, 1);
     Moa* moa = mgf_moa_new(mop, "tests_moa_pop", mgf_moatype_nsga2());
 
     mgf_moa_new_pop(moa, 20, mgf_indvtype_nsga2(moa));
@@ -52,7 +55,7 @@ int main(int argc, char const *argv[]) {
     Individual *indv;
     Individual *indv2;
     IndvidualType *type;
-    int non_equal = 1;
+    int non_equal = 0;
     for (int j = 0; j < copy_pop->size - 1; ++j) {
         indv = mgf_pop_get_indv(copy_pop, j);
         indv2 = mgf_pop_get_indv(mop->pop, j);
@@ -63,6 +66,7 @@ int main(int argc, char const *argv[]) {
         non_equal += (indv->buffer_start != indv2->buffer_start)? 100: 0;
         non_equal += (indv_nsga2_crowdist(indv) != indv_nsga2_crowdist(indv2))? 1000: 0;
         non_equal += (indv->xtype != indv2->xtype)? 10000: 0;
+        non_equal += (indv->integer[1] != indv2->integer[1])? 100000 : 0;
 
         if(non_equal){
             printf("Copy %d, %d is not perfect %0.15f %0.15f\n", j, non_equal, indv->real[1], indv2->real[1]);

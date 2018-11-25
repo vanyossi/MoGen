@@ -27,8 +27,16 @@
 //#include <stdint.h>
 #include <string.h>
 
-#define CheckSpec(flag) (mop_specs & flag) == flag
-
+static int mgf_count_flags(unsigned int flags, int size){
+    int count = 0;
+    for (int i = 0; i < size; ++i) {
+        if (flags & 1) {
+            count++;
+        }
+        flags >>= 1;
+    }
+    return count;
+}
 /**
  * @brief
  * @param mop_specs
@@ -42,44 +50,58 @@ Mop *mogen_mop(char *name, MopSpecs mop_specs, size_t mem_size) {
 
     strcpy(nmop->set.name, name);
 
-    if (CheckSpec(MOP_CONTIGUOUS)) {
-        nmop->set.continuous = 1;
-    }
-    if (CheckSpec(MOP_RESTRICTED)) {
-        nmop->set.restricted = 1;
-    }
+    if (CheckFlag(mop_specs, MOP_CONTIGUOUS)) { nmop->set.continuous = 1; }
+    if (CheckFlag(mop_specs, MOP_RESTRICTED)) { nmop->set.restricted = 1; }
 
     unsigned short is_mix = 0;
-    if( CheckSpec(MOP_REAL)) {
-        is_mix |= MOP_REAL;
-    }
-    if( CheckSpec(MOP_BIN)) {
-        is_mix |= MOP_BIN;
-    }
-    nmop->set.type = is_mix;
+    if( CheckFlag(mop_specs, MOP_REAL)) { is_mix |= MOP_REAL; }
+    if( CheckFlag(mop_specs, MOP_BIN))  { is_mix |= MOP_BIN; }
+    if( CheckFlag(mop_specs, MOP_INT))  { is_mix |= MOP_INT; }
 
-    if ( CheckSpec(MOP_DYNAMIC)) {
-        nmop->set.dynamic = 1;
-    }
+    if ( mgf_count_flags(is_mix,3) > 1) {
+        nmop->set.type = MOP_MIX;
+    } else {
+        nmop->set.type = is_mix;
+    };
+
+    if ( CheckFlag(mop_specs, MOP_DYNAMIC)) nmop->set.dynamic = 1;
 
     return nmop;
 }
 
-void mop_set_params(Mop *mop, unsigned int ndec, unsigned int nobjs, unsigned int ncons){
-    mop->set.ndec = ndec;
+void mop_set_params(
+    Mop *mop, unsigned int real, unsigned int binary, unsigned int integer, unsigned int nobjs, unsigned int ncons) {
+    mop->set.xsize = real;
+    mop->set.isize = integer;
+    mop->set.bsize = binary;
+
     mop->set.nobj = nobjs;
     mop->set.ncons = ncons;
 }
 
-void mop_set_limits_ndec(Mop *mop, double *min, double *max, unsigned int size) {
-    mop->limits.xmin = (double*) malloc(sizeof(double) * mop->set.ndec);
-    mop->limits.xmax = (double*) malloc(sizeof(double) * mop->set.ndec);
-
+void mop_set_limits_ndec(
+    Mop *mop, double *xmin, double *xmax, unsigned int lim_xsize, int *imin, int *imax, unsigned int lim_isize)
+{
     int j;
-    for (int i = 0; i < mop->set.ndec; i++) {
-        j = i % size;
-        mop->limits.xmin[i] = min[j];
-        mop->limits.xmax[i] = max[j];
+    if (lim_xsize) {
+        mop->limits.xmin = (double*) malloc(sizeof(double) * mop->set.xsize);
+        mop->limits.xmax = (double*) malloc(sizeof(double) * mop->set.xsize);
+
+        for (int i = 0; i < mop->set.xsize; i++) {
+            j = i % lim_xsize;
+            mop->limits.xmin[i] = xmin[j];
+            mop->limits.xmax[i] = xmax[j];
+        }
+    }
+    if (lim_isize) {
+        mop->limits.imin = calloc(mop->set.isize, sizeof(int));
+        mop->limits.imax = calloc(mop->set.isize, sizeof(int));
+
+        for (int i = 0; i < mop->set.isize; i++) {
+            j = i % lim_isize;
+            mop->limits.imin[i] = imin[j];
+            mop->limits.imax[i] = imax[j];
+        }
     }
 }
 

@@ -29,6 +29,8 @@ struct indv_type_t {
     int data_size;
     unsigned int mop_type;
     unsigned int xsize;
+    unsigned int isize;
+    unsigned int bsize;
     unsigned int fsize;
     unsigned int gsize;
     // interface
@@ -46,9 +48,9 @@ struct indv_t {
     struct indv_type_t *type;
     int xtype:16;
     int feasible:16;
-    int        *type_idx;   //!< Type index identify which position are binary
-    int        *bin;        //!< Int array, each bit represents one position
     double     *real;       //!< Double array for real values
+    int        *integer;
+    int        *bin;        //!< Int array, each bit represents one position
     double      *f;
     double      *g;
     double CV;
@@ -70,11 +72,14 @@ void mgf_indv_set_double(struct indv_t *indv, unsigned int pos, double value);
 
 void mgf_indv_set_bin(struct indv_t *indv, unsigned int pos, int value);
 
-double mgf_indv_value_at(struct indv_t *indv, unsigned int pos);
-
-int mgf_indv_value_isbin(struct indv_t *indv, unsigned int pos);
+//deprecated
+//double mgf_indv_value_at(struct indv_t *indv, unsigned int pos);
+//
+//int mgf_indv_value_isbin(struct indv_t *indv, unsigned int pos);
 
 double* mgf_indv_get_realdatapointer(struct indv_t *indv);
+
+int* mgf_indv_get_integerdatapointer(struct indv_t *indv);
 
 double* mgf_indv_get_solution_pointer(struct indv_t *indv);
 

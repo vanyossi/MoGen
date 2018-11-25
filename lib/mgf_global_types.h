@@ -26,6 +26,16 @@
 
 typedef enum mop_specs_e MopSpecs;
 
+enum mop_specs_e {
+    MOP_REAL =          1 << 0,     // 0b000000001
+    MOP_INT =           1 << 1,     // 0b000000010
+    MOP_BIN =           1 << 2,     // 0b000000100
+    MOP_MIX =           111 << 0,     // 0b000001000
+    MOP_CONTIGUOUS =    1 << 6,     // 0b001000000
+    MOP_RESTRICTED =    1 << 7,     // 0b010000000
+    MOP_DYNAMIC =       1 << 8      // 0b100000000
+};
+
 typedef struct mop_t Mop;
 typedef struct mop_base_t Mop_base;
 typedef struct mop_extra_t Mop_extra;

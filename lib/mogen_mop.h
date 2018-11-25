@@ -32,15 +32,6 @@
 #include "mgf_moa.h"
 #include "mop_report.h"
 
-enum mop_specs_e {
-    MOP_REAL =          1 << 0,     // 0b000000001
-    MOP_BIN =           1 << 1,     // 0b000000010
-    MOP_MIX =           11 << 0,    // 0b000000011
-    MOP_CONTIGUOUS =    1 << 6,     // 0b001000000
-    MOP_RESTRICTED =    1 << 7,     // 0b010000000
-    MOP_DYNAMIC =       1 << 8      // 0b100000000
-};
-
 struct mop_t;
 struct moa_t;
 
@@ -51,15 +42,18 @@ struct mop_base_t {
     unsigned int restricted:8;
     unsigned int dynamic:8;
 
-    unsigned int ndec;     //!< Number of real decision variables
+    unsigned int xsize;     //!< Number of real decision variables
+    unsigned int isize;
+    unsigned int bsize;
     unsigned int nobj;    //!< Number of objectives
     unsigned int ncons;   //!< Constrain number
 };
 
-
 struct mop_limit_t {
     double *xmin;
     double *xmax;
+    int *imin;
+    int *imax;
 };
 
 
@@ -81,9 +75,11 @@ struct mop_t {
 
 Mop *mogen_mop(char *name, MopSpecs mop_specs, size_t mem_size);
 
-void mop_set_params(Mop *mop, unsigned int nreal, unsigned int nobjs, unsigned int ncons);
+void mop_set_params(
+    Mop *mop, unsigned int real, unsigned int binary, unsigned int integer, unsigned int nobjs, unsigned int ncons);
 
-void mop_set_limits_ndec(Mop *mop, double *min, double *max, unsigned int size);
+void mop_set_limits_ndec(
+    Mop *mop, double *xmin, double *xmax, unsigned int lim_xsize, int *imin, int *imax, unsigned int lim_isize);
 
 Individual *mogen_mop_getindv(Mop *mop, unsigned int pos);
 

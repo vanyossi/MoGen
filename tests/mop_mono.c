@@ -40,12 +40,12 @@ int main(int argc, char const *argv[]) {
     set_random(0.141559);
 
     Mop* mypolin = mogen_mop("Polinom_3x", MOP_REAL | MOP_CONTIGUOUS, sizeof(MopMono));
-    mop_set_params(mypolin, 2, 1, 0);
+    mop_set_params(mypolin, 2, 0, 0, 1, 0);
 
     double xmin = -6;
     double xmax = 4;
 
-    mop_set_limits_ndec(mypolin, &xmin, &xmax, 1);
+    mop_set_limits_ndec(mypolin, &xmin, &xmax, 1, NULL, NULL, 0);
     moa_secant(mypolin, .000001);
 
 //    printf("epsilon = %.6f", mgf_moa_get_mono_buffer(mypolin->solver)->epsilon );

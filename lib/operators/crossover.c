@@ -38,6 +38,7 @@ static void (*cross_PNX[3])(Mop*, Individual*, Individual*, Individual*, Individ
 void moa_cross_setup(Moa *moa, CXType cx_type) {
     switch(cx_type){
         case CX_PNX:
+            // @TODO this wont work for other types than real.
             mgf_opset_crossover(cross_PNX[moa->mop->set.type - 1]);
             break;
         default:
@@ -62,12 +63,12 @@ void PNX_real(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1
     double *chi2 = mgf_indv_get_realdatapointer(c2);
 
     if (rnd_perc() > cprob) {
-        memcpy(chi1, par1, sizeof(double) * mop->set.ndec);
-        memcpy(chi2, par2, sizeof(double) * mop->set.ndec);
+        memcpy(chi1, par1, sizeof(double) * mop->set.xsize);
+        memcpy(chi2, par2, sizeof(double) * mop->set.xsize);
         return;
     }
 
-    for (j = 0; j < mop->set.ndec; j++)
+    for (j = 0; j < mop->set.xsize; j++)
     {
         /* crossover */
         s = fabs(par2[j] - par1[j] + 1e-14) / eta;
@@ -96,12 +97,12 @@ void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1,
 
     if (rnd_perc() > cross.prob)
     {
-        memcpy(c1->bin, parent1->bin, mop->set.ndec / WORD_BIT);
-        memcpy(c2->bin, parent2->bin, mop->set.ndec / WORD_BIT);
+        memcpy(c1->bin, parent1->bin, mop->set.xsize / WORD_BIT);
+        memcpy(c2->bin, parent2->bin, mop->set.xsize / WORD_BIT);
         return;
     }
 
-    for (j = 0; j < mop->set.ndec; j++)
+    for (j = 0; j < mop->set.bsize; j++)
     {
         /* crossover */
         s = mgf_indv_get_bin(parent2, j) - mgf_indv_get_bin(parent1, j) / eta;
@@ -130,24 +131,72 @@ void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c
 
     if (rnd_perc() > cross.prob)
     {
-        memcpy(c1->type_idx, parent1->type_idx, (2 * mop->set.ndec / WORD_BIT) + sizeof(double) * mop->set.ndec);
-        memcpy(c2->type_idx, parent2->type_idx, (2 * mop->set.ndec / WORD_BIT) + sizeof(double) * mop->set.ndec);
+        memcpy(c1->real, parent1->real, sizeof(double) * mop->set.xsize);
+        memcpy(c1->integer, parent1->bin, sizeof(int) * mop->set.isize);
+        memcpy(c1->bin, parent1->bin, mop->set.bsize / WORD_BIT);
+
+        memcpy(c2->real, parent2->real, sizeof(double) * mop->set.xsize);
+        memcpy(c2->integer, parent2->bin, sizeof(int) * mop->set.isize);
+        memcpy(c2->bin, parent2->bin, mop->set.bsize / WORD_BIT);
         return;
     }
-    // @TODO after crossing all variables are real!
-    for (j = 0; j < mop->set.ndec; j++)
+
+    double *par1 = mgf_indv_get_realdatapointer(parent1);
+    double *par2 = mgf_indv_get_realdatapointer(parent2);
+    double *chi1 = mgf_indv_get_realdatapointer(c1);
+    double *chi2 = mgf_indv_get_realdatapointer(c2);
+
+    for (j = 0; j < mop->set.xsize; j++)
     {
         /* crossover */
-        s = fabs(mgf_indv_value_at(parent2, j) - mgf_indv_value_at(parent1, j)) / eta;
-        mgf_indv_set_double(c1,j, (rnd_perc() < .5) ? rnd_normal(mgf_indv_value_at(parent1, j), s) : rnd_normal(mgf_indv_value_at(parent2, j), s) );
-        mgf_indv_set_double(c2,j, (rnd_perc() < .5) ? rnd_normal(mgf_indv_value_at(parent1, j), s) : rnd_normal(mgf_indv_value_at(parent2, j), s) );
+        s = fabs(par2[j] - par1[j] + 1e-14) / eta;
+        chi1[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
+        chi2[j] = (rnd_perc() < .5) ? rnd_normal(par1[j], s) : rnd_normal(par2[j], s);
 
         /* child1 bounds */
-        mgf_indv_set_double(c1,j, (mgf_indv_get_bin(c1, j) < low_bound[j]) ? low_bound[j] : mgf_indv_value_at(c1, j) );
-        mgf_indv_set_double(c1,j, (mgf_indv_get_bin(c1, j) > up_bound[j]) ? up_bound[j] : mgf_indv_value_at(c1, j) );
+        chi1[j] = (chi1[j] < low_bound[j]) ? low_bound[j] : chi1[j];
+        chi1[j] = (chi1[j] > up_bound[j]) ? up_bound[j] : chi1[j];
 
         /* child2 bounds */
-        mgf_indv_set_double(c2,j, (mgf_indv_get_bin(c2, j) < low_bound[j]) ? low_bound[j] : mgf_indv_value_at(c2, j) );
-        mgf_indv_set_double(c2,j, (mgf_indv_get_bin(c2, j) > up_bound[j]) ? up_bound[j] : mgf_indv_value_at(c2, j) );
+        chi2[j] = (chi2[j] < low_bound[j]) ? low_bound[j] : chi2[j];
+        chi2[j] = (chi2[j] > up_bound[j]) ? up_bound[j] : chi2[j];
+    }
+
+    //missing integer cross
+//    int *par1_i = mgf_indv_get_integerdatapointer(parent1);
+//    int *par2_i = mgf_indv_get_integerdatapointer(parent2);
+//    int *chi1_i = mgf_indv_get_integerdatapointer(c1);
+//    int *chi2_i = mgf_indv_get_integerdatapointer(c2);
+//
+//    for (j = 0; j < mop->set.isize; j++)
+//    {
+//        /* crossover */
+//        s = fabs(par2_i[j] - par1_i[j] + 1e-14) / eta;
+//        chi1_i[j] = (rnd_perc() < .5) ? rnd_normal(par1_i[j], s) : rnd_normal(par2_i[j], s);
+//        chi2_i[j] = (rnd_perc() < .5) ? rnd_normal(par1_i[j], s) : rnd_normal(par2_i[j], s);
+//
+//        /* child1 bounds */
+//        chi1_i[j] = (chi1_i[j] < low_bound[j]) ? low_bound[j] : chi1[j];
+//        chi1_i[j] = (chi1_i[j] > up_bound[j]) ? up_bound[j] : chi1[j];
+//
+//        /* child2 bounds */
+//        chi2_i[j] = (chi2_i[j] < low_bound[j]) ? low_bound[j] : chi2[j];
+//        chi2_i[j] = (chi2_i[j] > up_bound[j]) ? up_bound[j] : chi2[j];
+//    }
+
+    for (j = 0; j < mop->set.bsize; j++)
+    {
+        /* crossover */
+        s = mgf_indv_get_bin(parent2, j) - mgf_indv_get_bin(parent1, j) / eta;
+        mgf_indv_set_bin(c1,j, (rnd_perc() < .5) ? (int)rnd_normal(mgf_indv_get_bin(parent1, j), s) : (int)rnd_normal(mgf_indv_get_bin(parent2, j), s) );
+        mgf_indv_set_bin(c2,j, (rnd_perc() < .5) ? (int)rnd_normal(mgf_indv_get_bin(parent1, j), s) : (int)rnd_normal(mgf_indv_get_bin(parent2, j), s) );
+
+        /* child1 bounds */
+        mgf_indv_set_bin(c1,j, (mgf_indv_get_bin(c1, j) < low_bound[j]) ? (int)low_bound[j] : mgf_indv_get_bin(c1, j) );
+        mgf_indv_set_bin(c1,j, (mgf_indv_get_bin(c1, j) > up_bound[j]) ? (int)up_bound[j] : mgf_indv_get_bin(c1, j) );
+
+        /* child2 bounds */
+        mgf_indv_set_bin(c2,j, (mgf_indv_get_bin(c2, j) < low_bound[j]) ? (int)low_bound[j] : mgf_indv_get_bin(c2, j) );
+        mgf_indv_set_bin(c2,j, (mgf_indv_get_bin(c2, j) > up_bound[j]) ? (int)up_bound[j] : mgf_indv_get_bin(c2, j) );
     }
 }

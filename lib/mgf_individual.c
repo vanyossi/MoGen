@@ -43,13 +43,18 @@ struct indv_t* mgf_indv_new(struct indv_type_t *type){
     struct indv_t* indv = calloc(1,size);
     indv->type = type;
     indv->xtype = indv->type->mop_type;
-    // assign 1 bit for each element in variables
-    indv->type_idx = calloc(1, indv->type->xsize / INT_BITSIZE);
-    if ((indv->type->mop_type & MOP_REAL) == MOP_REAL) {
+
+    if (CheckFlag(indv->xtype, MOP_REAL)) {
         indv->real = malloc(sizeof (double) * indv->type->xsize);
     }
-    if ((indv->type->mop_type & MOP_BIN) == MOP_BIN) {
-        indv->bin = calloc(1,indv->type->xsize / INT_BITSIZE);
+    if (CheckFlag(indv->xtype, MOP_INT)) {
+        indv->integer = malloc(sizeof (int) * indv->type->isize);
+    }
+    if (CheckFlag(indv->xtype, MOP_BIN)) {
+        // assign 1 bit for each element in variables
+        size_t csize = indv->type->bsize / INT_BITSIZE;
+        csize += indv->type->bsize % INT_BITSIZE;
+        indv->bin = calloc(1,csize);
     }
 
     indv->f = calloc(sizeof(double), type->fsize);
@@ -61,26 +66,21 @@ struct indv_t* mgf_indv_new(struct indv_type_t *type){
 
 void mgf_indv_init(struct indv_t *indv, Mop *mop){
 
-    if (indv->xtype == MOP_REAL){
+    if (CheckFlag(indv->xtype, MOP_REAL)){
         double *data = mgf_indv_get_realdatapointer(indv);
-        for (int i = 0; i < mop->set.ndec; ++i) {
+        for (int i = 0; i < mop->set.xsize; ++i) {
             data[i] = rnd_real(mop->limits.xmin[i], mop->limits.xmax[i]);
         }
-    } else if (indv->xtype == MOP_BIN) {
-        for (int i = 0; i < mop->set.ndec; ++i) {
+    }
+    if (CheckFlag(indv->xtype, MOP_BIN)) {
+        for (unsigned int i = 0; i < mop->set.bsize; ++i) {
             mgf_indv_set_bin(indv, i, ((rnd_perc() < 0.5) ? 0 : 1));
         }
-    } else {
-        // @TODO mix values must use type position array
-        double value;
-        for (unsigned int i = 0; i < mop->set.ndec; ++i) {
-            // bin or real
-            if(rnd_perc() < 0.5) {
-                value = rnd_real(mop->limits.xmin[i], mop->limits.xmax[i]);
-                mgf_indv_set_double(indv, i, value);
-            } else {
-                mgf_indv_set_bin(indv, i, (rnd_perc() < 0.5) ? 0 : 1);
-            }
+    }
+    if (CheckFlag(indv->xtype, MOP_INT)) {
+        for (int i = 0; i < mop->set.isize; ++i) {
+            int *data = mgf_indv_get_integerdatapointer(indv);
+            data[i] = rnd_int(mop->limits.imin[i], mop->limits.imax[i]);
         }
     }
 
@@ -139,7 +139,7 @@ void mgf_indv_set_bin(struct indv_t *indv, unsigned int pos, int value){
     int bitpos = pos / INT_BITSIZE;
     int shift = pos % INT_BITSIZE;
 
-    indv->type_idx[bitpos] = indv->type_idx[bitpos] | (1 << shift);
+//    indv->type_idx[bitpos] = indv->type_idx[bitpos] | (1 << shift);
 
     if (value) {
         indv->bin[bitpos] = indv->bin[bitpos] | (1 << shift);
@@ -149,32 +149,37 @@ void mgf_indv_set_bin(struct indv_t *indv, unsigned int pos, int value){
 }
 
 
+// deprecated for mixed arrays ID
 
-double mgf_indv_value_at(struct indv_t *indv, unsigned int pos){
-    union mixed value = {DOUBLE_NAN};
-    value.data[0] = 1; // regular NaN this data is 0
-
-    int bitpos = pos / INT_BITSIZE;
-    int shift = pos % INT_BITSIZE;
-
-    if (pos < indv->type->xsize) {
-        if((indv->type_idx[bitpos] >> shift) & 1) {
-            value.val = ((indv->bin[bitpos] >> shift & 1)? INDV_TRUE: INDV_FALSE);
-        } else {
-            value.val = indv->real[pos];
-        }
-    }
-    return value.val;
-}
-
-int mgf_indv_value_isbin(struct indv_t *indv, unsigned int pos){
-    int bitpos = pos / INT_BITSIZE;
-    int shift = pos % INT_BITSIZE;
-    return indv->type_idx[bitpos] >> shift & 1;
-}
+//double mgf_indv_value_at(struct indv_t *indv, unsigned int pos){
+//    union mixed value = {DOUBLE_NAN};
+//    value.data[0] = 1; // regular NaN this data is 0
+//
+//    int bitpos = pos / INT_BITSIZE;
+//    int shift = pos % INT_BITSIZE;
+//
+//    if (pos < indv->type->xsize) {
+//        if((indv->type_idx[bitpos] >> shift) & 1) {
+//            value.val = ((indv->bin[bitpos] >> shift & 1)? INDV_TRUE: INDV_FALSE);
+//        } else {
+//            value.val = indv->real[pos];
+//        }
+//    }
+//    return value.val;
+//}
+//
+//int mgf_indv_value_isbin(struct indv_t *indv, unsigned int pos){
+//    int bitpos = pos / INT_BITSIZE;
+//    int shift = pos % INT_BITSIZE;
+//    return indv->type_idx[bitpos] >> shift & 1;
+//}
 
 double* mgf_indv_get_realdatapointer(struct indv_t *indv){
     return indv->real;
+}
+
+int* mgf_indv_get_integerdatapointer(struct indv_t *indv){
+    return indv->integer;
 }
 
 double* mgf_indv_get_solution_pointer(struct indv_t *indv){
@@ -184,16 +189,18 @@ double* mgf_indv_get_solution_pointer(struct indv_t *indv){
 /** Standard individual functions **/
 void mgf_indv_free_std(struct indv_t* indv){
     if (indv->real) free(indv->real);
+    if (indv->integer)  free(indv->integer);
     if (indv->bin)  free(indv->bin);
-    if (indv->type_idx)  free(indv->type_idx);
+    if (indv->f)  free(indv->f);
+    if (indv->g)  free(indv->g);
 }
 
 static void mgf_indv_cpy_std(struct indv_t *to, struct indv_t *from) {
     memcpy(to, from, sizeof(int*) *2);
-    memcpy(to->type_idx, from->type_idx, from->type->xsize / INT_BITSIZE);
 
     if (from->real) { memcpy(to->real, from->real, sizeof(double) * from->type->xsize); }
-    if (from->bin) { memcpy(to->bin, from->bin, from->type->xsize / INT_BITSIZE); }
+    if (from->integer) { memcpy(to->integer, from->integer, sizeof(int) * from->type->isize); }
+    if (from->bin) { memcpy(to->bin, from->bin, from->type->bsize / INT_BITSIZE); }
     if (from->f) { memcpy(to->f, from->f, sizeof(double) * from->type->fsize); }
     if (from->g) { memcpy(to->g, from->g, sizeof(double) * from->type->gsize); }
     to->CV = from->CV;
@@ -212,7 +219,7 @@ struct indv_type_t *mgf_indvtype_new(
         void (*free)(struct indv_t *))
 {
     struct indv_type_t *indv = calloc(1, sizeof(struct indv_type_t));
-    memcpy(&indv->xsize, &moa->mop->set.ndec, sizeof(int) * 3);
+    memcpy(&indv->xsize, &moa->mop->set.xsize, sizeof(int) * 5);
     indv->mop_type = moa->mop->set.type;
     indv->data_size = data_size;
     indv->typealloc = typealloc;
