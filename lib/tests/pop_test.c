@@ -34,8 +34,8 @@ int main(int argc, char const *argv[]) {
 
     double min = 0.2;
     double max = 0.8;
-    int imin = 2;
-    int imax = 120;
+    int imin = 0;
+    int imax = 1;
     mop_set_limits_ndec(mop, &min, &max, 1, &imin, &imax, 1);
     Moa* moa = mgf_moa_new(mop, "tests_moa_pop", mgf_moatype_nsga2());
 
@@ -61,12 +61,12 @@ int main(int argc, char const *argv[]) {
         indv2 = mgf_pop_get_indv(mop->pop, j);
         type = indv->type;
 
-        non_equal += (indv->real[1] != indv2->real[1])? 1 : 0;
+        non_equal += (indv->real[type->xsize -1] != indv2->real[type->xsize -1])? 1 : 0;
         non_equal += (indv->type != indv2->type)? 10: 0;
         non_equal += (indv->buffer_start != indv2->buffer_start)? 100: 0;
         non_equal += (indv_nsga2_crowdist(indv) != indv_nsga2_crowdist(indv2))? 1000: 0;
         non_equal += (indv->xtype != indv2->xtype)? 10000: 0;
-        non_equal += (indv->integer[1] != indv2->integer[1])? 100000 : 0;
+        non_equal += (indv->integer[type->isize - 1] != indv2->integer[type->isize - 1])? 100000 : 0;
 
         if(non_equal){
             printf("Copy %d, %d is not perfect %0.15f %0.15f\n", j, non_equal, indv->real[1], indv2->real[1]);
