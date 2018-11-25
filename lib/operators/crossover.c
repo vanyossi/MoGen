@@ -129,11 +129,11 @@ void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c
 
     if (rnd_perc() > cprob) {
         memcpy(c1->real, parent1->real, sizeof(double) * mop->set.xsize);
-        memcpy(c1->integer, parent1->bin, sizeof(int) * mop->set.isize);
+        memcpy(c1->integer, parent1->integer, sizeof(int) * mop->set.isize);
         memcpy(c1->bin, parent1->bin, mop->set.bsize / WORD_BIT);
 
         memcpy(c2->real, parent2->real, sizeof(double) * mop->set.xsize);
-        memcpy(c2->integer, parent2->bin, sizeof(int) * mop->set.isize);
+        memcpy(c2->integer, parent2->integer, sizeof(int) * mop->set.isize);
         memcpy(c2->bin, parent2->bin, mop->set.bsize / WORD_BIT);
         return;
     }
