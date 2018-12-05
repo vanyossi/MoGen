@@ -87,28 +87,42 @@ static void mgf_zdtm1(Mop *mop, Individual *indv)
     double *real = mgf_indv_get_realdatapointer(indv);
     int *integer = mgf_indv_get_integerdatapointer(indv);
 
+//    f1 = (real[0] + integer[0] + mgf_indv_get_bin(indv, 0)) / 3;
     f1 = real[0];
 
     sum = 0.0;
     for (int i = 1; i < indv_type->xsize; i++) {
         sum += pow(real[i] - 0.5,2);
     }
+
+//    double inorm;
     int res;
+    int interval;
+    int isum = 0;
     for (int i = 0; i < indv_type->isize; ++i) {
-        res = integer[i] - (i % indv_type->isize);
-        sum += res;
-    }
+        interval = mop->limits.imax[i] - mop->limits.imin[i];
+//        res = pow((integer[i] - mop->limits.imin[i]) / inorm,2);
 
+//        res = integer[i] - (mop->limits.imax[i] + (mop->limits.imin[i] / 2));
+        res = integer[i] - (i % interval);
+        res *= res; // power by 2
+        isum += res;
+    }
+    sum += (double) isum / 100; //size * intervalsize
+
+    int bsum = 0;
     for (unsigned int i = 0; i < indv_type->bsize; ++i) {
-        sum += mgf_indv_get_bin(indv,i) ^ (i % 2);
+        bsum += mgf_indv_get_bin(indv,i) ^ (i % 2);
     }
-    g = 1.0 + sum / (indv_type->xsize + indv_type->isize + indv_type->bsize - 1);
-    f2 = 1 - sqrt(f1) + g;
-//    g = 1.0 + 9.0 * sum / (indv_type->xsize - 1.0);
-//    h = 1.0 - sqrt(f1 / g);
-//    f2 = g * h;
+//    printf("%g, ", (double) bsum / indv_type->bsize);
+    sum += bsum / 10; // size
 
-    F[0] = f1;
+    g = sum;
+//    g = 1.0 + sum / ((indv_type->xsize + indv_type->isize + indv_type->bsize - 1));
+    f2 = 1 - sqrt(f1) + g;
+//    f2 = h;
+
+    F[0] = f1 + g;
     F[1] = f2;
 
     return;
@@ -175,7 +189,7 @@ Mop *mop_zdt(ZDTVariant zdt, MopSpecs specs)
     double xmin = 0.0;
     double xmax = 1.0;
     int imin = 0;
-    int imax = 1;
+    int imax = 10;
     mop_set_limits_ndec(mop, &xmin, &xmax, 1, &imin, &imax, 1);
 
     mop->evaluate = z_ops.zdt_eval;

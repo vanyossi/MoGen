@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]) {
     moa_mutation_setup(nsga2, MUT_PBM);
     moa_nsga2_cross_eta(mgf_moa_nsga2_data(nsga2), 10);
 
-    mop_solve(zdt, 300);
+    mop_solve(zdt, 1000);
 
     double res[2];
     for (int i = 0; i < zdt->pop->size; ++i) {
@@ -51,5 +51,8 @@ int main(int argc, char const *argv[]) {
         zdt->solver->name,
         mogen_time_ms2sec(zdt->report.total.t_elapsed),
         zdt->report.total.t_elapsed);
+
+    mgf_pop_free(zdt->pop);
+
     return 0;
 }
