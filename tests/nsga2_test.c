@@ -27,15 +27,21 @@
 int main(int argc, char const *argv[]) {
     set_random(0.123452);
 
-    Mop *zdt = mop_zdt(ZDTM1, MOP_MIX | MOP_CONTIGUOUS);
+    Mop *zdt = mop_zdt(ZDTM1);
     Moa *nsga2 = moa_nsga2(zdt);
+//    mop_set_params(zdt, 10, 30, 3, 2, 0);
+//    double min = 0;
+//    double max = 1;
+//    int imin = 0;
+//    int imax = 60;
+//    mop_set_limits_ndec(zdt, &min, &max, 1, &imin, &imax, 1);
 
     mgf_moa_new_pop(nsga2, 100, mgf_indvtype_nsga2(nsga2));
     mgf_pop_init(nsga2);
 
     moa_cross_setup(nsga2, CX_PNX);
     moa_mutation_setup(nsga2, MUT_PBM);
-    moa_nsga2_cross_eta(mgf_moa_nsga2_data(nsga2), 10);
+//    moa_nsga2_cross_eta(mgf_moa_nsga2_data(nsga2), 10);
 
     mop_solve(zdt, 1000);
 

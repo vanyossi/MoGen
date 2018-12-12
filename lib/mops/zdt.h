@@ -32,6 +32,6 @@ typedef enum mop_zdt_e {
     ZDTM1
 } ZDTVariant;
 
-Mop *mop_zdt(ZDTVariant zdt, MopSpecs specs);
+Mop *mop_zdt(ZDTVariant zdt);
 
 #endif //MOGEN_ZDT_H

@@ -108,14 +108,14 @@ static void mgf_zdtm1(Mop *mop, Individual *indv)
         res *= res; // power by 2
         isum += res;
     }
-    sum += (double) isum / 100; //size * intervalsize
+    sum += (double) isum; //size * intervalsize
 
     int bsum = 0;
     for (unsigned int i = 0; i < indv_type->bsize; ++i) {
         bsum += mgf_indv_get_bin(indv,i) ^ (i % 2);
     }
 //    printf("%g, ", (double) bsum / indv_type->bsize);
-    sum += bsum / 10; // size
+    sum += (double) bsum; // size
 
     g = sum;
 //    g = 1.0 + sum / ((indv_type->xsize + indv_type->isize + indv_type->bsize - 1));
@@ -133,11 +133,13 @@ struct mgf_zdt_ops_t {
     unsigned int integer;
     unsigned int bin;
     char name[8];
+    MopSpecs specs;
     void (*zdt_eval)(Mop*, Individual*);
 };
 
 struct mgf_zdt_ops_t mgf_zdt_ops(zdt) {
     struct mgf_zdt_ops_t zdt_ops = {10,0, 0, {0}};
+    zdt_ops.specs = MOP_REAL | MOP_CONTIGUOUS;
 
     if (zdt <= ZDT3) {
         zdt_ops.real = 30;
@@ -167,6 +169,7 @@ struct mgf_zdt_ops_t mgf_zdt_ops(zdt) {
             zdt_ops.zdt_eval = mgf_zdt6;
             break;
         case ZDTM1:
+            zdt_ops.specs = MOP_MIX | MOP_CONTIGUOUS;
             strcpy(zdt_ops.name, "ZDTM1");
             zdt_ops.zdt_eval = mgf_zdtm1;
             zdt_ops.real = 10;
@@ -180,10 +183,10 @@ struct mgf_zdt_ops_t mgf_zdt_ops(zdt) {
  * The parameter settings for the unconstrained DTLZ test problems
  * @param mop Multiobjectibe prblem reference
  */
-Mop *mop_zdt(ZDTVariant zdt, MopSpecs specs)
+Mop *mop_zdt(ZDTVariant zdt)
 {
     struct mgf_zdt_ops_t z_ops = mgf_zdt_ops(zdt);
-    Mop *mop = mogen_mop(z_ops.name, specs, 0);
+    Mop *mop = mogen_mop(z_ops.name, z_ops.specs, 0);
     mop_set_params(mop, z_ops.real, z_ops.bin, z_ops.integer, 2, 0); // default params
 
     double xmin = 0.0;
