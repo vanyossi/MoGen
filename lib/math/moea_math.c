@@ -75,8 +75,7 @@ double pDistance(double *a, double *b, int dim, double p)
     double dist = 0.0;
 
     assert(p > 0.0);
-    for (i = 0; i < dim; ++i)
-    {
+    for (i = 0; i < dim; ++i) {
         dist += pow(fabs(a[i] - b[i]), p);
     }
     return pow(dist, 1.0 / p);

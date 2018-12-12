@@ -273,9 +273,6 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks, int front_idx)
     unsigned int id_max, id_min;
     unsigned int id_prev, id_next, id_cur;
 
-//    crw_struct.pop = pop;
-
-    //printf("F.size: %d\n", F->size);
 
     /* One element in the front*/
     if (F->size == 1) {
@@ -303,19 +300,13 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks, int front_idx)
 
         for (int obj = 0; obj < indv_type->fsize; obj++) {
 
-            for (int kl = 0; kl < F->size; ++kl) {
-                if ( isnan(indv_type->get_crowdist(mgf_pop_get_indv(pop, F->idx[kl]))) ) {
-                    printf("befrem indv %d, %d, %p is nan\n", F->idx[kl], kl, crowdists);
-//                indv_type->set_crowdist(indv, 1.0e14);
-                }
-            }
-
             mgf_crowdist_a_set_obj(crowdists, F->size, obj);
             qsort(crowdists, (size_t)F->size, sizeof(struct mgf_indv_crowdist_a), qsort_compare_obj);
             mgf_crowdist_array_to_front(crowdists, F);
 
             id_min = F->idx[0];
             id_max = F->idx[F->size - 1];
+
             // @TODO convert to general, bin mixed int op.
             f_min = mgf_pop_get_indv(pop,id_min)->f[obj];
             f_max = mgf_pop_get_indv(pop,id_max)->f[obj];
@@ -330,12 +321,25 @@ void pop_crowding_assignment(struct mgf_pop_ranks_t *pop_ranks, int front_idx)
                     id_next = F->idx[i + 1];
                     indv_type->set_crowdist(mgf_pop_get_indv(pop,id_cur),
                         indv_type->get_crowdist(mgf_pop_get_indv(pop,id_cur)) + (
-                        (mgf_pop_get_indv(pop,id_next)->f[obj] -
-                        mgf_pop_get_indv(pop,id_prev)->f[obj]) / (f_max - f_min))
+                        (mgf_pop_get_indv(pop,id_next)->f[obj] - mgf_pop_get_indv(pop,id_prev)->f[obj])
+                        / (f_max - f_min))
                     );
                 }
             }
 
+//            for (int kl = 0; kl < F->size; ++kl) {
+//                if ( isnan(indv_type->get_crowdist(mgf_pop_get_indv(pop, F->idx[kl]))) ) {
+//                    printf("erc indv %d, %d, %p is nan, %0.6f, %0.6f\n", F->idx[kl], kl, crowdists, f_max, f_min);
+//                    flag = 1;
+////                indv_type->set_crowdist(indv, 1.0e14);
+//                }
+//            }
+
+//            if (flag) {
+//                for (int kl = 0; kl < F->size; ++kl) {
+//                    printf("cdst %0.5f\n", indv_type->get_crowdist(mgf_pop_get_indv(pop, F->idx[kl])) );
+//                }
+//            }
         }
         /* Following lines are like the original implementation of NSGA-II */
         Individual *indv;

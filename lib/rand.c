@@ -141,19 +141,6 @@ int rnd_bit(void)
 void rnd_shuffle_vector(void *a, unsigned int n, size_t size)
 {
     gsl_ran_shuffle(rand_object, a, n, size);
-    /*
-    int *b=(int*) malloc(sizeof(int) * n);
-    int i, rnd, tmp;
-    int *aa=(int*)a;
-    memcpy(b, a, n * sizeof(int));
-    for (i = 0; i < n; i++)
-    {
-        rnd = rnd_int(i, n - 1);
-        tmp = b[rnd];
-        b[rnd] = b[i];
-        aa[i] = tmp;
-    }
-    free(b);*/
     return;
 }
 
