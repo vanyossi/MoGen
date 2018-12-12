@@ -8,7 +8,7 @@ include_directories(
 
 set(MGF_MOA_SOURCES
     mgf_nsga2.c
-    mgf_moead.c mgf_moead.h decomposition/mgf_weights.c decomposition/mgf_weights.h decomposition/mgf_scalarization.c decomposition/mgf_scalarization.h)
+    mgf_moead.c mgf_moead.h decomposition/mgf_weights.c decomposition/mgf_weights.h decomposition/mgf_scalarization.c decomposition/mgf_scalarization.h mgf_pareto.c mgf_pareto.h)
 
 add_library(moa ${MGF_MOA_SOURCES})
 target_link_libraries(moa mogenmop)

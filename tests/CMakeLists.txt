@@ -12,3 +12,6 @@ target_link_libraries(mopmono_test mopmono)
 
 add_executable(nsga2_test nsga2_test.c)
 target_link_libraries(nsga2_test moa mogenops bench_mops)
+
+add_executable(moead_test moead_test.c)
+target_link_libraries(moead_test moa mogenops bench_mops)

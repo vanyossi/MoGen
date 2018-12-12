@@ -46,6 +46,7 @@ struct moa_type_t {
     // traits: initialized null
     struct moa_cm_container (*get_crossover_vals)(Moa*);
     struct moa_cm_container (*get_mutation_vals)(Moa*);
+    scalarization_f scalarize;
 };
 
 struct moa_t {
@@ -76,6 +77,8 @@ struct moa_type_t* mgf_moa_type(struct moa_t* self);
 mbool mgf_moa_run(Moa* moa);
 
 void* mgf_moa_buffer(struct moa_t* self);
+
+scalarization_f mgf_moa_scalarization(struct moa_t *self);
 
 void mgf_moa_free_std(struct moa_t* moa);
 

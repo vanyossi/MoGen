@@ -76,6 +76,10 @@ void* mgf_moa_buffer(struct moa_t* self){
     return (void*) &(self->buffer_start);
 }
 
+scalarization_f mgf_moa_scalarization(struct moa_t *self){
+    return mgf_moa_type(self)->scalarize;
+}
+
 void mgf_moa_free(struct moa_t* moa){
     if (moa) {
         moa->type->free(moa);
