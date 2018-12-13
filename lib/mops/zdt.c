@@ -102,7 +102,6 @@ static void mgf_zdtm1(Mop *mop, Individual *indv)
     for (int i = 0; i < indv_type->isize; ++i) {
         interval = mop->limits.imax[i] - mop->limits.imin[i];
 //        res = pow((integer[i] - mop->limits.imin[i]) / inorm,2);
-
 //        res = integer[i] - (mop->limits.imax[i] + (mop->limits.imin[i] / 2));
         res = integer[i] - (i % interval);
         res *= res; // power by 2

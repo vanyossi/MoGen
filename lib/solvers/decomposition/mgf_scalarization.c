@@ -208,8 +208,7 @@ double tch_norm(int nobjs, double *f, double *w, double *z, double *n)
 
     for (j = 0; j < nobjs; j++)
     {
-        if (n[j] - z[j] == 0.0)
-        {
+        if (n[j] - z[j] == 0.0) {
             return 1e+30;
         }
         wj = (w[j] == 0.0) ? 0.0001 : w[j];
