@@ -24,6 +24,11 @@
 
 #include "mogen_mop.h"
 
+/**
+ * ZDT1 Mop
+ * @param mop Multiobjective problem
+ * @param indv Individual to be evaluated
+ */
 void mgf_zdt1(Mop *mop, Individual *indv)
 {
     IndvidualType *indv_type = mgf_indv_type(indv);
@@ -45,7 +50,13 @@ void mgf_zdt1(Mop *mop, Individual *indv)
     return;
 }
 
-static void mgf_zdt2(Mop *mop, Individual *indv){
+/**
+ * ZDT2 Mop
+ * @param mop Multiobjective problem
+ * @param indv Individual to be evaluated
+ */
+static void mgf_zdt2(Mop *mop, Individual *indv)
+{
     IndvidualType *indv_type = mgf_indv_type(indv);
     double *F = mgf_indv_get_solution_pointer(indv);
     double f1, f2, g, h, sum;
@@ -65,16 +76,85 @@ static void mgf_zdt2(Mop *mop, Individual *indv){
     return;
 }
 
-static void mgf_zdt3(Mop *mop, Individual *indv){
+/**
+ * ZDT3 Mop
+ * @param mop Multiobjective problem
+ * @param indv Individual to be evaluated
+ */
+static void mgf_zdt3(Mop *mop, Individual *indv)
+{
+    IndvidualType *indv_type = mgf_indv_type(indv);
+    double *F = mgf_indv_get_solution_pointer(indv);
+    double *X = mgf_indv_get_realdatapointer(indv);
 
+    double f1, f2, g, h, sum;
+    unsigned int i;
+
+    f1 = X[0];
+    sum = 0.0;
+    for (i = 1; i < indv_type->xsize; i++)
+    {
+        sum += X[i];
+    }
+    g = 1.0 + 9.0 * sum / (indv_type->xsize - 1.0);
+    h = 1.0 - sqrt(f1 / g) - (f1 / g) * sin(10.0 * M_PI * f1);
+    f2 = g * h;
+    F[0] = f1;
+    F[1] = f2;
 }
 
-static void mgf_zdt4(Mop *mop, Individual *indv){
+/**
+ * ZDT4 Mop
+ * @param mop Multiobjective problem
+ * @param indv Individual to be evaluated
+ */
+static void mgf_zdt4(Mop *mop, Individual *indv)
+{
+    IndvidualType *indv_type = mgf_indv_type(indv);
+    double *F = mgf_indv_get_solution_pointer(indv);
+    double *X = mgf_indv_get_realdatapointer(indv);
 
+    double f1, f2, g, h, sum;
+    unsigned int i;
+
+    f1 = X[0];
+    sum = 0.0;
+    for (i = 1; i < indv_type->xsize; i++)
+    {
+        sum += (pow(X[i], 2.0) - 10.0 * cos(4.0 * M_PI * X[i]));
+    }
+    g = 1.0 + 10.0 * (indv_type->xsize - 1.0) + sum;
+    h = 1.0 - sqrt(f1 / g);
+    f2 = g * h;
+    F[0] = f1;
+    F[1] = f2;
 }
 
-static void mgf_zdt6(Mop *mop, Individual *indv){
+/**
+ * ZDT6 Mop
+ * @param mop Multiobjective problem
+ * @param indv Individual to be evaluated
+ */
+static void mgf_zdt6(Mop *mop, Individual *indv)
+{
+    IndvidualType *indv_type = mgf_indv_type(indv);
+    double *F = mgf_indv_get_solution_pointer(indv);
+    double *X = mgf_indv_get_realdatapointer(indv);
 
+    double f1, f2, g, h, sum;
+    unsigned int i;
+
+    f1 = 1.0 - exp(-4.0 * X[0]) * pow(sin(6.0 * M_PI * X[0]), 6.0);
+    sum = 0.0;
+    for (i = 1; i < indv_type->xsize; i++)
+    {
+        sum += X[i];
+    }
+    g = 1.0 + 9.0 * pow((sum / (indv_type->xsize - 1.0)), 0.25);
+    h = 1.0 - pow((f1 / g), 2.0);
+    f2 = g * h;
+    F[0] = f1;
+    F[1] = f2;
 }
 
 #include <stdio.h>
