@@ -120,6 +120,7 @@ void PNX_bin(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1,
     }
 }
 
+
 void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c1, Individual* c2) {
     struct moa_cm_container cross = mop->solver->type->get_crossover_vals(mop->solver);
     //    assert(mop->set.type != 3);
@@ -176,7 +177,7 @@ void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c
     for (j = 0; j < mop->set.isize; j++)
     {
         /* crossover */
-        s_i = abs(par2_i[j] - par1_i[j] + 1) / (int) round(eta);
+        s_i = (abs(par2_i[j] - par1_i[j]) / (int) round(eta));
         chi1_i[j] = (rnd_perc() < .5) ? rnd_int(par1_i[j], s_i) : rnd_int(par2_i[j], s_i);
         chi2_i[j] = (rnd_perc() < .5) ? rnd_int(par1_i[j], s_i) : rnd_int(par2_i[j], s_i);
 
@@ -187,6 +188,7 @@ void PNX_mixed(Mop* mop, Individual *parent1, Individual* parent2, Individual* c
         /* child2 bounds */
         chi2_i[j] = (chi2_i[j] < low_bound_i[j]) ? low_bound_i[j] : chi2_i[j];
         chi2_i[j] = (chi2_i[j] > up_bound_i[j]) ? up_bound_i[j] : chi2_i[j];
+
     }
 
     for (j = 0; j < mop->set.bsize; j++)
