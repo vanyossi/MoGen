@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
     Mop *zdt = mop_zdt(ZDTM1);
     // moead creates its own population and initializes it.
     Moa *moead = moa_moead(zdt, W_RES_210K);
-    mgf_moa_set_scalarization(&mgf_moa_moead_data(moead)->s_m, SCLM_TCH_NORM); // @TODO need API
+    mgf_moa_set_scalarization(&mgf_moa_moead_data(moead)->s_m, SCLM_TCH); // @TODO need API
 //    mop_set_params(zdt, 10, 30, 3, 2, 0);
 //    double min = 0;
 //    double max = 1;
