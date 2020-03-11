@@ -29,4 +29,6 @@ set_target_properties(mogenmop PROPERTIES
     INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME};@loader_path/lib/mogen"
     )
 
+install(TARGETS mogenmop ${INSTALL_TARGETS_DEFAULT_ARGS})
+
 add_subdirectory(solvers)

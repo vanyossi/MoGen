@@ -27,7 +27,7 @@
 int main(int argc, char const *argv[]) {
     set_random(0.123452);
 
-    Mop *zdt = mop_zdt(ZDTM1);
+    Mop *zdt = mop_zdt(ZDT3);
     // moead creates its own population and initializes it.
     Moa *moead = moa_moead(zdt, W_RES_210K);
     mgf_moa_set_scalarization(&mgf_moa_moead_data(moead)->s_m, SCLM_TCH); // @TODO need API
@@ -42,7 +42,7 @@ int main(int argc, char const *argv[]) {
     moa_mutation_setup(moead, MUT_PBM);
 //    moa_moead_cross_eta(mgf_moa_moead_data(moead), 10)
 
-    mop_solve(zdt, 1000);
+    mop_solve(zdt, 300);
 
     double res[2];
     for (int i = 0; i < zdt->pop->size; ++i) {

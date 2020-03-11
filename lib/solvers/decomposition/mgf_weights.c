@@ -203,6 +203,7 @@ static void initialize_WS_SLD_Layers(WeightParams *wp, int nobj)
     unsigned int p_id = 0;
     int H;
 
+    struct mgf_weight_set *W = wp->wset;
     double *w = calloc(nobj, sizeof(double));
 
     double centroid = 1.0 / (double) nobj;

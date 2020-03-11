@@ -1,7 +1,8 @@
 
-#include_directories(
-#    ${CMAKE_SOURCE_DIR}
-#)
-#
-#add_executable(moeadzdt1 moead_zdt1.c)
-#target_link_libraries(moeadzdt1 mogenmop mogenops)
+include_directories(
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/lib/solvers
+)
+
+add_executable(houseoptim houseoptim.c)
+target_link_libraries(houseoptim moa mogenmop mogenops)

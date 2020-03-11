@@ -66,6 +66,12 @@ Mop *mogen_mop(char *name, MopSpecs mop_specs, size_t mem_size) {
 
     if ( CheckFlag(mop_specs, MOP_DYNAMIC)) nmop->set.dynamic = 1;
 
+    nmop->report.report = NULL;
+    nmop->report.header.alloc_size = 0;
+    nmop->report.header.alloc_size = 1024;
+    nmop->report.header.str = calloc(nmop->report.header.alloc_size, 1); // freed on header lock
+    nmop->report.header.cursor = nmop->report.header.str;
+
     return nmop;
 }
 

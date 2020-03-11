@@ -67,7 +67,7 @@ mbool moa_mono_run(Mop *mop) {
     struct indv_t_mono_type* indv_data;
     Individual* indv;
     int ev = 0;
-    for (int i = 0; i < mop->pop->size; ++i){
+    for (unsigned int i = 0; i < mop->pop->size; ++i){
         indv = mgf_pop_get_indv(mop->pop, i);
         indv_data = mgf_indv_buffer(indv);
         if ( indv_data->error > secant->epsilon) {

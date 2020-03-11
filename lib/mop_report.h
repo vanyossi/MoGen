@@ -20,6 +20,7 @@
 #ifndef MOGEN_MOP_REPORT_H
 #define MOGEN_MOP_REPORT_H
 
+#include "mgf_global_types.h"
 #include "time_tools.h"
 
 typedef struct mop_report_stats_t {
@@ -28,10 +29,24 @@ typedef struct mop_report_stats_t {
     long t_elapsed;
 } MopReportStats;
 
+struct mgf_report_header {
+    int size;
+    size_t alloc_size;
+    char *str;
+    char *cursor;
+    mbool locked;
+};
+
 typedef struct mop_report_t{
    MopReportStats current;
    MopReportStats total;
    MopReportStats record;
+   unsigned int run;
+   struct mgf_report_header header;
+   char name[64];
+   char name_var[64];
+   char name_obj[64];
+   void (*report)(Mop *mop);
 } MopReport;
 
 
@@ -40,5 +55,9 @@ void mop_start_timer(MopReport *report);
 void mop_stop_timer(MopReport *report);
 
 void mop_restart_stats(MopReportStats *stats);
+
+void mop_init_report(Mop *mop);
+
+void mop_report_header(MopReport *report, const char *format, ...);
 
 #endif //MOGEN_MOP_REPORT_H
