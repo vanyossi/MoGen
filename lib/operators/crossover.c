@@ -29,8 +29,6 @@
 #include "mgf_moa.h"
 #include "mgf_operators.h"
 
-#define UNUSED(expr) do { (void)(expr); } while (0)
-
 //static void (*cross_PNX[3])(Mop*, Individual*, Individual*, Individual*, Individual*) = {
 //    PNX_real, PNX_bin, PNX_mixed
 //};

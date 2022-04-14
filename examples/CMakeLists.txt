@@ -5,4 +5,4 @@ include_directories(
 )
 
 add_executable(houseoptim houseoptim.c)
-target_link_libraries(houseoptim moa mogenmop mogenops)
+target_link_libraries(houseoptim moa mogenmop mogenops bench_mops)

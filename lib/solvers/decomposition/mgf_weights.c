@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "mgf_global_types.h"
 #include "moea_math.h"
 
 /**
@@ -78,6 +79,7 @@ unsigned int WS_SLD_config(WeightParams *wp, int nobj)
         (nobj == 20) ? WS_SLD_config_instance(wp, 2, (int[]){2, 1}) : /* 20objs (2 layer): 2=>210 + 1=>20 => N=230 */
         -1;
     assert(L > 0);
+    UNUSED(L);
 
     //printf("flag: %d\n", layers);
     //printf("ws.layers: %d\n", ws->layers);
@@ -241,6 +243,7 @@ static void initialize_WS_SLD_Layers(WeightParams *wp, int nobj)
         }
     }
     assert(W->size == p_id);
+    UNUSED(W);
 
     /* Labeling layers */
     for (i = 0; i < (int)wp->wset->size; i++)

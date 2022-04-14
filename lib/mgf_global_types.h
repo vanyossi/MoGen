@@ -59,7 +59,8 @@ typedef struct mgf_pop_t MoeazPop;
 typedef double (*scalarization_f)(int, double *, double *, double *, double *);
 
 // Useful defines
-#define UNUSED(expr) do { (void)(expr); } while (0)
+// #define UNUSED(expr) do { (void)(expr); } while (0)
+#define UNUSED(x) ((void)(x))
 
 #define CheckFlag(data, flag) (data & flag) == flag
 

@@ -36,13 +36,26 @@ if(APPLE)
     endif("${isSystemDir}" STREQUAL "-1")
 endif()
 
+## Modules
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 ## Find GSL
-if(NOT GSL_ROOT_DIR)
-    message(WARNING "GSL_ROOT_DIR not set, searching GSL on system")
+find_package(GSL REQUIRED)
+find_package(BLAS)
+
+if(APPLE)
+    find_package(vecLib)
+
+    include_directories(
+        ${vecLib_INCLUDE_DIR}
+    )
 endif()
-FIND_PACKAGE(GSL REQUIRED)
-message(${GSL_INCLUDE_DIRS})
+
+# if(NOT GSL_ROOT_DIR)
+#     message(WARNING "GSL_ROOT_DIR not set, searching GSL on system")
+# endif()
+# FIND_PACKAGE(GSL REQUIRED)
+# message(${GSL_INCLUDE_DIRS})
 
 
 ## install logic

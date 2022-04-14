@@ -22,6 +22,10 @@ set(mogen_mop_SOURCES
 add_library(mogenmop SHARED ${mogen_mop_SOURCES})
 target_link_libraries(mogenmop moea_math)
 
+if(APPLE)
+    target_link_libraries(mogenmop ${vecLib_LINKER_LIBS})
+endif()
+
 set_target_properties(mogenmop PROPERTIES
     VERSION ${MOGEN_VERSION_MAJOR} SOVERSION ${MOGEN_VERSION_MAJOR}
     BUILD_WITH_INSTALL_RPATH TRUE

@@ -359,6 +359,7 @@ void mgf_nsga2_reduce(MoeazPop *P, Moa *moa)
     }
     delete = selection_count - P->size;
     assert(delete >= 0);
+    UNUSED(delete);
 
     sol = 0;
     /* Copying the first ranks */

@@ -64,13 +64,13 @@ int main(int argc, char const *argv[]) {
             if (!double_isequal(F[j], indv_res[i].res[j], 0.00001) ){
                 fail = 1;
             } else {
-//                printf("f %d,%d are equal\n", i, j);
+            //    printf("f %d,%d are equal\n", i, j);
             }
         }
     }
 
     if (!fail){
-        printf("Zdt1 test passed!");
+        printf("Zdt1 test passed!\n");
     }
     return fail;
 }
