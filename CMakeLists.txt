@@ -68,7 +68,7 @@ set(INSTALL_TARGETS_DEFAULT_ARGS
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/lib
-    SYSTEM ${GSL_INCLUDE_DIRS}
+    ${CMAKE_INSTALL_PREFIX}/include
 )
 
 
