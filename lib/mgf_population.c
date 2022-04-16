@@ -38,7 +38,7 @@ MoeazPop *mgf_pop_alloc(unsigned int size, IndvidualType *indvtype) {
     new_pop->indv = calloc(size, alloc_size);
 
     char *indv_adress = (char*)new_pop->indv;
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         // @TODO assigning array value missing
         memcpy(indv_adress, mgf_indv_new(indvtype), alloc_size);
         indv_adress += alloc_size;
@@ -85,7 +85,7 @@ void mgf_pop_free(MoeazPop *pop){
 
 mbool mgf_pop_evaluate(MoeazPop *pop, Mop *mop) {
     Individual *indv;
-    for (int i = 0; i < pop->size; ++i){
+    for (size_t i = 0; i < pop->size; ++i){
         indv = mgf_pop_get_indv(pop, i);
             if (!mop_evaluate(mop, indv)) return mfalse;
     }

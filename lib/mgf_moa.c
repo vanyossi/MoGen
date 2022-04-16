@@ -87,12 +87,13 @@ void mgf_moa_free(struct moa_t* moa){
 }
 
 void mgf_moa_free_std(struct moa_t* moa){
+    UNUSED(moa);
     return;
 }
 
 
 mbool moa_run(struct mop_t *mop){
-    for (int i = 0; i < mop->pop->size; ++i){
+    for (size_t i = 0; i < mop->pop->size; ++i){
         Individual* indv = mgf_pop_get_indv(mop->pop,i);
         if (!mop_evaluate(mop, indv)){
             return mfalse;

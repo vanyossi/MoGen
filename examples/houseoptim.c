@@ -40,6 +40,7 @@ static double result[] = {17.592, 9.1302, 13.662, 11.854, 6.8233, 11.886, 4.3483
  */
 void ex_house_cost_optim(Mop *mop, Individual *indv)
 {
+    UNUSED(mop);
 //    IndvidualType *indv_type = mgf_indv_type(indv);
     double *F = mgf_indv_get_solution_pointer(indv);
 

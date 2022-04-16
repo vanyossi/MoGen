@@ -93,7 +93,7 @@ void mop_set_limits_ndec(
         mop->limits.xmin = (double*) malloc(sizeof(double) * mop->set.xsize);
         mop->limits.xmax = (double*) malloc(sizeof(double) * mop->set.xsize);
 
-        for (int i = 0; i < mop->set.xsize; i++) {
+        for (size_t i = 0; i < mop->set.xsize; i++) {
             j = i % lim_xsize;
             mop->limits.xmin[i] = xmin[j];
             mop->limits.xmax[i] = xmax[j];
@@ -103,7 +103,7 @@ void mop_set_limits_ndec(
         mop->limits.imin = calloc(mop->set.isize, sizeof(int));
         mop->limits.imax = calloc(mop->set.isize, sizeof(int));
 
-        for (int i = 0; i < mop->set.isize; i++) {
+        for (size_t i = 0; i < mop->set.isize; i++) {
             j = i % lim_isize;
             mop->limits.imin[i] = imin[j];
             mop->limits.imax[i] = imax[j];

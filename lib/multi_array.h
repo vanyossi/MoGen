@@ -33,7 +33,7 @@
 
 
 typedef struct {
-    int         size;       //!< Multiarray members size
+    size_t         size;       //!< Multiarray members size
     int         muatype;    //!< Defines type of multiarray (real, bin, mixed)
     int*        type_idx;   //!< Type index identify which position are binary
     double*     real;       //!< Double array for real values

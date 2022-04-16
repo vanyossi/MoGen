@@ -68,7 +68,7 @@ void mgf_indv_init(struct indv_t *indv, Mop *mop){
 
     if (CheckFlag(indv->xtype, MOP_REAL)){
         double *data = mgf_indv_get_realdatapointer(indv);
-        for (int i = 0; i < mop->set.xsize; ++i) {
+        for (size_t i = 0; i < mop->set.xsize; ++i) {
             data[i] = rnd_real(mop->limits.xmin[i], mop->limits.xmax[i]);
         }
     }
@@ -78,7 +78,7 @@ void mgf_indv_init(struct indv_t *indv, Mop *mop){
         }
     }
     if (CheckFlag(indv->xtype, MOP_INT)) {
-        for (int i = 0; i < mop->set.isize; ++i) {
+        for (size_t i = 0; i < mop->set.isize; ++i) {
             int *data = mgf_indv_get_integerdatapointer(indv);
             data[i] = rnd_int(mop->limits.imin[i], mop->limits.imax[i]);
         }

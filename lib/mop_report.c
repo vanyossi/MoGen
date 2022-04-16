@@ -77,7 +77,7 @@ void mgf_update_cursor(int *size, char **str)
     *size += counter;
 }
 
-int mgf_realloc_buffer(int size, size_t *alloc_size, void **buffer)
+int mgf_realloc_buffer(size_t size, size_t *alloc_size, void **buffer)
 {
     int bool_realloc = 0;
     void *new_buffer;
