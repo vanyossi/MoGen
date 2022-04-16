@@ -6,11 +6,9 @@
 #include "population.h"
 #include "individual.h"
 
-#define UNUSED(x) ((void)(x))
+void test_init_value(void* in, void* param);
 
-void test_init_rand(void* in, void* param);
-
-int main(int argc, char const *argv[])
+int main()
 {
     printf("test ran!\n");
     // rnd_initialize();
@@ -21,6 +19,7 @@ int main(int argc, char const *argv[])
     
     IndvParam param = {12,2,0};
     IndvOps *iops = mgn_IndvOps_init();
+    
 
     MgnPop *pop = mgn_pop_alloc(100, (void*)iops, &param);
     mgnLimit ilim = {12.5,36.3};
@@ -39,26 +38,38 @@ int main(int argc, char const *argv[])
         printf("%.6f, %.6f\n",
         gsl_vector_min(tmp),gsl_vector_max(tmp));
     }
-    
     mgn_pop_free(pop);
-    mgn_IndvOps_free(iops);
 
+    MgnPop *pop1 = mgn_pop_alloc(5, (void*)iops,&param);
+    MgnPop *pop2 = mgn_pop_alloc(15,(void*)iops,&param);
+
+    double val = 2.34;
+    mgn_pop_init(pop1,test_init_value, &val);
+    val = 5;
+    mgn_pop_init(pop2,test_init_value, &val);
+
+    MgnPop *join = mgn_pop_join(pop1,pop2);
+
+    printf("%.5f ", gsl_vector_get(mgn_indv_getx_vec(join,2),0));
+    printf("%.5f ", gsl_vector_get(mgn_indv_getx_vec(join,10),0));
+    printf("\n");
+
+    mgn_pop_free(pop1);
+    mgn_pop_free(pop2);
+    mgn_pop_free(join);
+
+    mgn_IndvOps_free(iops);
     return 0;
 }
 
-void test_init_rand(void* in, void* param)
+void test_init_value(void* in, void* param)
 {
-    UNUSED(param);
+    double value = *(double*)param;
     Individual *ind = (Individual*) in;
     gsl_vector *x = ind->x;
 
-    double llim = 34;
-    double ulim = 36;
-
     for (size_t i = 0; i < x->size; i++) {
-        gsl_vector_set(x,i, rnd_getUniform_limit(llim,ulim));
+        gsl_vector_set(x,i, value);
     }
-
-    return;
 }
 

@@ -8,6 +8,7 @@
 
 #include "mgn_random.h"
 #include "mgn_types.h"
+#include "mgn_mop.h"
 #include "mgn_pop_init.h"
 
 
@@ -27,9 +28,11 @@ struct _mgn_indv_params {
 };
 
 struct _mgn_indv {
-    IndvOps* ops;
+    int index;
     bool feasable;
-    unsigned int size[3];
+    IndvOps* ops;
+    struct _mgn_indv_params* params;
+    /*unsigned int size[3];*/
     gsl_vector        *x;
     gsl_vector        *f;
     gsl_vector        *g;
@@ -41,31 +44,40 @@ struct _mgn_indv_ops {
     void (*copy)(void*, void*);
     void (*free)(void*);
     size_t (*sizeofp)();
+    void* (*get_iparams)(void*);
+    void* (*get_iops)(void*);
+    void (*eval)(mgnMop*, void*);
     // interface for this Indtype
-    int (*getXSize)(Individual*);
-    int (*getObjSize)(Individual*);
-    int (*getConsSize)(Individual*);
+    size_t (*getXSize)(Individual*);
+    size_t (*getObjSize)(Individual*);
+    size_t (*getConsSize)(Individual*);
 };
 
 // Helper operation functions
-int getRSize(Individual* ind) { return ind->size[0]; }
-int getObjSize(Individual* ind) { return ind->size[1]; }
-int getConsSize(Individual* ind) { return ind->size[2]; }
+int getRSize(Individual* ind) { return ind->params->realSize; }
+int getObjSize(Individual* ind) { return ind->params->objSize; }
+int getConsSize(Individual* ind) { return ind->params->consSize; }
 
 // Mandatory functions
 void mgn_indv_alloc(void* indv, void* ops, void* params);
 void mgn_indv_copy(void *into, void *infrom);
 void mgn_indv_free(void *in);
 size_t mgn_sizeofp();
+void* mgn_indv_get_params(void*);
+void* mgn_indv_get_ops(void* indv);
+void mgn_indv_eval(mgnMop *mop, void* indv);
 
 
 IndvOps* mgn_IndvOps_init()
 {
-    IndvOps *iops = (IndvOps*)calloc(1,sizeof(IndvOps));
+    IndvOps *iops = calloc(1,sizeof(*iops));
     iops->alloc = mgn_indv_alloc;
     iops->copy = mgn_indv_copy;
     iops->free = mgn_indv_free;
     iops->sizeofp = mgn_sizeofp;
+    iops->get_iops = mgn_indv_get_ops;
+    iops->get_iparams = mgn_indv_get_params;
+    iops->eval = mgn_indv_eval;
 
     return iops;
 }
@@ -79,13 +91,14 @@ void mgn_IndvOps_free(IndvOps *iops)
 void mgn_indv_alloc(void* indv, void* ops, void* params)
 {
     Individual *nindv = (Individual*)indv;
-    nindv->ops = (IndvOps*)ops;  
+    nindv->ops = (IndvOps*)ops;
 
     struct _mgn_indv_params* param = (struct _mgn_indv_params*)params;
 
-    nindv->size[0] = param->realSize;
-    nindv->size[1] = param->objSize;
-    nindv->size[2] = param->consSize;
+    nindv->params = param;
+//    nindv->size[0] = param->realSize;
+//    nindv->size[1] = param->objSize;
+//    nindv->size[2] = param->consSize;
 
     nindv->x = gsl_vector_alloc(param->realSize);
     nindv->f = gsl_vector_alloc(param->objSize);
@@ -112,9 +125,11 @@ void mgn_indv_copy(void *into, void *infrom)
     to->ops = from->ops;
     to->feasable = from->feasable;
 
-    to->size[0] = indGetXSize(from);
-    to->size[1] = indGetObjSize(from);
-    to->size[2] = indGetConsSize(from);
+    to->params = from->params;
+
+//    to->size[0] = indGetXSize(from);
+//    to->size[1] = indGetObjSize(from);
+//    to->size[2] = indGetConsSize(from);
 
     gsl_vector_memcpy(to->x, from->x);
     gsl_vector_memcpy(to->f, from->f);
@@ -126,6 +141,29 @@ void mgn_indv_copy(void *into, void *infrom)
 size_t mgn_sizeofp()
 {
     return sizeof(Individual);
+}
+
+void mgn_indv_eval(mgnMop *mop, void* indv)
+{
+    Individual *in = (Individual*)indv;
+    if (mop->eval_vector_real) {
+        mop->eval_vector_real(in->x, in->f, in->g);
+    } else {
+        mop->eval_real(in->x->data, in->f->data, in->g->data);
+    }
+    return;
+}
+
+void* mgn_indv_get_ops(void* indv)
+{
+    Individual *in = (Individual*)indv;
+    return in->ops;
+}
+
+void* mgn_indv_get_params(void* indv)
+{
+    Individual *in = (Individual*)indv;
+    return in->params;
 }
 
 // indv helpers
