@@ -16,11 +16,19 @@ set(MOGEN_VERSION ${MOGEN_VERSION_STRING})
 
 message(STATUS "mogen version - ${MOGEN_VERSION}")
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+set(CMAKE_C_FLAGS_DEBUG "-g")
+set(CMAKE_C_FLAGS_RELEASE "-O3")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO  "-O3")
+
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Weverything -Wno-unused-function")
 endif()
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wno-padded -Wno-unused-function")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-padded -Wno-unused-function")
 
 
 if(APPLE)
