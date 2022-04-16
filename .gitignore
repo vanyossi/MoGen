@@ -1,4 +1,6 @@
+/build**
 cmake-build*
+*.dSYM
 *.user
 .idea
 .DS_Store
