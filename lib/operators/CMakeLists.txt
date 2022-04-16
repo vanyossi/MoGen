@@ -3,6 +3,8 @@ add_subdirectory(tests)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/lib/
+    ${CMAKE_SOURCE_DIR}/lib/math
 )
 
 set(MOGEN_OP_SOURCES
@@ -14,6 +16,7 @@ set(MOGEN_OP_SOURCES
     mgf_mutation.c
     mgf_mutation.h
     mgf_dominance.c
+    mgn_vector_distance.h
     )
 
 add_library(mogenops SHARED ${MOGEN_OP_SOURCES})

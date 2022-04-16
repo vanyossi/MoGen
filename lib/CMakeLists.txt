@@ -7,6 +7,7 @@ add_subdirectory(tests)
 include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/lib/operators
+    ${CMAKE_SOURCE_DIR}/lib/math
 )
 
 set(mogen_mop_SOURCES

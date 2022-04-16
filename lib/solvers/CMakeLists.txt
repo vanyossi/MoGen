@@ -3,12 +3,17 @@ add_subdirectory(mono)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/math
 )
 
 set(MGF_MOA_SOURCES
     mgf_nsga2.c
-    mgf_moead.c mgf_moead.h decomposition/mgf_weights.c decomposition/mgf_weights.h decomposition/mgf_scalarization.c decomposition/mgf_scalarization.h mgf_pareto.c mgf_pareto.h)
+    mgf_moead.c
+    decomposition/mgf_weights.c
+    decomposition/mgf_scalarization.c
+    mgf_pareto.c
+)
 
 add_library(moa ${MGF_MOA_SOURCES})
 target_link_libraries(moa mogenmop)
@@ -19,3 +24,9 @@ set_target_properties(moa PROPERTIES
     INSTALL_RPATH_USE_LINK_PATH TRUE
     INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME};@loader_path/lib/mogen"
     )
+
+#set(MGN_MOA_SOURCES
+#    mgn_moead.h
+#)
+#add_library(mgnmoa ${MGN_MOA_SOURCES})
+#set_target_properties(mgnmoa PROPERTIES LINKER_LANGUAGE C)

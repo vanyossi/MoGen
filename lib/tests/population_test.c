@@ -19,7 +19,7 @@ int main()
     
     IndvParam param = {12,2,0};
     IndvOps *iops = mgn_IndvOps_init();
-    
+
 
     MgnPop *pop = mgn_pop_alloc(100, (void*)iops, &param);
     mgnLimit ilim = {12.5,36.3};
