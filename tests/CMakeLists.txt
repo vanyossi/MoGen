@@ -1,6 +1,8 @@
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/lib
+    ${CMAKE_SOURCE_DIR}/lib/math
     ${CMAKE_SOURCE_DIR}/lib/solvers
 )
 
@@ -15,3 +17,10 @@ target_link_libraries(nsga2_test moa mogenops bench_mops)
 
 add_executable(moead_test moead_test.c)
 target_link_libraries(moead_test moa mogenops bench_mops)
+
+add_executable(moeadtest mgn_moeadtest.c)
+target_link_libraries(moeadtest)
+target_link_libraries(moeadtest ${GSL_LIBRARIES} ${BLAS_LIBRARIES})
+if(APPLE)
+    target_link_libraries(moeadtest ${vecLib_LINKER_LIBS})
+endif()

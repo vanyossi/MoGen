@@ -42,6 +42,12 @@ double rnd_getUniform_limit(double lower, double upper)
     return value;
 }
 
+gsl_rng* rnd_get_generator()
+{
+    if (!randGenerator) { rnd_initialize(); }
+    return randGenerator;
+}
+
 
 
 #endif // _MGN_RANDOM_

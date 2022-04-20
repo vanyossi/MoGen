@@ -45,7 +45,7 @@ int main(int argc, char const *argv[]) {
     mop_solve(zdt, 300);
 
     double res[2];
-    for (int i = 0; i < zdt->pop->size; ++i) {
+    for (size_t i = 0; i < zdt->pop->size; ++i) {
         res[0] = mogen_mop_getindv(zdt,i)->f[0];
         res[1] = mogen_mop_getindv(zdt,i)->f[1];
         printf("%.10f, %.10f\n", res[0], res[1]);

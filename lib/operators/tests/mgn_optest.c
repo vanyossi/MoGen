@@ -14,11 +14,14 @@
 #include "mgn_vector_distance.h"
 #include "mgn_types.h"
 #include "mgn_random.h"
+#include "mgn_moa.h"
+
+#include "mgn_gen_operator.h"
 
 void mgn_test(char* name, bool (*func)())
 {
-    printf("%s ", name);
-    if(func){
+    printf("%s \n", name);
+    if(func()){
         printf("PASS!\n");
     } else {
         printf("FAIL!\n");
@@ -26,6 +29,8 @@ void mgn_test(char* name, bool (*func)())
 }
 
 bool test_vec_ordering();
+bool test_genop_sbx();
+bool test_genop_pbm();
 
 int main(int argc, char const *argv[]) {
     UNUSED(argc);
@@ -48,14 +53,18 @@ int main(int argc, char const *argv[]) {
         gsl_matrix_set_row(wei,i,temp_vec);
         gsl_vector_free(temp_vec);
     }
+
+
 //    gsl_matrix_fprintf(stdout, wei, "%g");
     printf("sizes %zu, %zu\n", wei->size1, wei->size2);
     gsl_matrix *dist = gsl_vector_distance_matrix(wei,2);
     gsl_matrix_int *drank = gsl_matrix_int_alloc(dist->size1, dist->size2);
     for (int i = 0; i < vecnum; ++i) {
         gsl_vector_view crow = gsl_matrix_column(dist,i);
-        gsl_vector_int_view irank = gsl_vector_int_view_array(gsl_vector_qsort(&crow.vector),vecnum);
+        int *iorder = gsl_vector_qsort(&crow.vector);
+        gsl_vector_int_view irank = gsl_vector_int_view_array(iorder,vecnum);
         gsl_matrix_int_set_row(drank,i,&irank.vector);
+        free(iorder);
     }
     gsl_matrix_int_fprintf(stdout, drank, "%d");
     gsl_matrix_int_free(drank);
@@ -87,6 +96,13 @@ int main(int argc, char const *argv[]) {
 ////    gsl_matrix_fprintf(stdout, dist2, "%.6f");
 //    gsl_matrix_free(dist2);
 
+    mgn_test("crossover", test_genop_sbx);
+
+    for (int i = 0; i < 10; ++i) {
+        test_genop_pbm();
+    }
+
+    gsl_matrix_free(wei);
 
     return 0;
 }
@@ -101,10 +117,81 @@ bool test_vec_ordering() {
     int *order = gsl_vector_qsort(&vnorder.vector);
 
     for (size_t i = 0; i < vecdim; ++i) {
-        printf("order %d ", order[i]);
+//        printf("order %d ", order[i]);
         result = (orderdata[i] == vnorder.vector.data[i]);
     }
     printf("\n");
     free(order);
     return result;
 }
+
+// needs better design to deal with stochastic
+bool test_genop_sbx(){
+    double n = 30;
+    double B;
+    size_t size = 4;
+
+    mgn_ga_sets ga_probs = {0.9, 0.01, NULL, NULL};
+    ga_probs.mut_llim = calloc(size, sizeof(ga_probs.mut_llim));
+    ga_probs.mut_ulim = calloc(size, sizeof(ga_probs.mut_ulim));
+    for (size_t i = 0; i < size; ++i) {
+        ga_probs.mut_llim[i] = 0;
+        ga_probs.mut_ulim[i] = 1;
+    }
+
+    double p1[4] = {1, 1, 1, 1};
+    double p2[4] = {2, 2, 2, 2};
+    double c1[4] = {0, 0, 0, 0};
+    double c2[4] = {0, 0, 0, 0};
+
+    printf("%.8f %g\n", pow(-2,-0.9), mgn_pow(-2,-0.5));
+    printf("%.8f %g\n", pow(2,-0.5), mgn_pow(2,-0.5));
+    printf("%.16f \n", 0.5 * M_PI);
+//    pow(2,-0.9) * cos(-0.9 * M_PI);
+//    return true;
+
+    for (int i = 0; i < 1; ++i) {
+        mgn_genop_sbx(n,p1,p2,c1,c2,size,&ga_probs);
+        B = fabs( (c2[0] - c1[0]) / (p2[0] - p1[0]) );
+        for (size_t j = 0; j < size; ++j) {
+            printf("%.6f %.6f %.6f %.6f\n", p1[j], p2[j], c1[j], c2[j]);
+//            p1[j] = c1[j];
+//            p2[j] = c2[j];
+        }
+        printf("\n");
+    }
+    rnd_getUniform();
+
+    for (int i = 0; i < 1; ++i) {
+        mgn_genop_sbx_alt(n,p1,p2,c1,c2,size,&ga_probs);
+        B = fabs( (c2[0] - c1[0]) / (p2[0] - p1[0]) );
+        for (size_t j = 0; j < size; ++j) {
+            printf("%.6f %.6f %.6f %.6f\n", p1[j], p2[j], c1[j], c2[j]);
+        }
+        printf("\n");
+    }
+
+//    for (size_t i = 0; i < size; ++i) {
+//        printf("c1;c2:: %.6f, %.6f\n", c1[i], c2[i]);
+//    }
+//    printf("Bval: %.6f\n", B);
+
+    return (fabs(B - 1) < 0.1);
+}
+
+bool test_genop_pbm()
+{
+    double n = 30;
+    size_t size = 1;
+    double p[1] = {3};
+    double lb[1] = {1};
+    double ub[1] = {8};
+
+    mgn_genop_pbm(n,0.01,p,lb,ub,size);
+
+    printf("np: %.6f\n", p[0]);
+
+    return true;
+}
+
+

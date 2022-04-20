@@ -5,6 +5,19 @@
 #include <gsl/gsl_vector.h>
 #include <stdlib.h>
 
+#include "mgn_types.h"
+
+// helper functions for math ops
+double hpow(double value, void* pvalue) {
+    double *p = (double*)pvalue;
+    return fabs(pow(value, *p));
+}
+
+double mgn_fabs(double value, void* nouse) {
+    UNUSED(nouse);
+    return fabs(value);
+}
+
 static void gsl_vector_map(gsl_vector *V, double (*func)(double, void*), void* param)
 {
     size_t size = V->size;
@@ -13,11 +26,6 @@ static void gsl_vector_map(gsl_vector *V, double (*func)(double, void*), void* p
         gsl_vector_set(V,i, func(gsl_vector_get(V,i), param) );
     }
     return;
-}
-
-double hpow(double value, void* pvalue) {
-    double *p = (double*)pvalue;
-    return fabs(pow(value, *p));
 }
 
 static double gsl_vector_pnorm(gsl_vector *v, double pvalue)
@@ -43,7 +51,7 @@ static int cmp_double(const void *a, const void *b)
 static int* gsl_vector_qsort(gsl_vector *vec)
 {
     int *index = (int*)calloc(vec->size, sizeof(int));
-    struct gsl_vector_qsort_idx *idata = (struct gsl_vector_qsort_idx*)calloc(vec->size, sizeof(struct gsl_vector_qsort_idx));
+    struct gsl_vector_qsort_idx *idata = calloc(vec->size, sizeof(*idata));
 
     for (size_t i = 0; vec->size > i; ++i) {
         idata[i].idx = i;
@@ -55,6 +63,7 @@ static int* gsl_vector_qsort(gsl_vector *vec)
         gsl_vector_set(vec,i,idata[i].value);
         index[i] = (int)idata[i].idx;
     }
+    free(idata);
     return index;
 }
 

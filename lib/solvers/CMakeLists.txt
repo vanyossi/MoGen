@@ -25,6 +25,18 @@ set_target_properties(moa PROPERTIES
     INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME};@loader_path/lib/mogen"
     )
 
+add_executable(testweight decomposition/tests/testweight.c)
+target_link_libraries(testweight ${GSL_LIBRARIES} ${BLAS_LIBRARIES})
+if(APPLE)
+    target_link_libraries(testweight ${vecLib_LINKER_LIBS})
+endif()
+
+add_executable(scalartest decomposition/tests/mgn_scalar_test.c)
+target_link_libraries(scalartest ${GSL_LIBRARIES} ${BLAS_LIBRARIES})
+if(APPLE)
+    target_link_libraries(scalartest ${vecLib_LINKER_LIBS})
+endif()
+
 #set(MGN_MOA_SOURCES
 #    mgn_moead.h
 #)

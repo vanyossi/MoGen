@@ -4,8 +4,8 @@ include_directories(
 )
 
 set(mops_TEST
-    zdt_test.c)
+    mgn_zdt_test.c)
 
-add_executable(test_zdt ${mops_TEST})
+add_executable(zdt_test ${mops_TEST})
 
-target_link_libraries(test_zdt bench_mops)
+target_link_libraries(zdt_test bench_mops)

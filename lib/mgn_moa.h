@@ -2,21 +2,38 @@
 #define _LIB_MGN_MOA_H_
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "mgn_types.h"
 
-typedef struct _mgn_moa_t mgnMoa;
+#define MOA_NAME_LEN 32
 
-struct _mgn_moa_t {
-    char name[32];
-    void (*run)(mgnMop*);
+typedef struct mgn_moa_t mgnMoa;
+typedef struct mgn_moa_ga_set mgn_ga_sets;
+
+struct mgn_moa_t {
+    char name[MOA_NAME_LEN];
+    size_t tot_exec;
+    void (*run)(mgnMoa*);
     bool (*stop)();
-    void* features; 
+    void (*set_ga_vals)(mgnMoa*, mgn_ga_sets*);
+    void* features;
 };
 
-bool mgn_moa_solve(mgnMoa *moa, mgnMop *mop)
+struct mgn_moa_ga_set {
+    double cross_rate;
+    double mut_rate;
+    double *mut_llim;
+    double *mut_ulim;
+};
+
+bool mgn_moa_solve(mgnMoa *moa, size_t runs)
 {
-    moa->run(mop);
+    for (size_t i = 0; i < runs; ++i) {
+        printf("initializing run %zu\n", i);
+        moa->run(moa);
+        printf("total exec: %zu\n", moa->tot_exec);
+    }
     return true;
 }
 

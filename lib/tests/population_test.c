@@ -5,6 +5,7 @@
 
 #include "population.h"
 #include "individual.h"
+//#include "mgn_pareto.h"
 
 void test_init_value(void* in, void* param);
 
@@ -17,17 +18,17 @@ int main()
         printf("rand %g\n", rnd_getUniform());
     }
     
-    IndvParam param = {12,2,0};
-    IndvOps *iops = mgn_IndvOps_init();
+    mgn_indv_param param = {12, 2, 0};
+    mgn_indv_ops *iops = mgn_indv_ops_init();
 
 
-    MgnPop *pop = mgn_pop_alloc(100, (void*)iops, &param);
+    mgn_pop *pop = mgn_pop_alloc(100, (void*)iops, &param);
     mgnLimit ilim = {12.5,36.3};
     mgn_pop_init(pop, mgn_ind_init_rand, &ilim);
 
     // printf("indv 0 address %p\n", pop->I);
     // printf("indv 0 address %p\n", &pop->I[0]);
-    // printf("indv 0 address %p\n", &(((Individual*)(pop->I))[0]) );
+    // printf("indv 0 address %p\n", &(((mgn_indv*)(pop->I))[0]) );
     // printf("aa %g\n", gsl_vector_get(
     //     mgn_indv_getx_vec_of(pop,10),
     //     0
@@ -40,15 +41,15 @@ int main()
     }
     mgn_pop_free(pop);
 
-    MgnPop *pop1 = mgn_pop_alloc(5, (void*)iops,&param);
-    MgnPop *pop2 = mgn_pop_alloc(15,(void*)iops,&param);
+    mgn_pop *pop1 = mgn_pop_alloc(5, (void*)iops,&param);
+    mgn_pop *pop2 = mgn_pop_alloc(15,(void*)iops,&param);
 
     double val = 2.34;
     mgn_pop_init(pop1,test_init_value, &val);
     val = 5;
     mgn_pop_init(pop2,test_init_value, &val);
 
-    MgnPop *join = mgn_pop_join(pop1,pop2);
+    mgn_pop *join = mgn_pop_join(pop1,pop2);
 
     printf("%.5f ", gsl_vector_get(mgn_indv_getx_vec(join,2),0));
     printf("%.5f ", gsl_vector_get(mgn_indv_getx_vec(join,10),0));
@@ -58,14 +59,67 @@ int main()
     mgn_pop_free(pop2);
     mgn_pop_free(join);
 
-    mgn_IndvOps_free(iops);
+    double *f;
+    pop = mgn_pop_alloc(4,(void*)iops,&param);
+    // a=[0 1;2 5]; b=[3 9]; z=[1 0; 0 10]
+    // a
+    f = mgn_indv_geto_vec(pop,0)->data;
+    f[0] = 2; f[1] = 5;
+    f = mgn_indv_geto_vec(pop,1)->data;
+    f[0] = 3; f[1] = 9;
+    f = mgn_indv_geto_vec(pop,2)->data;
+    f[0] = 1; f[1] = 0;
+    f = mgn_indv_geto_vec(pop,3)->data;
+    f[0] = 0; f[1] = 10;
+
+//    mgnLimit nlim = {0,1};
+//    mgn_pop_init(pop, mgn_ind_init_rand,&nlim);
+    mgn_pop_prank_sort(pop);
+    for (size_t i = 0; i < pop->size; ++i) {
+        printf("d %d\n", mgn_indv_get(pop,i)->rank);
+    }
+
+//    gsl_matrix *i_matrix = mgn_ind_matrix(pop);
+//    int *dom_index = gsl_matrix_pareto_rank(i_matrix);
+//    for (size_t i = 0; i < pop->size; ++i) {
+//        printf("d %d\n", dom_index[i]);
+//    }
+//    free(dom_index);
+//    gsl_matrix_fprintf(stdout,i_matrix,"%.3f");
+//    printf("Sizes %zu %zu", i_matrix->size1, i_matrix->size2);
+//    gsl_matrix_free(i_matrix);
+
+    mgn_pop_copy(pop,pop,0,3,1);
+    printf("\n");
+    printf("psize %d\n", pop->size);
+    for (size_t i = 0; i < pop->size; ++i) {
+        printf("in %zu: %d\n", i, mgn_indv_get(pop,i)->rank);
+        gsl_vector_fprintf(stdout,mgn_indv_geto_vec(pop,i),"%.2f");
+    }
+
+    mgn_pop* exchange_pop = mgn_pop_alloc(0,(void*)iops,&param);;
+    mgn_pop* newpop = mgn_pop_join(pop, exchange_pop);
+
+
+//    printf("size %d %d", newpop->size, exchange_pop->size);
+    for (size_t i = 0; i < newpop->size; ++i) {
+        printf("aa %zu: %d\n", i, mgn_indv_get(newpop,i)->rank);
+        gsl_vector_fprintf(stdout,mgn_indv_geto_vec(newpop,i),":: %.2f");
+    }
+    mgn_pop_exchange_iarray(pop,exchange_pop);
+
+    mgn_pop_free(exchange_pop);
+    mgn_pop_free(pop);
+    mgn_pop_free(newpop);
+
+    mgn_indv_ops_free(iops);
     return 0;
 }
 
 void test_init_value(void* in, void* param)
 {
     double value = *(double*)param;
-    Individual *ind = (Individual*) in;
+    mgn_indv *ind = (mgn_indv*) in;
     gsl_vector *x = ind->x;
 
     for (size_t i = 0; i < x->size; i++) {
