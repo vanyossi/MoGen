@@ -9,6 +9,7 @@
 #include "../mgn_scalarization.h"
 #include "../mgn_weights.h"
 #include "mops/mgn_zdt.h"
+#include "mgn_types.h"
 
 static size_t nobj;
 

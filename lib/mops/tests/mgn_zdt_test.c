@@ -33,7 +33,7 @@ int main() {
     }
     gsl_vector_set_all(vf,0.0);
 
-    mgn_indv_param ip = {xsize, fsize, 0};
+    struct mgn_zdt_param ip = {xsize, fsize, 0};
     mgn_zdt1(vx->data, vf->data,0,&ip);
 
     for (int i = 0; i < fsize; ++i) {

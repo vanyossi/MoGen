@@ -5,6 +5,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/math
+    ${CMAKE_SOURCE_DIR}/lib/operators
 )
 
 set(MGF_MOA_SOURCES
@@ -32,10 +33,7 @@ if(APPLE)
 endif()
 
 add_executable(scalartest decomposition/tests/mgn_scalar_test.c)
-target_link_libraries(scalartest ${GSL_LIBRARIES} ${BLAS_LIBRARIES})
-if(APPLE)
-    target_link_libraries(scalartest ${vecLib_LINKER_LIBS})
-endif()
+target_link_libraries(scalartest  mgnmoefa)
 
 #set(MGN_MOA_SOURCES
 #    mgn_moead.h

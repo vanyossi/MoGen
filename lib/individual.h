@@ -6,6 +6,7 @@
 // #include <stdio.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
+//#include <gsl/gsl_blas.h>
 
 #include "mgn_random.h"
 #include "mgn_types.h"
@@ -135,6 +136,14 @@ void mgn_indv_copy(void *into, void *infrom)
     gsl_vector_memcpy(to->x, from->x);
     gsl_vector_memcpy(to->f, from->f);
     gsl_vector_memcpy(to->g, from->g);
+
+//    cblas_dcopy((int)to->x->size, from->x->data,1, to->x->data,1);
+//    cblas_dcopy((int)to->f->size, from->f->data,1, to->f->data,1);
+//    cblas_dcopy((int)to->g->size, from->g->data,1, to->g->data,1);
+
+//    gsl_blas_dcopy(from->x,to->x);
+//    gsl_blas_dcopy(from->f,to->f);
+//    gsl_blas_dcopy(from->g,to->g);
 
     return;
 }

@@ -11,7 +11,5 @@ add_executable(operator_test mgf_operator_test.c)
 target_link_libraries(operator_test mogenops mogenmop moa)
 
 add_executable(mgnoptest mgn_optest.c )
-target_link_libraries(mgnoptest ${GSL_LIBRARIES} ${BLAS_LIBRARIES})
-if(APPLE)
-    target_link_libraries(mgnoptest ${vecLib_LINKER_LIBS})
-endif()
+target_link_libraries(mgnoptest mgnmoefa)
+
