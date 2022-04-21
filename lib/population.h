@@ -12,6 +12,11 @@
                             ,RPOP->ops->get_iops(RPOP->I)\
                             , RPOP->ops->get_iparams_pointer(RPOP->I))\
 
+#define mgnt_pop_free(name) void (*name)(void*)
+#define mgnt_pop_copy(name) void (*name)(void*, void*)
+#define mgnt_pop_alloc(name) void (*name)(void*, void*, void*)
+#define mgnt_pop_alloc(name) void (*name)(void*, void*, void*)
+
 enum _mgn_pop_type {
     MGN_REAL =          1 << 0,     // 0b000000001
     MGN_INT =           1 << 1,     // 0b000000010
@@ -64,11 +69,12 @@ mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params)
     pop->I = calloc(size, pop->ops->sizeofp());
 
     // printf("sizeof %zu\n", pop->ops->sizeofp());
-
+    size_t isize = pop->ops->sizeofp();
+    mgnt_pop_alloc(alloc) = pop->ops->alloc;
     char *pin = (char*)pop->I;
     for (size_t i = 0; i < size; i++) {
-        pop->ops->alloc((void*)pin,indv_ops,params);
-        pin += pop->ops->sizeofp();
+        alloc((void*)pin,indv_ops,params);
+        pin += isize;
     }
     
     return pop;
@@ -77,10 +83,12 @@ mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params)
 void mgn_pop_free(mgn_pop *pop)
 {
     char *pin = (char*)pop->I;
+    size_t isize = pop->ops->sizeofp();
+    mgnt_pop_free(ind_free) = pop->ops->free;
     for (size_t i = 0; i < pop->size; i++) {
-        pop->ops->free((void*)pin);
+        ind_free((void*)pin);
         // pop->ops->free(&pop->I[i]);
-        pin += pop->ops->sizeofp();
+        pin += isize;
     }
     free(pop->I);
     free(pop);
@@ -100,9 +108,10 @@ void* mgn_pop_get(mgn_pop *pop, size_t pos)
 void mgn_pop_init(mgn_pop *pop, void (*apply)(void*, void*), void* params)
 {
     char *pin = (char*)pop->I;
+    size_t isize = pop->ops->sizeofp();
     for (size_t i = 0; i < pop->size; i++) {
         apply((void*)pin, params);
-        pin += pop->ops->sizeofp();
+        pin += isize;
     }
 }
 
@@ -117,8 +126,9 @@ void mgn_pop_copy(mgn_pop *dest, mgn_pop *orig, size_t destpos, size_t origpos, 
 
     if ((destpos + size) > dest->size) { return;}
 
+    mgnt_pop_copy(copy) = dest->ops->copy;
     for (size_t i = 0; (i < size) && (destpos + i < dest->size); ++i) {
-        dest->ops->copy(pdest, porig);
+        copy(pdest, porig);
         pdest += isize;
         porig += isize;
     }

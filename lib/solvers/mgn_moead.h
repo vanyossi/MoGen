@@ -134,8 +134,29 @@ void moead_update_ep(moeadf *set, mgn_pop *lpop)
 //    mgn_pop *tpop = mgn_pop_alloc(1,set->pop->ops->get_iops(ind), set->pop->ops->get_iparams_pointer(ind));
 //    mgn_pop_copy(tpop,lpop,0,0,1);
 
+    for (size_t i = 0; i < set->epop->size; ++i) {
+        int loc_dom_glob = vector_dominate(pop_get_iparam(lpop,0).f, pop_get_iparam(set->epop,i).f);
+        if (loc_dom_glob < 0) {
+//            printf("idom %d\n", loc_dom_glob);
+            mgn_pop_param param = {1,0,0,0,0};
+            set->epop->ops->set_iparams(mgn_pop_get(set->epop,i),param);
+        }
+        if (pop_get_iparam(lpop,0).rank == 0) {
+            int glob_dom_loc = vector_dominate(pop_get_iparam(set->epop,i).f,pop_get_iparam(lpop,0).f);
+            if (glob_dom_loc < 0) {
+//                printf("itheydom %d\n", glob_dom_loc);
+                mgn_pop_param param = {1,0,0,0,0};
+                lpop->ops->set_iparams(mgn_pop_get(lpop,0),param);
+            }
+        }
+    }
     mgn_pop *jpop = mgn_pop_join(lpop,set->epop);
-    mgn_pop_prank_sort(jpop);
+    mgn_pop_qsort(jpop, indv_rank_sort);
+    // TODO no need to rank sort all pop
+    // make one pass to remove (add rank +1)
+    // in same pass check if I will be added
+//    mgn_pop_prank_sort(jpop);
+    int imdom = 0;
 
     // count non dominated
     int nondom = 0;
@@ -336,6 +357,7 @@ mgnMoa* mgn_moead_init(size_t H,size_t nobj, size_t T, mgn_pop *rpop, mgnMop *mo
     //evaluate pop
     moead_pop_evaluate(rpop, fe); // external pop
     moead_pop_evaluate(fe->pop,fe);
+    mgn_pop_prank_sort(fe->pop);
 
     return moead;
 }

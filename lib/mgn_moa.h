@@ -29,11 +29,12 @@ struct mgn_moa_ga_set {
 
 bool mgn_moa_solve(mgnMoa *moa, size_t runs)
 {
-    for (size_t i = 0; i < runs; ++i) {
-        printf("initializing run %zu\n", i);
+    size_t i = 0;
+    for (i = 0; i < runs; ++i) {
         moa->run(moa);
         printf("total exec: %zu\n", moa->tot_exec);
     }
+    printf("gens: %zu\n", i);
     return true;
 }
 
