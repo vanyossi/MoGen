@@ -40,11 +40,14 @@ double mgn_pow(double base, double nexp)
 // selects 2 randon indv and gives the best one back
 void mgn_select_nrandom_el(gsl_vector_int *el, gsl_vector_int *out)
 {
-    gsl_permutation *perm_index = gsl_permutation_alloc(el->size);
+    gsl_permutation *perm_index = gsl_permutation_alloc(out->size);
     gsl_permutation_init(perm_index);
     gsl_ran_shuffle(rnd_get_generator(),perm_index->data,perm_index->size, sizeof(size_t));
     for (size_t i = 0; i < out->size; ++i) {
-        gsl_vector_int_set(out,i,gsl_permutation_get(perm_index,i));
+        // element 0 is self
+        gsl_vector_int_set(out,i, gsl_vector_int_get(
+            el,gsl_permutation_get(perm_index,i))
+            );
     }
     gsl_permutation_free(perm_index);
 }
