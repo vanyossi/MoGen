@@ -120,13 +120,12 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
         }
     }
 //    gsl_vector_free(wperm);
-    return;
 }
 
 void moead_update_ep(moeadf *set, mgn_pop *lpop)
 {
     // TODO make this an option
-    int max_ep_size = 200;
+//    int max_ep_size = 200;
     // workaround as pop is not linkedlist
     // create new pop with only nondominated
     // exchange pop->I pointers
