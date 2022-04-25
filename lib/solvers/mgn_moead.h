@@ -46,17 +46,22 @@ moeadf* mgn_moead_getfeatures(mgnMoa* moead);
 mgn_pop* mgn_moead_getpop(mgnMoa* moead);
 void mgnp_moead_update_z(gsl_vector* x, gsl_vector* f, gsl_vector* g, moeadf* param);
 
-mgn_pop* moead_reproduction(moeadf* set, size_t Ni)
+
+
+void moead_reproduction(moeadf* set, mgn_pop* y_pop, size_t Ni)
 {
     // crossover
     gsl_vector_int_view cur = gsl_matrix_int_row(set->dindex,Ni);
-    gsl_vector_int *rand_sel = gsl_vector_int_alloc(set->size_nei);
-    mgn_select_nrandom_el(&cur.vector,rand_sel);
-//    gsl_vector_int_fprintf(stdout,rand_sel, "%d");
-    mgn_pop* l_pop = mgn_pop_alloc(2
-        ,set->pop->ops->get_iops(set->pop->I)
-        , set->pop->ops->get_iparams_pointer(set->pop->I));
+//    gsl_vector_int_view cur = gsl_matrix_int_subrow(set->dindex,Ni,1,set->dindex->size1 -1);
 
+    gsl_vector_int *rand_sel = gsl_vector_int_alloc(set->size_nei);
+
+//    memcpy(rand_sel->data, cur.vector.data, sizeof(int) * set->size_nei);
+//    gsl_ran_shuffle(rnd_get_generator(), rand_sel->data, rand_sel->size,sizeof(int));
+
+    mgn_select_nrandom_el(&cur.vector,rand_sel);
+
+    mgn_pop* l_pop = pop_alloc_pop(2,set->pop);
     //          ,set->pop->ops->get_iparams( mgn_pop_get(set->pop,gsl_vector_int_get(rand_sel,0))).x->data
 
     if(set->ga_set->cross_rate > rnd_getUniform()) {
@@ -84,10 +89,10 @@ mgn_pop* moead_reproduction(moeadf* set, size_t Ni)
         ,set->pop->ops->get_iparams(mgn_pop_get(l_pop,0)).x->size
         );
 
-    mgn_pop* ret_pop = pop_alloc_pop(1,l_pop);
-    mgn_pop_copy(ret_pop,l_pop,0, rnd_getUniform_int(2),1);
+//    mgn_pop* ret_pop = pop_alloc_pop(1,l_pop);
+    mgn_pop_copy(y_pop,l_pop,Ni, rnd_getUniform_int(2),1);
     mgn_pop_free(l_pop);
-    return ret_pop;
+    return;
 }
 
 // return selected child index
@@ -107,7 +112,7 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
 //        gsl_ran_shuffle(rnd_get_generator(),wperm->data, wperm->size, sizeof(double));
 
         double g1 = set->scalarize(&wcur.vector
-            , lpop->ops->get_iparams(mgn_pop_get(lpop,0)).f
+            , lpop->ops->get_iparams(mgn_pop_get(lpop,Ni)).f
             , &zview.vector
             );
         double g2 = set->scalarize(&wcur.vector
@@ -116,7 +121,7 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
         );
 
         if (g1 < g2) {
-            mgn_pop_copy(set->pop,lpop,id,0,1);
+            mgn_pop_copy(set->pop,lpop,id,Ni,1);
         }
     }
 //    gsl_vector_free(wperm);
@@ -124,6 +129,24 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
 
 void moead_update_ep(moeadf *set, mgn_pop *lpop)
 {
+    mgn_pop *jpop = mgn_pop_join(lpop,set->epop);
+    mgn_pop_prank_sort(jpop);
+
+    int nondom = 0;
+    for (size_t i = 0; i < jpop->size; ++i) {
+        int rank = jpop->ops->get_iparams(mgn_pop_get(jpop,i)).rank;
+        if (rank > 0 || nondom > 10000) break; // max epop artificial limit
+        nondom++;
+    }
+
+    mgn_pop *non_dom_pop = pop_alloc_pop(nondom,set->pop);
+    mgn_pop_copy(non_dom_pop,jpop,0,0,nondom);
+    mgn_pop_exchange_iarray(set->epop, non_dom_pop);
+
+    mgn_pop_free(non_dom_pop);
+    mgn_pop_free(jpop);
+
+/*
     // TODO make this an option
 //    int max_ep_size = 200;
     // workaround as pop is not linkedlist
@@ -156,7 +179,7 @@ void moead_update_ep(moeadf *set, mgn_pop *lpop)
     // make one pass to remove (add rank +1)
     // in same pass check if I will be added
 //    mgn_pop_prank_sort(jpop);
-    int imdom = 0;
+//    int imdom = 0;
 
     // count non dominated
     int nondom = 0;
@@ -174,6 +197,8 @@ void moead_update_ep(moeadf *set, mgn_pop *lpop)
     mgn_pop_free(non_dom_pop);
     mgn_pop_free(jpop);
 //    mgn_pop_free(tpop);
+*/
+
 }
 
 //void moead_run(mgnMop *mop, void* features)
@@ -186,22 +211,23 @@ void moead_run(mgnMoa* moead)
         return;
     }
 
-    for (size_t i = 0; i < feat->wei->size1; ++i) {
-        mgn_pop *mpop = moead_reproduction(feat, i);
+    size_t n_weights = feat->wei->size1;
+    mgn_pop* ypop = pop_alloc_pop(n_weights, feat->pop);
+    for (size_t i = 0; i < n_weights; ++i) {
+        moead_reproduction(feat, ypop,i);
         // TODO add mop params to mop.
         // update z
-        moead->tot_exec += mgn_mop_eval_pop(feat->mop,mpop,NULL);
+        moead->tot_exec += mgn_mop_eval_pop_index(feat->mop,ypop,NULL,i,1);
         // update rank
-        mgn_mop_eval_pop(feat->_mop, mpop, feat);
+        mgn_mop_eval_pop_index(feat->_mop, ypop, feat,i,1);
 
         // update neighbour
-        moead_update_neighbour(mpop,feat,i);
+        moead_update_neighbour(ypop,feat,i);
 
-        moead_update_ep(feat, mpop);
-
-        mgn_pop_free(mpop);
     }
+    moead_update_ep(feat, ypop);
 
+    mgn_pop_free(ypop);
 
     /* general framework assuming Tcheby
      *  sea W un conjunto de N vectores de peso
@@ -283,16 +309,16 @@ moeadf* mgn_moead_alloc_features(size_t H, size_t nobj, size_t T, mgn_pop *rpop,
     fe->ismopset = false;
 
     // generate weight, get dist and sort;
-    fe->wei = mgn_weight_slattice_perm(H,nobj);
+//    fe->wei = mgn_weight_slattice_perm(H,nobj);
 
-//    fe->wei = mgn_weight_slattice_comb(H,nobj);
-//    for (size_t i = 0; i < fe->wei->size1; ++i) {
-//        gsl_vector_view wcur = gsl_matrix_row(fe->wei,i);
-//        gsl_ran_shuffle(rnd_get_generator(),
-//                        wcur.vector.data, wcur.vector.size,
-//                        sizeof(double)
-//                        );
-//    }
+    fe->wei = mgn_weight_slattice_comb(H,nobj);
+    for (size_t i = 0; i < fe->wei->size1; ++i) {
+        gsl_vector_view wcur = gsl_matrix_row(fe->wei,i);
+        gsl_ran_shuffle(rnd_get_generator(),
+                        wcur.vector.data, wcur.vector.size,
+                        sizeof(double)
+                        );
+    }
     fe->dist = gsl_vector_distance_matrix(fe->wei, 2.0);
     fe->dindex = gsl_matrix_int_alloc(fe->dist->size1, fe->dist->size2);
 

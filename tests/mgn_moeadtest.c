@@ -16,7 +16,7 @@ int main() {
     zdt->eval = mgn_cast_eval(mgn_zdt1_vector);
     mgn_mop_eval_pop(zdt,EP,NULL);
 //
-    mgnMoa *moead = mgn_moead_init(16, 2, 12, EP, zdt, mgn_ind_init,NULL);
+    mgnMoa *moead = mgn_moead_init(27, 2, 10, EP, zdt, mgn_ind_init,NULL);
     mgn_ga_sets ga_probs = {0.9, 0.01, NULL, NULL};
         ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
         ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
