@@ -39,7 +39,7 @@ int main() {
        ,in->f->data[0], in->f->data[1]);
     }
 
-    FILE *ofile = fopen("../../moead_tmp.txt","w");
+    FILE *ofile = fopen("../../moead_tmp2.txt","w");
     for (size_t i = 0; i < EP->size; ++i) {
        mgn_indv *in = mgn_indv_get(EP,i);
        fprintf(ofile, "%.6f %.6f\n"
