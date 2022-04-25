@@ -8,6 +8,7 @@
 
 #include "mgn_moa.h"
 #include "population.h"
+#include "mgn_poplist.h"
 #include "individual.h"
 #include "decomposition/mgn_weights.h"
 #include "decomposition/mgn_scalarization.h"

@@ -33,6 +33,8 @@ struct _mgn_indv {
     int rank;
     bool feasable;
     mgn_indv_ops* ops;
+    mgn_indv *next;
+    mgn_indv *prev;
     struct _mgn_indv_params* params;
     /*unsigned int size[3];*/
     gsl_vector        *x;
@@ -56,7 +58,7 @@ size_t getObjSize(mgn_indv* ind) { return ind->params->objSize; }
 size_t getConsSize(mgn_indv* ind) { return ind->params->consSize; }
 
 // Mandatory functions
-void mgn_indv_alloc(void* indv, void* ops, void* params);
+void * mgn_indv_alloc(void* indv, void* ops, void* params);
 void mgn_indv_copy(void *into, void *infrom);
 void mgn_indv_free(void *in);
 size_t mgn_sizeofp();
@@ -65,6 +67,11 @@ mgn_pop_param mgn_indv_get_params(mgn_indv *in);
 void* mgn_indv_get_ops(void* indv);
 void mgn_indv_eval(mgnMop *mop, void* indv, void* param);
 void mgn_indv_setparams(void* indv, mgn_pop_param);
+int indv_rank_sort(const void* indv_a, const void* indv_b);
+void* mgn_indv_next(void *indv);
+void mgn_indv_set_next(mgn_indv *dest, mgn_indv *in);
+void* mgn_indv_prev(void *indv);
+void mgn_indv_set_prev(mgn_indv *dest, mgn_indv *in);
 
 mgn_indv_ops* mgn_indv_ops_init()
 {
@@ -78,8 +85,39 @@ mgn_indv_ops* mgn_indv_ops_init()
     iops->eval = mgn_indv_eval;
     iops->get_iparams = cast_get_iparams(mgn_indv_get_params);
     iops->set_iparams = mgn_indv_setparams;
+    iops->next = mgn_indv_next;
+    iops->set_next = (void (*)(void*,void*))mgn_indv_set_next;
+    iops->prev = mgn_indv_prev;
+    iops->set_prev = (void (*)(void*,void*))mgn_indv_set_prev;
+    iops->rank_sort = indv_rank_sort;
 
     return iops;
+}
+
+void* mgn_indv_next(void *indv)
+{
+    mgn_indv *ind = (mgn_indv*)indv;
+    return ind->next;
+}
+
+void* mgn_indv_prev(void *indv)
+{
+    mgn_indv *ind = (mgn_indv*)indv;
+    return ind->prev;
+}
+
+void mgn_indv_set_next(mgn_indv *dest, mgn_indv *in)
+{
+    if(dest != NULL) {
+        dest->next = in;
+    }
+}
+
+void mgn_indv_set_prev(mgn_indv *dest, mgn_indv *in)
+{
+    if(dest != NULL) {
+        dest->prev = in;
+    }
 }
 
 void mgn_indv_ops_free(mgn_indv_ops *iops)
@@ -88,10 +126,15 @@ void mgn_indv_ops_free(mgn_indv_ops *iops)
     return;
 }
 
-void mgn_indv_alloc(void* indv, void* ops, void* params)
+void * mgn_indv_alloc(void* indv, void* ops, void* params)
 {
+    if (indv == NULL) {
+        indv = malloc(mgn_sizeofp());
+    }
     mgn_indv *nindv = (mgn_indv*)indv;
     nindv->ops = (mgn_indv_ops*)ops;
+    nindv->next = 0;
+    nindv->prev = 0;
 
     struct _mgn_indv_params* param = (struct _mgn_indv_params*)params;
 
@@ -105,7 +148,7 @@ void mgn_indv_alloc(void* indv, void* ops, void* params)
     nindv->f = gsl_vector_alloc(param->objSize);
     nindv->g = gsl_vector_alloc(param->consSize);
 
-    return;
+    return nindv;
 }
 
 void mgn_indv_free(void *in)
@@ -116,6 +159,12 @@ void mgn_indv_free(void *in)
     gsl_vector_free(nindv->g);
 
     return;
+}
+
+void mgn_indv_free_all(void* in)
+{
+    mgn_indv_free(in);
+    free(in);
 }
 
 void mgn_indv_copy(void *into, void *infrom)
@@ -278,7 +327,7 @@ void mgn_pop_prank_sort(mgn_pop *pop)
         ind += pop->ops->sizeofp();
     }
     // TODO make prototype indv to add default actions
-    mgn_pop_qsort(pop, indv_rank_sort);
+    mgn_pop_qsort(pop, pop->ops->rank_sort);
     free(dranks);
     gsl_matrix_free(M);
 }

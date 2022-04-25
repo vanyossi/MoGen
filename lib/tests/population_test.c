@@ -5,6 +5,8 @@
 
 #include "population.h"
 #include "individual.h"
+
+#include "mgn_poplist.h"
 //#include "mgn_pareto.h"
 
 void test_init_value(void* in, void* param);
@@ -18,7 +20,7 @@ int main()
         printf("rand %g\n", rnd_getUniform());
     }
     
-    mgn_indv_param param = {12, 2, 0};
+    mgn_indv_param param = {12, 2, 2};
     mgn_indv_ops *iops = mgn_indv_ops_init();
 
 
@@ -112,6 +114,91 @@ int main()
     mgn_pop_free(pop);
     mgn_pop_free(newpop);
 
+
+    mgn_popl* popl = mgn_popl_alloc((void*)iops,&param);
+
+//    mgn_popl_pop(popl,0);
+    mgn_popl_push(
+        popl, mgn_indv_alloc(NULL
+                             , popl->ops->get_iops(popl->I)
+                             , popl->ops->get_iparams_pointer(popl->I)));
+    mgn_popl_push(popl, mgn_indv_alloc(0, (void *) iops, &param));
+
+    for (int i = 0; i < 6; ++i) {
+        mgn_popl_push(popl, mgn_indv_alloc(0, (void *) iops, &param));
+    }
+//    mgn_popl_push(popl, mgn_indv_alloc(0,(void*)iops, &param));
+//    mgn_popl_push(popl, mgn_indv_alloc(0,(void*)iops, &param));
+//
+    mgn_popl_cursor_start(popl);
+    printf("size %d\n", popl->size);
+    for (size_t i = 0; i < popl->size; ++i) {
+        val = i;
+        if (i == 1 || i == 2 || i == 6) {
+            val = 4;
+        }
+//        printf("pointer %p %p\n",popl->first, mgn_popl_next(popl));
+        test_init_value(mgn_popl_next(popl),&val);
+//        mgn_popl_next(popl);
+    }
+//    mgn_indv *tmp = mgn_popl_pop(popl,1);
+//    mgn_indv_free(tmp);
+//    free(tmp);
+    mgn_popl_cursor_reset(popl);
+    printf("size %d\n", popl->size);
+    for (size_t i = 0; i < popl->size; ++i) {
+        double myval = popl->ops->get_iparams(mgn_popl_next(popl)).x->data[0];
+        printf("val %zu, %.6f\n",i, myval);
+//        mgn_popl_next(popl);
+    }
+
+
+    mgn_popl_cursor_reset(popl);
+    int j = 0;
+    void* ind = mgn_popl_current(popl);
+    while(ind != 0) {
+        double myval = popl->ops->get_iparams(ind).x->data[0];
+        if (myval == 4) {
+            printf("\teal %d, %.6f %d\n",j, myval, popl->size);
+            ind = mgn_popl_pop_current(popl);
+            double vals = popl->ops->get_iparams(ind).x->data[0];
+            printf("removed ind %p %g\n", ind, vals);
+            mgn_indv_free_all(ind);
+            ind = mgn_popl_current(popl);
+
+        } else {
+            printf("else\n");
+            mgn_popl_next(popl);
+            ind = mgn_popl_current(popl);
+            j++;
+        }
+    }
+        mgn_popl_cursor_reset(popl);
+    for (int i = 0; i < 5; ++i) {
+        mgn_popl_next(popl);
+    }
+//    mgn_popl_current_pop(popl);
+
+    mgn_popl_push(popl, mgn_indv_alloc(0,(void*)iops, &param));
+//    val = 100;
+//    test_init_value(mgn_popl_get(popl,12),&val);
+    val = 34.5;
+    test_init_value(mgn_popl_get_last(popl),&val);
+
+    mgn_popl_cursor_reset(popl);
+    printf("size %d\n", popl->size);
+    for (size_t i = 0; i < popl->size; ++i) {
+        double myval = popl->ops->get_iparams(mgn_popl_next(popl)).x->data[0];
+        printf("val %zu, %.6f\n",i, myval);
+//        mgn_popl_next(popl);
+    }
+    mgn_popl_cursor_reset(popl);
+    while(mgn_popl_current(popl) != 0) {
+        double myval = popl->ops->get_iparams(mgn_popl_next(popl)).x->data[0];
+        printf("vval, %.6f\n", myval);
+    }
+
+    mgn_popl_free(popl);
     mgn_indv_ops_free(iops);
     return 0;
 }
