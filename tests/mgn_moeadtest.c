@@ -8,16 +8,14 @@
 int main() {
     mgn_indv_param params = {6,2,0};
     mgn_indv_ops *iops = mgn_indv_ops_init();
-    mgn_pop *EP = mgn_pop_alloc(1,(void*)iops,&params);
-    mgnLimit ilimit = {0, 1};
-    mgn_pop_init(EP, mgn_ind_init, &ilimit);
+    mgn_popl *EP = mgn_popl_alloc((void*)iops,&params);
+//    mgnLimit ilimit = {0, 1};
 
     mgnMop *zdt = mgn_mop_alloc();
     zdt->eval = mgn_cast_eval(mgn_zdt1_vector);
-    mgn_mop_eval_pop(zdt,EP,NULL);
 //
     mgnMoa *moead = mgn_moead_init(27, 2, 10, EP, zdt, mgn_ind_init,NULL);
-    mgn_ga_sets ga_probs = {0.9, 0.01, NULL, NULL};
+    mgn_ga_sets ga_probs = {0.5, 0.01, NULL, NULL};
         ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
         ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
         for (size_t i = 0; i < params.realSize; ++i) {
@@ -29,22 +27,47 @@ int main() {
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    mgn_moa_solve(moead,300);
+    mgn_moa_solve(moead,101);
 
-    mgn_pop_prank_sort(EP);
-    for (size_t i = 0; i < EP->size; ++i) {
-       mgn_indv *in = mgn_indv_get(EP,i);
-       printf("%zu %d %.6f %.6f %.6f %.6f %.6f %.6f\n", i, in->rank
-       ,in->x->data[0],  in->x->data[1],  in->x->data[2],  in->x->data[3]
-       ,in->f->data[0], in->f->data[1]);
+//    mgn_pop_prank_sort(EP);
+    mgn_popl_cursor_reset(EP);
+    size_t i = 0;
+    while(mgn_popl_current(EP) != 0) {
+        mgn_indv *in = mgn_popl_next(EP);
+        printf("%zu %d %.6f %.6f %.6f %.6f %.6f %.6f\n", i, in->rank
+               ,in->x->data[0],  in->x->data[1],  in->x->data[2],  in->x->data[3]
+               ,in->f->data[0], in->f->data[1]);
+        i++;
     }
+//    mgn_popl_cursor_reset(EP);
+//    mgn_pop* epop_array = pop_alloc_pop(EP->size,EP);
+//    i = 0;
+//    while(mgn_popl_current(EP) != 0) {
+//        mgn_indv *in = mgn_popl_next(EP);
+//        epop_array->ops->copy(mgn_pop_get(epop_array,i),in);
+//        i++;
+//    }
+//    mgn_pop_prank_sort(epop_array);
+//    for (i = 0; i < epop_array->size; ++i) {
+//       mgn_indv *in = mgn_indv_get(epop_array,i);
+//       printf("%zu %d %.6f %.6f %.6f %.6f %.6f %.6f\n", i, in->rank
+//       ,in->x->data[0],  in->x->data[1],  in->x->data[2],  in->x->data[3]
+//       ,in->f->data[0], in->f->data[1]);
+//    }
 
     FILE *ofile = fopen("../../moead_tmp2.txt","w");
-    for (size_t i = 0; i < EP->size; ++i) {
-       mgn_indv *in = mgn_indv_get(EP,i);
-       fprintf(ofile, "%.6f %.6f\n"
-              ,in->f->data[0], in->f->data[1]);
+
+    mgn_popl_cursor_reset(EP);
+    while(mgn_popl_current(EP) != 0) {
+        mgn_indv *in = mgn_popl_next(EP);
+        fprintf(ofile, "%.6f %.6f\n"
+                ,in->f->data[0], in->f->data[1]);
     }
+//    for (size_t i = 0; i < EP->size; ++i) {
+//       mgn_indv *in = mgn_indv_get(EP,i);
+//       fprintf(ofile, "%.6f %.6f\n"
+//              ,in->f->data[0], in->f->data[1]);
+//    }
     fclose(ofile);
 
    //    mgn_moa_solve(moead,zdt);
@@ -66,7 +89,7 @@ int main() {
 
     mgn_mop_free(zdt);
     mgn_moead_free(moead);
-    mgn_pop_free(EP);
+    mgn_popl_free(EP);
     mgn_indv_ops_free(iops);
 
     return 0;
