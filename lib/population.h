@@ -36,15 +36,17 @@ mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params)
 
 void mgn_pop_free(mgn_pop *pop)
 {
-    char *pin = (char*)pop->I;
-    size_t isize = pop->ops->sizeofp();
-    mgnt_pop_free(ind_free) = pop->ops->free;
-    for (size_t i = 0; i < pop->size; i++) {
-        ind_free((void*)pin);
-        // pop->ops->free(&pop->I[i]);
-        pin += isize;
+    if(pop->I != 0) {
+        char *pin = (char*)pop->I;
+        size_t isize = pop->ops->sizeofp();
+        mgnt_pop_free(ind_free) = pop->ops->free;
+        for (size_t i = 0; i < pop->size; i++) {
+            ind_free((void*)pin);
+            // pop->ops->free(&pop->I[i]);
+            pin += isize;
+        }
+        free(pop->I);
     }
-    free(pop->I);
     free(pop);
     return;
 }
