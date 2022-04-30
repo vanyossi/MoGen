@@ -25,8 +25,12 @@ int main()
 
 
     mgn_pop *pop = mgn_pop_alloc(100, (void*)iops, &param);
-    mgnLimit ilim = {12.5,36.3};
-    mgn_pop_init(pop, mgn_ind_init_rand, &ilim);
+    mgnLimit *ilim = mgn_limit_alloc(param.realSize);
+    for (size_t i = 0; i < ilim->size; ++i) {
+        ilim->min[i] = -1;
+        ilim->max[i] = 1;
+    }
+    mgn_pop_init(pop, mgn_ind_init_rand, ilim);
 
     // printf("indv 0 address %p\n", pop->I);
     // printf("indv 0 address %p\n", &pop->I[0]);

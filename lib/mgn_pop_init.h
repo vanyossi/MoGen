@@ -4,10 +4,5 @@
 
 #include "mgn_types.h"
 
-struct mgn_limit {
-    double min;
-    double max;
-};
-
 
 #endif // _MGN_POP_INIT_

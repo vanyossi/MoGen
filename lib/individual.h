@@ -262,7 +262,7 @@ void mgn_ind_init_rand(void* in, void* limits)
     mgnLimit* lim = (mgnLimit*) limits;
 
     for (size_t i = 0; i < ind->x->size; i++) {
-        gsl_vector_set(ind->x,i, rnd_getUniform_limit(lim->min,lim->max));
+        gsl_vector_set(ind->x,i, rnd_getUniform_limit(lim->min[i],lim->max[i]));
     }
 }
 
