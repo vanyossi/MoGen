@@ -2,32 +2,56 @@
 // Created by Iván Yossi on 17/04/22.
 //
 
+#ifndef MGN_SBX_N
+#define MGN_SBX_N 30
+#endif
+
+#ifndef MGN_PBM_N
+#define MGN_PBM_N 100
+#endif
+
 #include "mgn_moead.h"
 #include "mops/mgn_zdt.h"
 
+#include "mops/mgn_cec09.h"
+
 int main() {
-    mgn_indv_param params = {6,2,0};
+    mgn_indv_param params = {30,2,0};
     mgn_indv_ops *iops = mgn_indv_ops_init();
     mgn_popl *EP = mgn_popl_alloc((void*)iops,&params);
 //    mgnLimit ilimit = {0, 1};
 
-    mgnMop *zdt = mgn_mop_alloc();
-    zdt->eval = mgn_cast_eval(mgn_zdt1_vector);
+//    mgnMop *zdt = mgn_mop_alloc();
+//    zdt->eval = mgn_cast_eval(mgn_zdt3_vector);
+//    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
+//    ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
+//    ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
+//    for (size_t i = 0; i < params.realSize; ++i) {
+//        ga_probs.mut_llim[i] = 0;
+//        ga_probs.mut_ulim[i] = 1;
+//    }
+
+    mgnMop *ufs = mgn_mop_alloc();
+    ufs->eval_array = mgn_cast_eval(mgn_uf1);
+    mgnLimit *moplim = mgn_limit_alloc(params.realSize);
+    mgn_cec09_set_limits(cec_uf1,moplim);
+    ufs->params = &params;
+
+    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
+    ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
+    ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
+    for (size_t i = 0; i < params.realSize; ++i) {
+        ga_probs.mut_llim[i] = -1;
+        ga_probs.mut_ulim[i] = 1;
+    }
 //
-    mgnMoa *moead = mgn_moead_init(27, 2, 10, EP, zdt, mgn_ind_init,NULL);
-    mgn_ga_sets ga_probs = {0.5, 0.01, NULL, NULL};
-        ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
-        ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
-        for (size_t i = 0; i < params.realSize; ++i) {
-            ga_probs.mut_llim[i] = 0;
-            ga_probs.mut_ulim[i] = 1;
-        }
+    mgnMoa *moead = mgn_moead_init(30, 2, 16, EP, ufs, mgn_ind_init,moplim);
     moead->set_ga_vals(moead,&ga_probs);
 
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    mgn_moa_solve(moead,101);
+    mgn_moa_solve(moead,200);
 
 //    mgn_pop_prank_sort(EP);
     mgn_popl_cursor_reset(EP);
@@ -63,8 +87,9 @@ int main() {
         fprintf(ofile, "%.6f %.6f\n"
                 ,in->f->data[0], in->f->data[1]);
     }
-//    for (size_t i = 0; i < EP->size; ++i) {
-//       mgn_indv *in = mgn_indv_get(EP,i);
+//    mgn_pop *moeadpop = mgn_moead_getfeatures(moead)->pop;
+//    for (size_t i = 0; i < moeadpop->size; ++i) {
+//       mgn_indv *in = mgn_indv_get(moeadpop,i);
 //       fprintf(ofile, "%.6f %.6f\n"
 //              ,in->f->data[0], in->f->data[1]);
 //    }
@@ -87,7 +112,7 @@ int main() {
     free(ga_probs.mut_llim);
     free(ga_probs.mut_ulim);
 
-    mgn_mop_free(zdt);
+    mgn_mop_free(ufs);
     mgn_moead_free(moead);
     mgn_popl_free(EP);
     mgn_indv_ops_free(iops);
