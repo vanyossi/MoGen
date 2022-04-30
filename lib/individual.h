@@ -207,6 +207,8 @@ void mgn_indv_eval(mgnMop *mop, void* indv, void* param)
     mgn_indv *in = (mgn_indv*)indv;
     if (mop->eval) {
         mop->eval(in->x, in->f, in->g, param);
+    } else if (mop->eval_array) {
+        mop->eval_array(in->x->data, in->f->data, in->g->data, param);
     }
     return;
 }

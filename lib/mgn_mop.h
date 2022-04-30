@@ -17,7 +17,9 @@
 
 struct _mgn_mop {
     char name[32];
+    void* params;
     void (*eval)(void*, void*, void*,void*);
+    void (*eval_array)(void*, void*, void*,void*);
 };
 
 mgnMop* mgn_mop_alloc(){
