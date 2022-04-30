@@ -6,6 +6,8 @@
 #include <stdio.h>
 
 #include <math.h>
+#include <float.h>
+
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_permutation.h>
 #include <gsl/gsl_randist.h>
@@ -228,7 +230,8 @@ void mgn_genop_pbm(double n, double pm, double *p, const double *lb, const doubl
 
         u = rnd_getUniform();
         if (u <= 0.5) {
-            d = pow((2*u),nexp)-1;
+            d = mgn_pow((2*u),nexp)-1;
+            d = (isnan(d))? DBL_MAX : d;
             np = p[i] + d * (p[i] - lb[i]);
         } else {
             d = 1-(2 * (1-u)) * nexp;
