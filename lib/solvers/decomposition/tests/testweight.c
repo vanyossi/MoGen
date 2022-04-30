@@ -34,7 +34,7 @@ void test_wei_combination()
 
 void test_wei_permutation()
 {
-    gsl_matrix *W = mgn_weight_slattice_perm(3, 2);
+    gsl_matrix *W = mgn_weight_slattice_perm(50, 2);
     puts("Permutation test");
     test_print_matrix(W);
 //    for (size_t i = 0; i < W->size1; ++i) {
