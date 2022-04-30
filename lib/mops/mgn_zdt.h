@@ -18,6 +18,7 @@ struct mgn_zdt_param {
     size_t gsize;
 };
 
+
 void mgn_zdt1(double *x, double* f, double* g, void* sizes)
 {
     zdt_unused(g);
