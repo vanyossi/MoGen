@@ -336,7 +336,7 @@ moeadf* mgn_moead_alloc_features(size_t H, size_t nobj, size_t T, mgn_popl *rpop
     fe->epop = rpop;
     fe->z = mgnp_moead_alloc_z(nobj);
     fe->size_nei = (fe->wei->size1 < T)? fe->wei->size1 : T;
-    printf("size wei %d, %zu\n", fe->wei->size1, fe->size_nei);
+    printf("size wei %zu, %zu\n", fe->wei->size1, fe->size_nei);
 
     fe->mop = mop;
     fe->_mop = mgn_mop_alloc();
