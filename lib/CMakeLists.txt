@@ -45,6 +45,7 @@ set(MGN_LIB_SOURCES
 #    solvers/decomposition/mgn_weights.c
 #    solvers/mgn_moead.c
 #    mgn_moa.c
+    mgn_initializer.c
     mgn_random.c
 #    mgn_types.c
 #    mgn_mop.c
