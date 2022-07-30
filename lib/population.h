@@ -117,4 +117,34 @@ void mgn_pop_qsort(mgn_pop *pop, int (*sort)(const void*, const void*))
     qsort(pop->I, pop->size, pop->ops->sizeofp(),sort);
 }
 
+int mgnp_pop_sort_1d(const void* ia, const void* ib)
+{
+    struct mgn_iparam_container* a = (struct mgn_iparam_container**)ia;
+    struct mgn_iparam_container* b = (struct mgn_iparam_container**)ib;
+
+    return (a->val <= b->val)? -1 : 1;
+}
+
+void pop_sort_1d(mgn_pop* pop)
+{
+    struct mgn_iparam_container* fvals;
+    fvals = calloc(pop->size, sizeof(*fvals));
+    mgn_pop *tmp_pop = pop_alloc_pop(pop->size,pop);
+
+    for (size_t i = 0; i < pop->size; ++i) {
+        fvals[i].i = i;
+        fvals[i].val = pop_get_iparam(pop,i).f->data[0];
+    }
+    qsort(fvals,pop->size, sizeof(*fvals), mgnp_pop_sort_1d);
+
+    for (size_t i = 0; i < pop->size; ++i) {
+        mgn_pop_copy(tmp_pop,pop,i,fvals[i].i,1);
+    }
+
+    mgn_pop_exchange_iarray(pop,tmp_pop);
+
+    mgn_pop_free(tmp_pop);
+    free(fvals);
+}
+
 #endif // _MGN_POPULATION_

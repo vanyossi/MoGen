@@ -12,7 +12,10 @@
 
 
 #define cast_get_iparams(fname) (mgn_pop_param (*)(void*))fname
+
 #define pop_get_iparam(POP,POS) POP->ops->get_iparams(mgn_pop_get(POP, POS))
+#define pop_get_iparamp(POP) POP->ops->get_iparams_pointer(POP->I)
+#define pop_get_iops(POP) POP->ops->get_iops(POP->I)
 #define pop_alloc_pop(SIZE, RPOP) mgn_pop_alloc(SIZE \
                             ,RPOP->ops->get_iops(RPOP->I)\
                             , RPOP->ops->get_iparams_pointer(RPOP->I))\
@@ -59,5 +62,10 @@ struct _mgn_i_ops {
 };
 // TODO evaluate (goes in mop)
 // copy pops
+
+struct mgn_iparam_container {
+    size_t i;
+    double val;
+};
 
 #endif //MOGEN_MGN_POP_PROTO_H
