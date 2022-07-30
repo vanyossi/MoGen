@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "mgn_types.h"
+#include "mgn_gen_operator.h"
 
 #define cec09_unused(x) ((void)(x))
 

@@ -7,10 +7,14 @@
 #define UNUSED(x) ((void)(x))
 
 typedef struct _mgn_pop mgn_pop;
+typedef struct mgn_popl_head mgn_popl;
+
 typedef struct _mgn_pop_param_pointer mgn_pop_param;
 typedef enum _mgn_pop_type popType;
 
 typedef struct _mgn_mop mgnMop;
+typedef struct mgn_moa_t mgnMoa;
+typedef struct mgn_moa_ga_set mgn_ga_sets;
 
 typedef struct mgn_limit mgnLimit;
 

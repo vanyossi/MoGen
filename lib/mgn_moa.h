@@ -1,15 +1,14 @@
 #ifndef _LIB_MGN_MOA_H_
 #define _LIB_MGN_MOA_H_
 
-#include <stdbool.h>
-#include <stdio.h>
-
 #include "mgn_types.h"
+
+#include <stdbool.h>
 
 #define MOA_NAME_LEN 32
 
-typedef struct mgn_moa_t mgnMoa;
-typedef struct mgn_moa_ga_set mgn_ga_sets;
+//typedef struct mgn_moa_t mgnMoa;
+//typedef struct mgn_moa_ga_set mgn_ga_sets;
 
 struct mgn_moa_t {
     char name[MOA_NAME_LEN];
@@ -27,15 +26,6 @@ struct mgn_moa_ga_set {
     double *mut_ulim;
 };
 
-bool mgn_moa_solve(mgnMoa *moa, size_t runs)
-{
-    size_t i = 0;
-    for (i = 0; i < runs; ++i) {
-        moa->run(moa);
-    }
-    printf("total exec: %zu\n", moa->tot_exec);
-    printf("gens: %zu\n", i);
-    return true;
-}
+bool mgn_moa_solve(mgnMoa *moa, size_t runs);
 
 #endif // _LIB_MGN_MOA_H_

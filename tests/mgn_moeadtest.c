@@ -11,9 +11,12 @@
 #endif
 
 #include "mgn_moead.h"
+#include "mgn_mop.h"
 #include "mops/mgn_zdt.h"
-
 #include "mops/mgn_cec09.h"
+
+#include "individual.h"
+#include "mgn_poplist.h"
 
 int main() {
     mgn_indv_param params = {30,2,0};
@@ -22,7 +25,7 @@ int main() {
 //    mgnLimit ilimit = {0, 1};
 
     mgnMop *mop = mgn_mop_alloc();
-    mop->eval = mgn_cast_eval(mgn_zdt3_vector);
+    mop->eval = mgn_cast_eval(mgn_zdt1_vector);
     mgnLimit *moplim = mgn_limit_alloc(params.realSize);
     for (size_t i = 0; i < moplim->size; ++i) {
         moplim->min[i] = 0;
@@ -77,16 +80,18 @@ int main() {
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    mgn_moa_solve(moead,1010);
+    mgn_moa_solve(moead,300000);
 
 //    mgn_pop_prank_sort(EP);
     mgn_popl_cursor_reset(EP);
     size_t i = 0;
     while(mgn_popl_current(EP) != 0) {
         mgn_indv *in = mgn_popl_next(EP);
-        printf("%zu %d %.6f %.6f %.6f %.6f %.6f %.6f\n", i, in->rank
-               ,in->x->data[0],  in->x->data[1],  in->x->data[2],  in->x->data[3]
-               ,in->f->data[0], in->f->data[1]);
+        double *in_x = mgn_indv_get_params(in).x->data;
+        double *in_f = mgn_indv_get_params(in).f->data;
+        printf("%zu %d %.6f %.6f %.6f %.6f %.6f %.6f\n", i, mgn_indv_get_params(in).rank
+               ,in_x[0], in_x[1], in_x[2], in_x[3]
+               ,in_f[0], in_f[1]);
         i++;
     }
 //    mgn_popl_cursor_reset(EP);
@@ -110,8 +115,9 @@ int main() {
     mgn_popl_cursor_reset(EP);
     while(mgn_popl_current(EP) != 0) {
         mgn_indv *in = mgn_popl_next(EP);
+        double *in_f = mgn_indv_get_params(in).f->data;
         fprintf(ofile, "%.6f %.6f\n"
-                ,in->f->data[0], in->f->data[1]);
+                ,in_f[0], in_f[1]);
     }
 //    mgn_pop *moeadpop = mgn_moead_getfeatures(moead)->pop;
 //    for (size_t i = 0; i < moeadpop->size; ++i) {
