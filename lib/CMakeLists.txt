@@ -57,11 +57,17 @@ set(MGN_LIB_SOURCES
 
 add_library(mgnmoefa SHARED ${MGN_LIB_SOURCES})
 
+# ./moeadtest  26,10s user 0,03s system 99% cpu 26,215 total
 target_link_libraries(mgnmoefa ${GSL_LIBRARY} ${BLAS_LIBRARIES})
+# ./moeadtest  58,79s user 0,52s system 81% cpu 1:12,42 total
+# add if APPLE
+# ./moeadtest  35,92s user 0,18s system 94% cpu 38,120 total
+#target_link_libraries(mgnmoefa ${GSL_LIBRARIES} ${GSL_CBLAS_LIBRARIES})
 
 if(APPLE)
-#    message(status "veclib ${vecLib_LINKER_LIBS}")
-    target_link_libraries(mgnmoefa ${vecLib_LINKER_LIBS})
+#    message(status "veclib ${vecLib_LINKER_LIBS} -F${BLAS_LIBRARIES}/Versions/Current/Frameworks/vecLib.framework")
+#    target_link_libraries(mgnmoefa "-F/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework")
+    target_link_libraries(mgnmoefa "-F${BLAS_LIBRARIES}/Versions/Current/Frameworks/vecLib.framework")
 endif()
 
 set_target_properties(mgnmoefa PROPERTIES
