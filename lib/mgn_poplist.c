@@ -72,9 +72,9 @@ void* mgn_popl_get(mgn_popl *pop, size_t pos)
     size_t ipos = 0;
     void* current = pop->first;
     if(current != 0){
-        struct _mgn_i_ops *ops = pop->ops->get_iops(current);
-        while (ipos < pos  && current && ops->next(current) != 0) {
-            current = ops->next(current);
+//        struct _mgn_i_ops *ops = pop->ops->get_iops(current);
+        while (ipos < pos  && current && pop->ops->next(current) != 0) {
+            current = pop->ops->next(current);
             ipos++;
         }
     }
@@ -101,11 +101,11 @@ void* mgn_popl_pop_current(mgn_popl* pop)
     void *popped = 0;
     if (pop->current != 0) {
         void* cu = pop->current;
-        struct _mgn_i_ops *ops = pop->ops->get_iops(cu);
+//        struct _mgn_i_ops *ops = pop->ops->get_iops(cu);
         popped = cu;
-        ops->set_next(ops->prev(cu),ops->next(cu));
-        ops->set_prev(ops->next(cu),ops->prev(cu));
-        pop->current = ops->next(cu);
+        pop->ops->set_next(pop->ops->prev(cu),pop->ops->next(cu));
+        pop->ops->set_prev(pop->ops->next(cu),pop->ops->prev(cu));
+        pop->current = pop->ops->next(cu);
 //        printf("pop next %p\n", ops->next(cu));
         if (cu == pop->first) {
             pop->first = pop->current;
@@ -121,19 +121,21 @@ void* mgn_popl_next(mgn_popl *pop)
     void* prev = pop->current;
 
     if(prev != 0) {
-        struct _mgn_i_ops *ops = pop->ops->get_iops(pop->I);
-        pop->current = ops->next(prev);
+        //struct _mgn_i_ops *ops = pop->ops->get_iops(pop->I);
+        pop->current = pop->ops->next(prev);
     }
     return prev;
 }
 
 void* mgn_popl_pop(mgn_popl *pop, size_t pos)
 {
+    struct _mgn_i_ops *ops = pop->ops;
+
     size_t ipos = 0;
     void *popped = 0;
     if(pos < pop->size && pop->first != 0){
         void *current = pop->first;
-        struct _mgn_i_ops *ops = pop->ops->get_iops(current);
+//        struct _mgn_i_ops *ops = pop->ops->get_iops(current);
         while (ipos < pos && current != 0) {
             current = ops->next(current);
             ipos++;
@@ -157,10 +159,10 @@ void mgn_popl_free(mgn_popl* pop)
     void* current = pop->first;
     mgnt_pop_free(ind_free) = pop->ops->free;
     if(current != 0){
-        struct _mgn_i_ops *ops = pop->ops->get_iops(current);
-        while (ops->next(current) != 0) {
+//        struct _mgn_i_ops *ops = pop->ops->get_iops(current);
+        while (pop->ops->next(current) != 0) {
             void* for_free = current;
-            current = ops->next(current);
+            current = pop->ops->next(current);
             ind_free(for_free);
             free(for_free);
         }
