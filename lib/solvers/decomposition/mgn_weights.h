@@ -85,7 +85,7 @@ gsl_matrix* mgn_weight_slattice_perm(size_t H, size_t nf)
 //            gsl_matrix_set(W,i,j,gsl_vector_get(
 //                cval, gsl_vector_ulong_get(pcomb,j)));
         }
-        if (FCOMP(1.0,gsl_vector_sum(&crow.vector),2e-1)) {
+        if (FCOMP(1.0,gsl_vector_sum(&crow.vector),1e-3)) {
             feasable[i] = (int)i;
             feasable_c++;
         } else {

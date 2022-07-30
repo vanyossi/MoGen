@@ -14,7 +14,7 @@ int main() {
 //    gsl_matrix_fprintf(stdout,W,"%.6f");
 //    gsl_matrix_free(W);
 
-    test_wei_combination();
+//    test_wei_combination();
     test_wei_permutation();
 
 //    for (size_t i = 0; i < 30; ++i) {
@@ -34,7 +34,7 @@ void test_wei_combination()
 
 void test_wei_permutation()
 {
-    gsl_matrix *W = mgn_weight_slattice_perm(50, 2);
+    gsl_matrix *W = mgn_weight_slattice_perm(12, 2);
     puts("Permutation test");
     test_print_matrix(W);
 //    for (size_t i = 0; i < W->size1; ++i) {
@@ -49,9 +49,11 @@ void test_wei_permutation()
 void test_print_matrix(gsl_matrix *W)
 {
     for (size_t i = 0; i < W->size1; ++i) {
+        double sum = 0;
         for (size_t j = 0; j < W->size2; ++j) {
+            sum += gsl_matrix_get(W,i,j);
             printf("%.6f ", gsl_matrix_get(W,i,j));
         }
-        printf("\n");
+        printf("%.6f\n", sum);
     }
 }
