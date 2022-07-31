@@ -13,3 +13,5 @@ target_link_libraries(operator_test mogenops mogenmop moa)
 add_executable(mgnoptest mgn_optest.c )
 target_link_libraries(mgnoptest mgnmoefa)
 
+add_executable(gsl_kmeanstest gsl_kmeanstest.c ../gsl_kmeans.c)
+target_link_libraries(gsl_kmeanstest mgnmoefa)
