@@ -40,7 +40,7 @@ void mgn_popl_push(mgn_popl *pop, void *indv)
     if (last == 0) {
         pop->first = indv;
     } else {
-        printf("lst %p %p\n", last, indv);
+//        printf("lst %p %p\n", last, indv);
         pop->ops->set_next(last,indv);
         pop->ops->set_prev(indv,last);
     }
@@ -49,7 +49,8 @@ void mgn_popl_push(mgn_popl *pop, void *indv)
     return;
 }
 
-void mgn_popl_alloc_last(mgn_popl *pop)
+// alloc last and returns pointer to last
+void* mgn_popl_alloc_last(mgn_popl *pop)
 {
     void* last = mgn_popl_get_last(pop);
 //    printf("alloc last  %p\n", last);
@@ -65,6 +66,8 @@ void mgn_popl_alloc_last(mgn_popl *pop)
         pop->ops->set_prev(new, last);
     }
     pop->size++;
+
+    return last;
 }
 
 void* mgn_popl_get(mgn_popl *pop, size_t pos)

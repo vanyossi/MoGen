@@ -12,22 +12,14 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "mgn_test.h"
+
 #include "mgn_vector_distance.h"
 #include "mgn_types.h"
 #include "mgn_random.h"
 #include "mgn_moa.h"
 
 #include "mgn_gen_operator.h"
-
-void mgn_test(char* name, bool (*func)())
-{
-    printf("%s \n", name);
-    if(func()){
-        printf("PASS!\n");
-    } else {
-        printf("FAIL!\n");
-    }
-}
 
 bool test_vec_ordering();
 bool test_genop_sbx();

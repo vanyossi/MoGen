@@ -17,19 +17,6 @@
 #include "population.h"
 #include "mgn_pareto.h"
 
-struct pmgn_indv {
-    int rank;
-    bool feasable;
-    mgn_indv_ops* ops;
-    mgn_indv *next;
-    mgn_indv *prev;
-    struct pmgn_indv_params* params;
-    /*unsigned int size[3];*/
-    gsl_vector        *x;
-    gsl_vector        *f;
-    gsl_vector        *g;
-};
-
 // TODO make macro of mandatory ops
 struct pmgn_indv_ops {
     //mandatory

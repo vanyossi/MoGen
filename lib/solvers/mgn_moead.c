@@ -127,7 +127,9 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
 //    gsl_vector_free(wperm);
 }
 
-
+// instead of checking dominance on every loop
+// do this after every run, else just add to EP
+// use sort by dominance
 void moead_update_ep(moeadf *set, mgn_pop *lpop)
 {
 //    printf("update ep\n");
@@ -168,8 +170,7 @@ void moead_update_ep(moeadf *set, mgn_pop *lpop)
     }
     if (inset_in) {
 //        printf("inser\n");
-        mgn_popl_alloc_last(set->epop);
-        void *last = mgn_popl_get_last(set->epop);
+        void *last = mgn_popl_alloc_last(set->epop);
 //        printf("pointer last %p\n", last);
         set->epop->ops->copy(last, in_sert);
 //        printf("data last inserted %g\n", set->epop->ops->get_iparams(last).f->data[0]);

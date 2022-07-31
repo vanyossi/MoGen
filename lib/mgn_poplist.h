@@ -17,13 +17,14 @@ struct mgn_popl_head {
     struct _mgn_i_ops *ops;
     void *first;
     void *current;
+    void *last;
     void* I; // for prototype creation
 };
 
 mgn_popl* mgn_popl_alloc(void*(*indv_ops)(void*), void *params);
 void* mgn_popl_get_last(mgn_popl *pop);
 void mgn_popl_push(mgn_popl *pop, void *indv);
-void mgn_popl_alloc_last(mgn_popl *pop);
+void* mgn_popl_alloc_last(mgn_popl *pop);
 void* mgn_popl_get(mgn_popl *pop, size_t pos);
 
 void mgn_popl_cursor_reset(mgn_popl *pop);

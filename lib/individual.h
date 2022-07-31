@@ -1,8 +1,17 @@
 #ifndef _MGN_INDIVIDUAL_
 #define _MGN_INDIVIDUAL_
 
+
 #include "mgn_types.h"
+
+#include <stdbool.h>
 #include <gsl/gsl_vector.h>
+
+
+typedef struct pmgn_indv_ops mgn_indv_ops;
+typedef struct pmgn_indv mgn_indv;
+typedef struct pmgn_indv_params mgn_indv_param;
+
 
 struct pmgn_indv_params {
     size_t realSize;
@@ -10,19 +19,30 @@ struct pmgn_indv_params {
     size_t consSize;
 };
 
+struct pmgn_indv {
+    int rank;
+    bool feasable;
+    mgn_indv_ops* ops;
+    mgn_indv *next;
+    mgn_indv *prev;
+    struct pmgn_indv_params* params;
+    /*unsigned int size[3];*/
+    gsl_vector        *x;
+    gsl_vector        *f;
+    gsl_vector        *g;
+};
+
 #define indvCallOp(self,operator) self->ops->operator(self)
 #define indGetXSize(self) indvCallOp(self,getXSize)
 #define indGetObjSize(self) indvCallOp(self,getObjSize)
 #define indGetConsSize(self) indvCallOp(self,getConsSize)
 
-typedef struct pmgn_indv_ops mgn_indv_ops;
-typedef struct pmgn_indv mgn_indv;
-typedef struct pmgn_indv_params mgn_indv_param;
 
 mgn_indv_ops* mgn_indv_ops_init();
 
 void mgn_ind_init(void* in, void* none);
 
+void mgn_ind_init(void* in, void* none);
 void mgn_ind_init_rand(void* in, void* limits);
 
 mgn_indv* mgn_indv_get(mgn_pop *pop, size_t in);
@@ -52,5 +72,7 @@ void* mgn_indv_next(void *indv);
 void mgn_indv_set_next(mgn_indv *dest, mgn_indv *in);
 void* mgn_indv_prev(void *indv);
 void mgn_indv_set_prev(mgn_indv *dest, mgn_indv *in);
+
+void mgn_pop_prank_sort(mgn_pop *pop);
 
 #endif // _MGN_INDIVIDUAL_
