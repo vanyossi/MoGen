@@ -4,11 +4,8 @@
 #include "mgn_pop_proto.h"
 
 struct _mgn_pop {
-    unsigned int size;
+    mgn_pop_ops()
     unsigned int current;
-    popType type;
-    struct _mgn_i_ops *ops;
-    void* I;
 };
 
 mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params);

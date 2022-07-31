@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 
+void* pmgn_pop_get(void* pop_in, size_t index);
 
 mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params)
 {
@@ -22,6 +23,8 @@ mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params)
         alloc((void*)pin,indv_ops,params);
         pin += isize;
     }
+
+    pop->get = pmgn_pop_get;
 
     return pop;
 }
@@ -137,4 +140,11 @@ void pop_sort_1d(mgn_pop* pop)
 
     mgn_pop_free(tmp_pop);
     free(fvals);
+}
+
+
+void* pmgn_pop_get(void* pop_in, size_t index)
+{
+    mgn_pop *pop = (mgn_pop*)pop_in;
+    return mgn_pop_get(pop,index);
 }

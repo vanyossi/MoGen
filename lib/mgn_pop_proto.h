@@ -24,9 +24,9 @@
 #define mgnt_pop_copy(name) void (*name)(void*, void*)
 #define mgnt_pop_alloc(name) void* (*name)(void*, void*, void*)
 
-enum _mgn_pop_type {
-    MGN_REAL =          1 << 0,     // 0b000000001
-    MGN_INT =           1 << 1,     // 0b000000010
+enum emgn_pop_type {
+    MGN_POP =          1 << 0,     // 0b000000001
+    MGN_POPL =           1 << 1,     // 0b000000010
     MGN_BIN =           1 << 2,     // 0b000000100
     MGN_MIX =           8 << 0,   // 0b000001000
 };
@@ -39,9 +39,21 @@ struct _mgn_pop_param_pointer {
     gsl_vector *g;
 };
 
-//TODO move ops to indv prototype
-
+// population operators
 #define mgn_pop_ops() \
+    struct pmgn_pop_ops *met; \
+    struct _mgn_i_ops *ops; \
+    unsigned int size; \
+    void* I; \
+    void* (*get)(void*, size_t);
+
+struct pmgn_pop_ops {
+    mgn_pop_ops()
+};
+
+// individual operators
+//TODO move ops to indv prototype
+#define mgn_i_ops() \
     void* (*alloc)(void*, void*, void*);\
     void (*copy)(void*, void*);\
     void (*free)(void*);\
@@ -58,7 +70,7 @@ struct _mgn_pop_param_pointer {
     void (*set_iparams)(void*, mgn_pop_param);
 
 struct _mgn_i_ops {
-    mgn_pop_ops()
+    mgn_i_ops()
 };
 // TODO evaluate (goes in mop)
 // copy pops
@@ -67,5 +79,7 @@ struct mgn_iparam_container {
     size_t i;
     double val;
 };
+
+
 
 #endif //MOGEN_MGN_POP_PROTO_H

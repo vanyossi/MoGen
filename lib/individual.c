@@ -20,7 +20,7 @@
 // TODO make macro of mandatory ops
 struct pmgn_indv_ops {
     //mandatory
-    mgn_pop_ops()
+    mgn_i_ops()
     // interface for this Indtype
     size_t (*getXSize)(mgn_indv*);
     size_t (*getObjSize)(mgn_indv*);

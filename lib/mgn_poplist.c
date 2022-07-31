@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+void* pmgn_popl_get(void* pop_in, size_t index);
 
 mgn_popl* mgn_popl_alloc(void*(*indv_ops)(void*), void *params)
 {
@@ -18,6 +19,8 @@ mgn_popl* mgn_popl_alloc(void*(*indv_ops)(void*), void *params)
 
     mgnt_pop_alloc(alloc) = pop->ops->alloc;
     pop->I = alloc(0,indv_ops,params);
+
+    pop->get = pmgn_popl_get;
 
     return pop;
 }
@@ -67,7 +70,7 @@ void* mgn_popl_alloc_last(mgn_popl *pop)
     }
     pop->size++;
 
-    return last;
+    return new;
 }
 
 void* mgn_popl_get(mgn_popl *pop, size_t pos)
@@ -177,4 +180,10 @@ void mgn_popl_free(mgn_popl* pop)
     free(pop);
 
     return;
+}
+
+void* pmgn_popl_get(void* pop_in, size_t index)
+{
+    mgn_popl *popl = (mgn_popl*)pop_in;
+    return mgn_popl_get(popl,index);
 }
