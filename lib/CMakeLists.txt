@@ -9,6 +9,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/lib/operators
     ${CMAKE_SOURCE_DIR}/lib/math
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 set(mogen_mop_SOURCES
@@ -37,6 +38,10 @@ set_target_properties(mogenmop PROPERTIES
 
 install(TARGETS mogenmop ${INSTALL_TARGETS_DEFAULT_ARGS})
 
+if(GNUPLOT_FOUND)
+    configure_file(gnuplotbin.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/gnuplotbin.h)
+endif()
+
 set(MGN_LIB_SOURCES
     math/gsl_vector_additional.c
     operators/mgn_gen_operator.c
@@ -52,6 +57,7 @@ set(MGN_LIB_SOURCES
     population.c
 #    mgn_types.c
     mgn_mop.c
+    mgn_gnuplot.c
 #    mgn_pareto.c
 #    mgn_pop_init.c
 #    individual.c

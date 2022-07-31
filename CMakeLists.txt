@@ -50,10 +50,18 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 ## Find GSL
 find_package(GSL REQUIRED)
 find_package(BLAS)
+find_package(Gnuplot)
+
+if(GNUPLOT_FOUND)
+    if(APPLE)
+        string(REPLACE "gnuplot.app" "Gnuplot.app" GNUPLOT_EXECUTABLE ${GNUPLOT_EXECUTABLE} )
+        string(REPLACE "MacOS/gnuplot.sh" "Resources/bin/gnuplot-run.sh -p" GNUPLOT_EXECUTABLE ${GNUPLOT_EXECUTABLE} )
+    endif()
+    message("Gnuplot found in ${GNUPLOT_EXECUTABLE}")
+endif()
 
 if(APPLE)
     find_package(vecLib)
-
     include_directories(
         ${vecLib_INCLUDE_DIR}
     )

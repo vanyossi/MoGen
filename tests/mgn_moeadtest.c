@@ -10,15 +10,21 @@
 #define MGN_PBM_N 5
 #endif
 
+#include <string.h>
+
 #include "mgn_moead.h"
 #include "mgn_mop.h"
+#include "mgn_gnuplot.h"
 #include "mops/mgn_zdt.h"
 #include "mops/mgn_cec09.h"
 
 #include "individual.h"
+#include "population.h"
 #include "mgn_poplist.h"
 
 int main() {
+    mgn_plot_open();
+
     mgn_indv_param params = {30,2,0};
     mgn_indv_ops *iops = mgn_indv_ops_init();
     mgn_popl *EP = mgn_popl_alloc((void*)iops,&params);
@@ -80,13 +86,28 @@ int main() {
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    mgn_moa_solve(moead,300000);
+    int runs = 20;
+    int plot_every = 1;
+    mgn_plot_data pdat = {"", "", "f_1", "f_2"};
+    strcpy(pdat.title, "MOEAD");
+    for (int run = 0; run < runs; ++run) {
+        mgn_moa_solve(moead, 1);
+
+        if (run % plot_every == 0) {
+            asprintf(&pdat.filename, "moead_run-%d", run);
+            mgn_plot((mgn_pop_proto *) EP, &pdat);
+        }
+    }
+    printf("total exec: %zu\n", moead->tot_exec);
+    printf("gens: %d\n", runs);
 
 //    mgn_pop_prank_sort(EP);
+    mgn_pop *pfinal = mgn_pop_alloc(EP->size,(void*)iops,&params);
     mgn_popl_cursor_reset(EP);
     size_t i = 0;
     while(mgn_popl_current(EP) != 0) {
         mgn_indv *in = mgn_popl_next(EP);
+        mgn_indv_copy(mgn_pop_get(pfinal,i), in);
         double *in_x = mgn_indv_get_params(in).x->data;
         double *in_f = mgn_indv_get_params(in).f->data;
         printf("%zu %d %.6f %.6f %.6f %.6f %.6f %.6f\n", i, mgn_indv_get_params(in).rank
@@ -94,7 +115,8 @@ int main() {
                ,in_f[0], in_f[1]);
         i++;
     }
-//    mgn_popl_cursor_reset(EP);
+
+    mgn_popl_cursor_reset(EP);
 //    mgn_pop* epop_array = pop_alloc_pop(EP->size,EP);
 //    i = 0;
 //    while(mgn_popl_current(EP) != 0) {
@@ -149,5 +171,6 @@ int main() {
     mgn_popl_free(EP);
     mgn_indv_ops_free(iops);
 
+//    mgn_plot_close();
     return 0;
 }
