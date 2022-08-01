@@ -26,8 +26,8 @@ void mgn_sel_lambda_mu(mgn_pop *A, mgn_pop *B,size_t size)
 {
     mgn_pop *tmp_pop = mgn_pop_alloc(size,pop_get_iops(A),pop_get_iparamp(A));
     mgn_pop_copy(tmp_pop,A,0,0,size);
-    mgn_pop_copy(A,B,0,0,A->size - size);
-    mgn_pop_copy(A,tmp_pop,A->size - size,0,size);
+    mgn_pop_copy(A,B,0,0,A->size);
+    mgn_pop_copy(A,tmp_pop,A->size - (size),0,size);
 }
 
 /*

@@ -1,16 +1,22 @@
-//
-// Created by Iván Yossi on 10/05/22.
-//
+/*
+ *
+ *  SPDX-FileCopyrightText: 2022 Iván Yossi <ghevan@gmail.com>
+ *
+ *  SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
 
 #include <stdio.h>
 
 #include "mgn_de.h"
 
+#include "mgn_gnuplot.h"
 #include "population.h"
 #include "individual.h"
 
 #include "mgn_initializer.h"
 #include "mgn_sphere.h"
+#include "mgn_zdt.h"
 
 int main() {
     mgn_indv_param param = {4, 1, 0};
@@ -24,6 +30,7 @@ int main() {
     }
 
     // TODO simplify on lib
+
     mgnMop *mop = mgn_mop_alloc();
     mop->eval_array = mgn_cast_eval(mgn_mop_sphere);
     mgnLimit *moplim = mgn_limit_alloc(param.realSize);
@@ -32,6 +39,7 @@ int main() {
         moplim->max[i] = 2;
     }
     mop->params = moplim;
+
     mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
     ga_probs.mut_llim = calloc(param.realSize, sizeof(ga_probs.mut_llim));
     ga_probs.mut_ulim = calloc(param.realSize, sizeof(ga_probs.mut_ulim));
@@ -45,7 +53,7 @@ int main() {
     de_param* de_p = mgn_de_alloc(Np,iops,&param);
     mgn_init_LHC_init(Np,param.realSize,rlim);
     mgnMoa *de = mgn_de_init(de_p, mgn_init_lhc, iops);
-    mgn_de_setmop(de, mop);
+    mgn_de_setmop(de, mop, mgn_mop_sphere_min);
     mgn_de_eval(de);
 
 
@@ -56,7 +64,28 @@ int main() {
                );
     }
 
-    mgn_moa_solve(de,50);
+
+    // mgn-solve
+    mgn_plot_open();
+    int runs = 30;
+    int plot_every = 1;
+    mgn_plot_data pdat = {"", "", "f_1", "f_2",
+                          -0.1f,1.1f,-0.1f,1.1f};
+    strcpy(pdat.title, "DE");
+
+    for (int run = 0; run < runs; ++run) {
+        mgn_moa_solve(de, 1); // TODO recieve solver_plot_function
+
+        if (run % plot_every == 0) {
+            asprintf(&pdat.filename, "DE_run-%d", run);
+            mgn_plot((mgn_pop_proto *) de_p->pop, &pdat);
+        }
+    }
+    printf("total exec: %zu\n", de->tot_exec);
+    printf("gens: %d\n", runs);
+    mgn_plot_close();
+
+    //
 
     for (size_t i = 0; i < de_p->pop->size; ++i) {
        mgn_indv *in = mgn_indv_get(de_p->pop,i);

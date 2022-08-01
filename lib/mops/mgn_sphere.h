@@ -31,17 +31,18 @@ void mgn_mop_sphere(double *x, double* f, double* g, void* param)
     }
 }
 
-int mgn_mop_sphere_min(double *x, double *v, unsigned int size)
+int mgn_mop_sphere_min(double *x, double *v, size_t size)
 {
     double sx = 0;
     double sv = 0;
 
     // min is 0, use abs to measure min distance to origin
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         sx += x[i];
         sv += v[i];
     }
-    return (sx <= sv)? -1 : 1;
+//    printf("min %g %g:: ", fabs(sx),fabs(sv));
+    return (fabs(sx) <= fabs(sv))? -1 : 1;
 }
 
 #endif //MOGEN_MGN_SPHERE_H

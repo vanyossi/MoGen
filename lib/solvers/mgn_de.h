@@ -1,6 +1,10 @@
-//
-// Created by Iván Yossi on 10/05/22.
-//
+/*
+ *
+ *  SPDX-FileCopyrightText: 2022 Iván Yossi <ghevan@gmail.com>
+ *
+ *  SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
 
 #ifndef MOGEN_MGN_DE_H
 #define MOGEN_MGN_DE_H
@@ -13,6 +17,7 @@
 #include <gsl/gsl_randist.h>
 
 #include "population.h"
+#include "individual.h"
 #include "mgn_mop.h"
 
 #include "mgn_random.h"
@@ -34,6 +39,8 @@
 
 typedef struct mgn_de_param de_param;
 
+#define mgn_de_ef(ef) int (*ef)(double*, double*, size_t)
+
 // tru refactor to make de_param private
 struct mgn_de_param {
     size_t size;
@@ -44,6 +51,7 @@ struct mgn_de_param {
     mgn_pop* pop;
     mgn_pop* trial;
     mgnMop *mop;
+    mgn_de_ef(ef);
 };
 
 typedef struct mgnp_de_cross_param {
@@ -51,13 +59,13 @@ typedef struct mgnp_de_cross_param {
     gsl_vector *r0;
     gsl_vector *r1;
     gsl_vector *r2;
-    gsl_vector *tcur;
+    gsl_vector *tu;
 } mgnp_crossparam;
 
 void mgn_de_run(mgnMoa* de);
 void mgnp_de_mut(mgnp_crossparam *param, size_t pos);
 void mgn_de_crossover(mgn_pop *pop, size_t *rsel, size_t jrand, de_param *dparam);
-void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgnMop *mop);
+void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgn_de_ef(ef));
 
 
 /*
@@ -75,7 +83,7 @@ de_param* mgn_de_alloc(size_t Np, void* iops, void* iparams)
     params->popeval = false;
     params->trial = mgn_pop_alloc(Np,iops,iparams);
     params->D = params->pop->ops->get_iparams(params->pop->I).x->size;
-    params->F = 1.15;
+    params->F = 1.10;
 
     params->mopset = false;
 
@@ -101,10 +109,11 @@ de_param* mgn_de_getfeatures(mgnMoa* moa)
     return (de_param*)moa->features;
 }
 
-void mgn_de_setmop(mgnMoa *de, mgnMop *mop)
+void mgn_de_setmop(mgnMoa *de, mgnMop *mop, mgn_de_ef(ef))
 {
     de_param *prm = mgn_de_getfeatures(de);
     prm->mop = mop;
+    prm->ef = ef;
     prm->mopset = true;
 }
 
@@ -146,27 +155,34 @@ void mgn_de_run(mgnMoa* de)
     gsl_vector_ulong *rindex = gsl_vector_ulong_alloc(m_p->size - 1);
 
     for (size_t i = 0; i < m_p->size; ++i) {
+        // select 3 random position and set last to current one.
         mgnp_de_rndseq_except(rindex,i);
         gsl_vector_ulong_view rsel = gsl_vector_ulong_subvector(rindex,0,4);
         gsl_vector_ulong_set(&rsel.vector,3,i);
 
+        // seleccionamos param x_i,j aleatorio
         unsigned long jrand = rnd_getUniform_int((int)m_p->D);
         mgn_de_crossover(m_p->pop, rsel.vector.data, jrand, m_p);
         mgn_mop_eval_pop_index(m_p->mop, m_p->pop, m_p->mop->params,i,1);
     }
-//    mgn_de_selection(m_p->pop, m_p->trial, m_p->mop);
+
+    // original Selection
     mgn_mop_eval_pop(m_p->mop, m_p->trial, m_p->mop->params);
+    mgn_de_selection(m_p->pop,m_p->trial,m_p->ef);
+//    mgn_pop_copy(m_p->trial, m_p->pop, 0, 0, m_p->trial->size);
 
     // A sel
 //    mgn_sel_sub(m_p->pop, m_p->trial);
 
 // B sel
+//    mgn_pop_prank_sort(m_p->pop);
+//    mgn_pop_prank_sort(m_p->trial);
+//    mgn_sel_lambda_mu(m_p->pop, m_p->trial,5);
 //    pop_sort_1d(m_p->pop);
 //    pop_sort_1d(m_p->trial);
-//    mgn_sel_lambda_mu(m_p->pop, m_p->trial,5);
 
 // C sel
-    mgn_sel_lambda_mu_plus(m_p->pop, m_p->trial, pop_sort_1d);
+    mgn_sel_lambda_mu_plus(m_p->pop, m_p->trial, mgn_pop_prank_sort);
 
 //    for (size_t i = 0; i < m_p->trial->size; ++i) {
 //        gsl_vector *f = pop_get_iparam(m_p->trial,i).f;
@@ -193,9 +209,9 @@ void mgnp_de_mut(mgnp_crossparam *param, size_t pos)
     double *r0 = param->r0->data;
     double *r1 = param->r1->data;
     double *r2 = param->r2->data;
-    double *tcur = param->tcur->data;
+    double *cur = param->tu->data;
 
-    tcur[pos] = r0[pos] + param->factor * (r1[pos] - r2[pos]);
+    cur[pos] = r0[pos] + (param->factor * (r1[pos] - r2[pos]));
 }
 /*
  * Crossover
@@ -210,22 +226,23 @@ void mgnp_de_mut(mgnp_crossparam *param, size_t pos)
  */
 void mgn_de_crossover(mgn_pop *pop, size_t *rsel, size_t jrand, de_param *dparam)
 {
-//    printf("cur %zu, %zu, %zu, %zu\n", rsel[0], rsel[1], rsel[2], rsel[3]);
+//    printf("tu %zu, %zu, %zu, %zu\n", rsel[0], rsel[1], rsel[2], rsel[3]);
     gsl_vector *r0 = pop->ops->get_iparams(mgn_pop_get(pop,rsel[0])).x;
     gsl_vector *r1 = pop->ops->get_iparams(mgn_pop_get(pop,rsel[1])).x;
     gsl_vector *r2 = pop->ops->get_iparams(mgn_pop_get(pop,rsel[2])).x;
-    gsl_vector *cur = pop->ops->get_iparams(mgn_pop_get(pop,rsel[3])).x;
+    gsl_vector *xi = pop->ops->get_iparams(mgn_pop_get(pop,rsel[3])).x;
 
-    gsl_vector *tcur = dparam->trial->ops->get_iparams(mgn_pop_get(dparam->trial,rsel[3])).x;
+    gsl_vector *tu = dparam->trial->ops->get_iparams(mgn_pop_get(dparam->trial,rsel[3])).x;
+    // TODO set crossrate as paramter
     double Cr = 0.9;
-    struct mgnp_de_cross_param fparam = {dparam->F,r0,r1,r2,tcur};
+    struct mgnp_de_cross_param fparam = {dparam->F, r0, r1, r2, tu};
 
-//    gsl_vector_map(tcur, mgnp_de_mut, &fparam);
-    for (size_t j = 0; j < tcur->size; ++j) {
+//    gsl_vector_map(tu, mgnp_de_mut, &fparam);
+    for (size_t j = 0; j < tu->size; ++j) {
         if (rnd_getUniform() <= Cr || j == jrand) {
             mgnp_de_mut(&fparam, j);
         } else {
-            gsl_vector_set(tcur,j,gsl_vector_get(cur,j));
+            gsl_vector_set(tu,j,gsl_vector_get(xi,j));
         }
     }
 }
@@ -237,13 +254,14 @@ void mgn_de_crossover(mgn_pop *pop, size_t *rsel, size_t jrand, de_param *dparam
  * x = -|
  *      -- x    otherwise
  */
-void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgnMop *mop)
+void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgn_de_ef(ef))
 {
-    mgn_mop_eval_pop(mop, trial, mop->params);
+//    mgn_mop_eval_pop(mop, trial, mop->params);
     for (size_t i = 0; i < pop->size; ++i) {
         gsl_vector *x = pop_get_iparam(pop,i).f;
         gsl_vector *v = pop_get_iparam(trial,i).f;
-        if (mgn_mop_sphere_min(v->data,x->data,v->size) == -1){
+        if (ef(x->data,v->data,v->size) == 1){
+//            printf("true x < v\n");
             mgn_pop_copy(pop,trial,i,i,1);
         }
     }
