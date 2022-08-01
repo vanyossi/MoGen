@@ -15,6 +15,10 @@ struct pmgn_plot_struct {
     char title[32];
     char xlabel[16];
     char ylabel[16];
+    float lxrange;
+    float uxrange;
+    float lyrange;
+    float uyrange;
 };
 
 void mgn_plot_open();

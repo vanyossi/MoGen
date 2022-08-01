@@ -24,6 +24,8 @@ void mgn_plot(mgn_pop_proto *popp, mgn_plot_data *gdata)
     fprintf(gnuplot, "\nreset\n");
     fprintf(gnuplot, "set terminal png\n");
     fprintf(gnuplot, "set output \"%s.png\"\n", gdata->filename);
+    fprintf(gnuplot, "set xrange[%f:%f]\n", gdata->lxrange, gdata->uxrange);
+    fprintf(gnuplot, "set yrange[%f:%f]\n", gdata->lyrange, gdata->uyrange);
     fprintf(gnuplot, "plot '-' title \"non dominated\"\n");
 
     for (size_t i = 0; i < pop->size; i++) {
