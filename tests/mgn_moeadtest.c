@@ -86,15 +86,16 @@ int main() {
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    int runs = 20;
-    int plot_every = 1;
-    mgn_plot_data pdat = {"", "", "f_1", "f_2"};
+    int runs = 300;
+    int plot_every = 30;
+    mgn_plot_data pdat = {"", "", "f_1", "f_2",
+                          -0.1f,1.1f,-0.1f,1.1f};
     strcpy(pdat.title, "MOEAD");
     for (int run = 0; run < runs; ++run) {
         mgn_moa_solve(moead, 1);
 
         if (run % plot_every == 0) {
-            asprintf(&pdat.filename, "moead_run-%d", run);
+            asprintf(&pdat.filename, "MOEAD_run-%d", run);
             mgn_plot((mgn_pop_proto *) EP, &pdat);
         }
     }
@@ -171,6 +172,6 @@ int main() {
     mgn_popl_free(EP);
     mgn_indv_ops_free(iops);
 
-//    mgn_plot_close();
+    mgn_plot_close();
     return 0;
 }
