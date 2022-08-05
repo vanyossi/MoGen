@@ -13,13 +13,6 @@ include_directories(
 )
 
 set(mogen_mop_SOURCES
-    mogen_mop.c
-    mgf_population.c
-    mgf_individual.c
-    multi_array.c
-    rand.c
-    mgf_moa.c
-    mop_report.c
     time_tools.c)
 
 add_library(mogenmop SHARED ${mogen_mop_SOURCES})

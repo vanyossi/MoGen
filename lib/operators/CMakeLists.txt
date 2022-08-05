@@ -8,19 +8,10 @@ include_directories(
 )
 
 set(MOGEN_OP_SOURCES
-    crossover.c
-    mgf_rank.c
-    mgf_rank.h
-    mgf_operators.c
-    mgf_operators.h
-    mgf_mutation.c
-    mgf_mutation.h
-    mgf_dominance.c
-    mgn_vector_distance.h
+    mgn_vector_distance.c
     )
 
 add_library(mogenops SHARED ${MOGEN_OP_SOURCES})
-target_link_libraries(mogenops mogenmop)
 
 set_target_properties(mogenops PROPERTIES
     VERSION ${MOGEN_VERSION_MAJOR} SOVERSION ${MOGEN_VERSION_MAJOR}

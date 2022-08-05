@@ -66,4 +66,58 @@ int* gsl_matrix_pareto_rank(gsl_matrix *M)
     return dominate;
 }
 
+
+//
+///**
+// * To verify dominance between two solutions
+// * Returns
+// *  1: if x weak dominates B
+// *  0: otherwise
+// *  */
+//int weak_dominance(double *x, double *y, int dim)
+//{
+//    int flag = 1;
+//    for (int i = 0; i < dim; ++i) {
+//        if (x[i] > y[i]) {
+//            flag = 0;
+//        }
+//    }
+//    return flag;
+//}
+//
+///**
+// * To verify dominance between two solutions
+// * @param A:    vector 'A'
+// * @param B:    vector'B'
+// * @param dim:  dimension of vectors
+// * @return:
+// *   1: if A dominates B
+// * 	-1: if B dominates A
+// *   0: if they are non-dominated
+// *   2:	if A = B
+// */
+//int dominance(double *A, double *B, int dim)
+//{
+//    int j, countA = 0, countB = 0;
+//
+//    for (j = 0; j < dim; j++){
+//        if (A[j] < B[j]) {
+//            countA++;
+//
+//        } else if (B[j] < A[j]) {
+//            countB++;
+//        }
+//    }
+//    if (countA > 0 && countB == 0){
+//        return 1;
+//    }
+//    if (countB > 0 && countA == 0){
+//        return -1;
+//    }
+//    if (countA == 0 && countB == 0){
+//        return 2;
+//    }
+//    return 0;
+//}
+
 #endif //MOGEN_MGN_PARETO_H

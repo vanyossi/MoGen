@@ -25,7 +25,6 @@
 #include <stdlib.h>
 
 #include "mgf_global_types.h"
-#include "moea_math.h"
 
 /**
  * Set the parameters for the Simplex-Lattice Design in a layer configuration approach

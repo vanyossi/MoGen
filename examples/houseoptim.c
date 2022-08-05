@@ -18,13 +18,13 @@
 
 #include <stdio.h>
 
-#include "mogen_mop.h"
-#include "solvers/mgf_moead.h"
-#include "solvers/mgf_nsga2.h"
-#include "operators/mgf_operators.h"
-#include "mops/zdt.h"
+//#include "mogen_mop.h"
+//#include "solvers/mgf_moead.h"
+//#include "solvers/mgf_nsga2.h"
+//#include "operators/mgf_operators.h"
+//#include "mops/zdt.h"
 
-#include "rand.h"
+//#include "rand.h"
 
 
 Mop *mop_houseoptim();

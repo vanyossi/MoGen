@@ -5,11 +5,8 @@ include_directories(
 )
 
 set(moead_math_SOURCES
-    array.c
     gsl_extension.c
-    linalg.c
-    moea_math.c
-)
+    )
 
 add_library(moea_math SHARED ${moead_math_SOURCES})
 target_link_libraries(moea_math ${GSL_LIBRARY} m)
