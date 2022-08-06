@@ -1,0 +1,140 @@
+/*
+ *
+ *  SPDX-FileCopyrightText: 2022$ Iván Yossi <ghevan@gmail.com>
+ *
+ *  SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+#include "gsl_kmeans_new.h"
+
+#include <stdlib.h>
+#include <stdbool.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_permutation.h>
+#include <gsl/gsl_randist.h>
+
+#include "gsl_vector_additional.h"
+#include "mgn_random.h"
+
+gsl_matrix*
+gsl_kmeans_new_centers(gsl_matrix *X, size_t k);
+
+void
+gsl_kmeans_update_index(gsl_matrix *X, gsl_vector_int *idx, gsl_matrix *C);
+
+void
+gsl_kmeans_update_c(gsl_matrix *X, gsl_matrix *C, gsl_vector_int *idx);
+
+bool
+gsl_kmeans_index_changed(gsl_vector_int *a, const gsl_vector_int *b);
+
+kmeans_data* gsl_kmeans(gsl_matrix *X, size_t k, size_t maxiter)
+{
+    kmeans_data *km = calloc(1, sizeof(*km));
+    km->index = gsl_vector_int_alloc(X->size1);
+    // initialize random centers from pop
+    km->centers = gsl_kmeans_new_centers(X,k);
+
+    // iterate until centroids are found.
+    gsl_vector_int *prev_idx = gsl_vector_int_calloc(X->size1);
+    size_t iter = 0;
+    do {
+        gsl_kmeans_update_index(X,km->index,km->centers);
+        gsl_kmeans_update_c(X,km->centers,km->index);
+    } while (++iter < maxiter || gsl_kmeans_index_changed(prev_idx,km->index));
+
+//    gsl_matrix_fprintf(stdout,km->centers,"::%.6f ");
+//    gsl_vector_int_fprintf(stdout,km->index,"%d ");
+
+    return km;
+}
+
+void gsl_kmeans_free(kmeans_data *kmeans)
+{
+    gsl_vector_int_free(kmeans->index);
+    gsl_matrix_free(kmeans->centers);
+    free(kmeans);
+}
+
+gsl_matrix*
+gsl_kmeans_new_centers(gsl_matrix *X, size_t k)
+{
+    gsl_matrix *C = gsl_matrix_alloc(k,X->size2);
+
+    // index permutation
+    gsl_permutation *pindex = gsl_permutation_calloc(X->size1);
+    gsl_ran_shuffle(rnd_get_generator(), pindex->data, X->size1, sizeof(size_t));
+
+    gsl_vector *vec_tmp = gsl_vector_alloc(X->size2);
+    for (size_t i = 0; i < k; ++i) {
+        gsl_matrix_get_row(vec_tmp, X, gsl_permutation_get(pindex, i));
+        gsl_matrix_set_row(C, i, vec_tmp);
+    }
+    gsl_vector_free(vec_tmp);
+
+
+    gsl_permutation_free(pindex);
+    return C;
+}
+
+/*
+ * idx index to which a sample belongs
+ * C centroids
+ * X samples
+ */
+void
+gsl_kmeans_update_index(gsl_matrix *X, gsl_vector_int *idx, gsl_matrix *C)
+{
+    gsl_matrix *base = gsl_matrix_alloc(C->size1, X->size2);
+    gsl_vector *dist = gsl_vector_alloc(C->size1);
+
+    for (size_t s = 0; s < idx->size; ++s) {
+        gsl_vector_view cs = gsl_matrix_row(X,s);
+        gsl_vector_repeat(&cs.vector, C->size1,base);
+        // || X_i - c_i ||^2
+        gsl_matrix_sub(base, C);
+        gsl_matrix_mul_elements(base,base);
+
+        for (size_t row = 0; row < base->size1; ++row) {
+            gsl_vector_view crow = gsl_matrix_row(base,row);
+            gsl_vector_set(dist,row,gsl_vector_pnorm(&crow.vector,2.0));
+        }
+        gsl_vector_int_set(idx,s, gsl_vector_min_index(dist));
+    }
+}
+
+void
+gsl_kmeans_update_c(gsl_matrix *X, gsl_matrix *C, gsl_vector_int *idx)
+{
+    gsl_matrix *mean_M = gsl_matrix_calloc(C->size1, C->size2);
+    gsl_vector_int *mb = gsl_vector_int_calloc(C->size1);
+
+    gsl_vector *cur_x = gsl_vector_alloc(C->size2);
+    for (size_t i_m = 0; i_m < idx->size; ++i_m) {
+        int i = gsl_vector_int_get(idx,i_m);
+
+        gsl_matrix_get_row(cur_x, X,i_m);
+        gsl_vector_view crow = gsl_matrix_row(mean_M, i);
+        gsl_vector_add(&crow.vector,cur_x);
+        gsl_vector_int_set(mb,i,gsl_vector_int_get(mb,i) + 1);
+    }
+    gsl_vector_free(cur_x);
+
+    for (size_t cen = 0; cen < mean_M->size1; ++cen) {
+        gsl_vector_view row = gsl_matrix_row(mean_M,cen);
+        gsl_vector_scale(&row.vector, 1.0 / gsl_vector_int_get(mb,cen));
+    }
+
+    gsl_matrix_memcpy(C,mean_M);
+    gsl_matrix_free(mean_M);
+    gsl_vector_int_free(mb);
+}
+
+bool
+gsl_kmeans_index_changed(gsl_vector_int *a, const gsl_vector_int *b)
+{
+    gsl_vector_int_sub(a,b);
+    bool changed = (gsl_vector_int_sum(a) != 0);
+    gsl_vector_int_memcpy(a,b);
+    return changed;
+}
