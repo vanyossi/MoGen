@@ -42,6 +42,8 @@ set(MGN_LIB_SOURCES
 #    solvers/decomposition/mgn_scalarization.c
 #    solvers/decomposition/mgn_weights.c
 #    solvers/mgn_moead.c
+    mgn_io.c
+    mgn_io_datalist.c
     mgn_moa.c
     mgn_initializer.c
     mgn_random.c
