@@ -17,8 +17,13 @@ void rnd_initialize()
     gsl_rng_env_setup();
     randType = gsl_rng_default;
     randGenerator = gsl_rng_alloc(randType);
-    // gsl_rng_set(r, seed)
+
     return;
+}
+
+void rnd_set_seed(unsigned long seed)
+{
+    gsl_rng_set(randGenerator, seed);
 }
 
 unsigned long rnd_getUniform_int(int max)

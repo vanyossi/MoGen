@@ -6,6 +6,8 @@
 
 void rnd_initialize();
 
+void rnd_set_seed(unsigned long seed);
+
 unsigned long rnd_getUniform_int(int max);
 
 double rnd_getUniform();
