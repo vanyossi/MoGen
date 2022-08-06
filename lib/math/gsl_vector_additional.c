@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_vector.h>
+#include <gsl/gsl_blas.h>
 
 #include "mgn_types.h"
 
@@ -76,4 +76,23 @@ void gsl_vector_set_seq(gsl_vector *vec)
         gsl_vector_set(vec,i,(double)i);
     }
     return;
+}
+
+void
+gsl_vector_repeat(gsl_vector *v, size_t rep, gsl_matrix *C)
+{
+//    gsl_matrix *result = gsl_matrix_calloc(rep,v->size);
+    gsl_matrix *ones = gsl_matrix_calloc(rep,1);
+    gsl_matrix_add_constant(ones,1);
+
+    gsl_matrix *vtmp = gsl_matrix_alloc(1, v->size);
+    gsl_matrix_set_row(vtmp,0,v);
+
+    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans,
+                   1.0, ones, vtmp, 0.0, C);
+
+    gsl_matrix_free(ones);
+    gsl_matrix_free(vtmp);
+
+//    return result;
 }
