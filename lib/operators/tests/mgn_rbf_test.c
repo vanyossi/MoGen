@@ -6,6 +6,9 @@
 
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_blas.h>
+
+#include "gsl_vector_additional.h"
 
 #include "mgn_io.h"
 
@@ -22,6 +25,8 @@ int main(int argc, char const *argv[]) {
     // generate Train data
     gsl_matrix *trainData = inData_toGSLMatrix(inGroup_getListAt(&inputData,0));
     gsl_matrix_view train_x = gsl_matrix_submatrix(trainData,0,3,trainData->size1,trainData->size2-3);
+    gsl_matrix_view train_y = gsl_matrix_submatrix(trainData,0,0,trainData->size1,3);
+
 
     // print what is inside CORRECT
 //    gsl_vector *ar = gsl_vector_alloc(train_x.matrix.size2);
@@ -31,13 +36,44 @@ int main(int argc, char const *argv[]) {
 //    }
 //    printf("===============================\n");
 
-    // define cluster sizes
-    size_t cluster_size = 10;
-    kmeans_data* km = gsl_kmeans(&train_x.matrix,cluster_size, 1000);
+    // need to find weights
+    // define clusters
+    size_t cluster_size = 50;
+    kmeans_data *km = gsl_kmeans(&train_x.matrix,cluster_size, 1000);
+    kmeans_data_extra *kme = gsl_kmeans_calc(km);
+
+//    gsl_matrix *m_variance = mgn_kmeans_cluster_var(km,kme,&train_x.matrix,true);
+//    gsl_matrix_printf(m_variance,stdout);
+
+    gsl_vector *dist_sigma = mgn_kmeans_cluster_var_dist(km,kme,&train_x.matrix,true);
+    gsl_matrix *mphi = mgn_rbf_create_phi(&train_x.matrix,km,dist_sigma,rbf_kernel_gauss);
+//    gsl_matrix_printf(mphi,stdout);
+
+    gsl_matrix *W = mgn_rbf_new_weight(mphi,&train_y.matrix);
+
+    // prefidct f from W.
+    gsl_matrix *y_p = gsl_matrix_alloc(train_y.matrix.size1, train_y.matrix.size2);
+    gsl_blas_dgemm(CblasNoTrans,CblasNoTrans,1,mphi,W,0,y_p);
+
+    FILE *data = fopen("y_prediction.txt","w");
+    gsl_matrix_printf(y_p,data);
+    fclose(data);
+//    gsl_vector_fprintf(stdout, dist_sigma,"%0.8f");
+
+    double mse = 0;
+    double mse_step = 0;
+    for (size_t i = 0; i < train_y.matrix.size2; ++i) {
+        gsl_vector_view v_row = gsl_matrix_column(&train_y.matrix,i);
+        gsl_vector_view y_rowyp = gsl_matrix_column(y_p,i);
+        mse_step = mgn_math_mse(&v_row.vector,&y_rowyp.vector);
+        mse += mse_step;
+    }
+    mse /= (double) train_y.matrix.size2;
+
+    printf("MSE: %.6f\n", mse);
 
     // TODO free indata
     gsl_matrix_free(trainData);
-
     gsl_kmeans_free(km);
     return 0;
 }

@@ -5,30 +5,34 @@
 #ifndef MOGEN_MGN_RBF_H
 #define MOGEN_MGN_RBF_H
 
-#include <math.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 
 #include "gsl_kmeans_new.h"
-#include "gsl_vector_additional.h"
 
-// TODO move to a gsl_map header helper macro
-double pgsl_vector_map_exp(double val, void* param)
-{
-    return exp(val);
-}
 // Kernels
-// d <- distance || x - y ||
-void rbf_kernel_gauss(gsl_vector *d, gsl_vector *sigma)
-{
-    // r^2 / sigma
-    gsl_vector_mul(d, d);
-    gsl_vector_div(d,sigma);
-    gsl_vector_map(d,pgsl_vector_map_exp,NULL);
-}
+// r <- distance || x - c ||
+void rbf_kernel_gauss(gsl_vector *r, double sigma);
 
-void mgn_rbf_train(gsl_matrix *P, gsl_vector Y);
+void rbf_kernel_mqua(gsl_vector *r, double sigma);
+
+void rbf_kernel_imqua(gsl_vector *r, double sigma);
 
 
+gsl_matrix*
+mgn_rbf_create_phi(gsl_matrix *X
+                   , kmeans_data *km
+                   , gsl_vector *sigma
+                   , void (*rbf)(gsl_vector *r, double s)
+                   );
+
+
+gsl_matrix *
+mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y);
+
+
+// helpers should probably go in another file
+// caluclate mean square error
+double mgn_math_mse(gsl_vector *y, gsl_vector *yp);
 
 #endif //MOGEN_MGN_RBF_H

@@ -12,6 +12,8 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_permutation.h>
 #include <gsl/gsl_randist.h>
+#include <gsl/gsl_statistics.h>
+#include <gsl/gsl_blas.h>
 
 #include "gsl_vector_additional.h"
 #include "mgn_random.h"
@@ -32,6 +34,7 @@ kmeans_data* gsl_kmeans(gsl_matrix *X, size_t k, size_t maxiter)
 {
     kmeans_data *km = calloc(1, sizeof(*km));
     km->index = gsl_vector_int_alloc(X->size1);
+    km->k = k;
     // initialize random centers from pop
     km->centers = gsl_kmeans_new_centers(X,k);
 
@@ -42,7 +45,7 @@ kmeans_data* gsl_kmeans(gsl_matrix *X, size_t k, size_t maxiter)
         gsl_kmeans_update_index(X,km->index,km->centers);
         gsl_kmeans_update_c(X,km->centers,km->index);
     } while (++iter < maxiter || gsl_kmeans_index_changed(prev_idx,km->index));
-
+    km->iter = iter;
 //    gsl_matrix_fprintf(stdout,km->centers,"::%.6f ");
 //    gsl_vector_int_fprintf(stdout,km->index,"%d ");
 
@@ -99,7 +102,7 @@ gsl_kmeans_update_index(gsl_matrix *X, gsl_vector_int *idx, gsl_matrix *C)
             gsl_vector_view crow = gsl_matrix_row(base,row);
             gsl_vector_set(dist,row,gsl_vector_pnorm(&crow.vector,2.0));
         }
-        gsl_vector_int_set(idx,s, gsl_vector_min_index(dist));
+        gsl_vector_int_set(idx,s, (int) gsl_vector_min_index(dist));
     }
 }
 
@@ -137,4 +140,129 @@ gsl_kmeans_index_changed(gsl_vector_int *a, const gsl_vector_int *b)
     bool changed = (gsl_vector_int_sum(a) != 0);
     gsl_vector_int_memcpy(a,b);
     return changed;
+}
+
+kmeans_data_extra*
+gsl_kmeans_data_extra_alloc(size_t cluster_size)
+{
+    kmeans_data_extra *data = calloc(1,sizeof(*data));
+    data->size = cluster_size;
+    data->mpos = calloc(cluster_size, sizeof(*data->mpos));
+
+//    for (size_t i = 0; i < data->size; ++i) {
+//        data->mpos[i].size = 0;
+//    }
+
+    return data;
+}
+
+void
+gsl_kmeans_data_extra_free(kmeans_data_extra *data)
+{
+    for (size_t i = 0; i < data->size; ++i) {
+        free(data->mpos[i].pos);
+    }
+    free(data->mpos);
+    free(data);
+}
+
+kmeans_data_extra*
+gsl_kmeans_calc(kmeans_data *km)
+{
+    kmeans_data_extra *kdata = gsl_kmeans_data_extra_alloc(km->centers->size1);
+
+    // TODO better use a list
+    gsl_matrix_uint *m_indexes = gsl_matrix_uint_alloc(km->k, km->index->size);
+    size_t c_cluster;
+    size_t *size;
+    for (size_t i = 0; i < km->index->size; ++i) {
+        c_cluster = gsl_vector_int_get(km->index,i);
+        size = &kdata->mpos[c_cluster].size;
+        gsl_matrix_uint_set(m_indexes,c_cluster,*size,i);
+//        printf("c %zu size %zu %zu\n", c_cluster, *size, kdata->mpos[c_cluster].size);
+        (*size)++;
+    }
+
+//    gsl_vector_uint *v_index;
+    for (size_t i = 0; i < m_indexes->size1; ++i) {
+        kdata->mpos[i].pos = calloc(kdata->mpos[i].size, sizeof(unsigned int));
+        gsl_vector_uint_view v_index = gsl_matrix_uint_row(m_indexes,i);
+        for (size_t j = 0; j < kdata->mpos[i].size; ++j) {
+            kdata->mpos[i].pos[j] = v_index.vector.data[j];
+        }
+    }
+    gsl_matrix_uint_free(m_indexes);
+    return kdata;
+}
+
+// returns variance
+// for sd square the results
+gsl_matrix *
+mgn_kmeans_cluster_var(kmeans_data *km, kmeans_data_extra *kme, gsl_matrix *X, bool get_sd)
+{
+    gsl_matrix *v_sigma = gsl_matrix_alloc(kme->size, X->size2);
+
+    // for each cluster, find all samples from it and calc sd
+    gsl_vector *v_sum = gsl_vector_calloc(X->size2);
+    gsl_vector *s_row = gsl_vector_calloc(X->size2);
+    gsl_vector_view centroid;
+    for (size_t cluster = 0; cluster < kme->size; ++cluster) {
+        gsl_vector_set_zero(v_sum);
+        centroid = gsl_matrix_row(km->centers,cluster);
+        for (size_t sample = 0; sample < kme->mpos[cluster].size; ++sample) {
+            gsl_matrix_get_row(s_row,X,kme->mpos[cluster].pos[sample]);
+            // SD
+            gsl_vector_sub(s_row,&centroid.vector);
+            gsl_vector_mul(s_row,s_row);
+            gsl_vector_add(v_sum,s_row);
+        }
+        gsl_vector_scale(v_sum, 1.0 / (kme->mpos[cluster].size));
+        if (get_sd) gsl_vector_map(v_sum,map_sqrt,NULL);
+        gsl_matrix_set_row(v_sigma,cluster,v_sum);
+    }
+    gsl_vector_free(v_sum);
+    gsl_vector_free(s_row);
+
+    return v_sigma;
+//    double gsl_stats_sd(const double data[], size_t stride, size_t n)
+}
+
+gsl_vector *
+mgn_kmeans_cluster_var_dist(kmeans_data *km, kmeans_data_extra *kme
+                       , gsl_matrix *X, bool get_sd)
+{
+    gsl_vector *v_sigma = gsl_vector_alloc(kme->size);
+
+    // for each cluster, find all samples from it and calc sd
+    double sum, norm;
+    gsl_vector *s_row = gsl_vector_calloc(X->size2);
+    gsl_vector_view centroid;
+    for (size_t cluster = 0; cluster < kme->size; ++cluster) {
+        sum = 0;
+        centroid = gsl_matrix_row(km->centers,cluster);
+        for (size_t sample = 0; sample < kme->mpos[cluster].size; ++sample) {
+            gsl_matrix_get_row(s_row,X,kme->mpos[cluster].pos[sample]);
+            // SD
+//            double cnorm = gsl_blas_dasum(&centroid.vector);
+            gsl_vector_sub(s_row,&centroid.vector);
+
+//            norm = gsl_blas_dnrm2(s_row);
+            norm = gsl_blas_dasum(s_row); // best a
+
+//            sum += pow(norm,2.0);
+            sum = sum + norm; // best a
+
+//            sum += gsl_blas_dnrm2(s_row);
+//            printf("%.3f ", sum);
+        }
+//        printf("\n");
+        sum /= (double)kme->mpos[cluster].size;
+        if (get_sd) {
+            sum = sqrt(sum);
+        }
+        gsl_vector_set(v_sigma,cluster,sum);
+    }
+    gsl_vector_free(s_row);
+
+    return v_sigma;
 }

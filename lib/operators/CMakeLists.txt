@@ -9,6 +9,8 @@ include_directories(
 
 set(MOGEN_OP_SOURCES
     mgn_vector_distance.c
+    gsl_kmeans_new.c
+    mgn_rbf.c
     )
 
 add_library(mogenops STATIC ${MOGEN_OP_SOURCES})

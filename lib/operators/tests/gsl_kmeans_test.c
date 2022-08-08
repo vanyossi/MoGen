@@ -8,23 +8,10 @@
 #include "gsl_kmeans_new.h"
 #include "mgn_random.h"
 
+#include "gsl_vector_additional.h"
+
 #include <string.h>
 
-void gsl_matrix_printf(gsl_matrix *M, FILE *stream)
-{
-    const char *format = "%.6f";
-
-    for (int c = 0; c < M->size1; ++c) {
-        gsl_vector_view crow = gsl_matrix_row(M, c);
-        for (size_t val = 0; val < crow.vector.size; ++val) {
-            fprintf(stream,format, gsl_vector_get(&crow.vector, val));
-            if(val != crow.vector.size -1) {
-                fprintf(stream," ");
-            }
-        }
-        fprintf(stream, "\n");
-    }
-}
 
 int main(int argc, char const *argv[]) {
 
@@ -51,9 +38,9 @@ int main(int argc, char const *argv[]) {
     gsl_matrix_set(X,5,0,5);
     gsl_matrix_set(X,5,1,4.1);
 
-    int n=500; //Number of cases
+    int n=300; //Number of cases
     int m=2;    //Number of variables
-    int k=50;
+    int k=10;
 
     //Number of groups
     gsl_matrix *B = gsl_matrix_alloc(n,m);
@@ -70,6 +57,19 @@ int main(int argc, char const *argv[]) {
     }
 
     kmeans_data* kmd = gsl_kmeans(B,k, 100);
+    kmeans_data_extra *kdat = gsl_kmeans_calc(kmd);
+
+    for (size_t l = 0; l < kdat->size; ++l) {
+        size_t size = kdat->mpos[l].size;
+        printf("cluster %zu: size %zu\n",l, size);
+        for (size_t i1 = 0; i1 < size; ++i1) {
+            printf("%u ", kdat->mpos[l].pos[i1]);
+        }
+        printf("\n");
+    }
+
+    gsl_kmeans_data_extra_free(kdat);
+
 
     // save B,centroids and print indexes
     FILE *train_data = fopen("train_data.txt","w");
