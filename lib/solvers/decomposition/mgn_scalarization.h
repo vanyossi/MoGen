@@ -14,7 +14,7 @@ double mgn_scalar_tchebycheff(gsl_vector *w, gsl_vector *f, gsl_vector *z)
     gsl_vector_memcpy(res,f);
 
     gsl_vector_sub(res,z);
-    gsl_vector_map(res,mgn_fabs,0);
+    gsl_vector_map(res, map_fabs, 0);
     gsl_vector_mul(res,w);
 
     double max = gsl_vector_max(res);

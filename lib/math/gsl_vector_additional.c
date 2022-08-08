@@ -17,11 +17,6 @@ struct gsl_vector_qsort_idx {
 };
 
 // private functions
-double hpow(double value, void* pvalue) {
-    double *p = (double*)pvalue;
-    return fabs(pow(value, *p));
-}
-
 int cmp_double(const void *a, const void *b)
 {
     struct gsl_vector_qsort_idx *ad = (struct gsl_vector_qsort_idx*)a;
@@ -31,11 +26,6 @@ int cmp_double(const void *a, const void *b)
 }
 
 // public functions
-double mgn_fabs(double value, void* nouse) {
-    UNUSED(nouse);
-    return fabs(value);
-}
-
 void gsl_vector_map(gsl_vector *V, double (*func)(double, void*), void* param)
 {
     size_t size = V->size;
@@ -46,7 +36,7 @@ void gsl_vector_map(gsl_vector *V, double (*func)(double, void*), void* param)
 
 double gsl_vector_pnorm(gsl_vector *v, double pvalue)
 {
-    gsl_vector_map(v,hpow, (void*)&pvalue);
+    gsl_vector_map(v, map_hpow, (void *) &pvalue);
     double sumv = gsl_vector_sum(v);
     return pow(sumv,1.0/pvalue);
 }
@@ -95,4 +85,39 @@ gsl_vector_repeat(gsl_vector *v, size_t rep, gsl_matrix *C)
     gsl_matrix_free(vtmp);
 
 //    return result;
+}
+
+gsl_vector* gsl_vector_get_indexes(gsl_vector *v, int *idx, size_t size)
+{
+    gsl_vector *out = gsl_vector_calloc(size);
+    for (size_t i = 0; i < size; ++i) {
+        gsl_vector_set(out,i,gsl_vector_get(v,idx[i]));
+    }
+    return out;
+}
+
+gsl_matrix* gsl_matrix_get_row_indexes(gsl_matrix *v, int *idx, size_t size)
+{
+    gsl_matrix *out = gsl_matrix_calloc(size,v->size2);
+    for (size_t i = 0; i < size; ++i) {
+        gsl_vector_view vecv = gsl_matrix_row(v,idx[i]);
+        gsl_matrix_set_row(out,i,&vecv.vector);
+    }
+    return out;
+}
+
+void gsl_matrix_printf(gsl_matrix *M, FILE *stream)
+{
+    const char *format = "%.6f";
+
+    for (size_t c = 0; c < M->size1; ++c) {
+        gsl_vector_view crow = gsl_matrix_row(M, c);
+        for (size_t val = 0; val < crow.vector.size; ++val) {
+            fprintf(stream,format, gsl_vector_get(&crow.vector, val));
+            if(val != crow.vector.size -1) {
+                fprintf(stream," ");
+            }
+        }
+        fprintf(stream, "\n");
+    }
 }

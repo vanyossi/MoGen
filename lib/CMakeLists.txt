@@ -36,7 +36,7 @@ if(GNUPLOT_FOUND)
 endif()
 
 set(MGN_LIB_SOURCES
-    math/gsl_vector_additional.c
+#    math/gsl_vector_additional.c
     operators/mgn_gen_operator.c
 #    operators/mgn_vector_distance.c
 #    solvers/decomposition/mgn_scalarization.c
@@ -63,7 +63,7 @@ set(MGN_LIB_SOURCES
 add_library(mgnmoefa SHARED ${MGN_LIB_SOURCES})
 
 # ./moeadtest  26,10s user 0,03s system 99% cpu 26,215 total
-target_link_libraries(mgnmoefa ${GSL_LIBRARY} ${BLAS_LIBRARIES} mogenops)
+target_link_libraries(mgnmoefa ${GSL_LIBRARY} ${BLAS_LIBRARIES} mogenops moea_math)
 # ./moeadtest  58,79s user 0,52s system 81% cpu 1:12,42 total
 # add if APPLE
 # ./moeadtest  35,92s user 0,18s system 94% cpu 38,120 total
