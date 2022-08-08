@@ -3,6 +3,7 @@ add_subdirectory(tests)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/lib/operators
 )
 
 #set(MOP_SOURCES

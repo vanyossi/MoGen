@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <gsl/gsl_vector.h>
 
-#include "../mgn_zdt.h"
+#include "mgn_zdt.h"
 
 int double_isequal(double a, double b, double delta);
 
