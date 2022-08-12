@@ -68,6 +68,11 @@ void mgn_de_crossover(mgn_pop *pop, size_t *rsel, size_t jrand, de_param *dparam
 void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgn_de_ef(ef));
 
 
+
+de_param* mgn_de_getfeatures(mgnMoa* moa)
+{
+    return (de_param*)moa->features;
+}
 /*
  * Initialization need
  *  bounds for x_
@@ -75,40 +80,56 @@ void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgn_de_ef(ef));
  *
  *
  */
-de_param* mgn_de_alloc(size_t Np, void* iops, void* iparams)
+
+mgnMoa* mgn_moa_de_alloc(size_t Np
+                       ,void* iops
+                       ,void* iparams
+                       )
 {
+    mgnMoa *de = malloc(sizeof(*de));
     de_param* params = malloc(sizeof(*params));
+
     params->size = Np;
     params->pop = mgn_pop_alloc(Np,iops, iparams);
     params->popeval = false;
     params->trial = mgn_pop_alloc(Np,iops,iparams);
     params->D = params->pop->ops->get_iparams(params->pop->I).x->size;
     params->F = 1.10;
-
     params->mopset = false;
 
-    return params;
-}
-
-mgnMoa* mgn_de_init(de_param* dparam
-    ,void (*apply)(void*, void*), void* params)
-{
-    mgnMoa *de = malloc(sizeof(*de));
     de->tot_exec = 0;
     de->run = mgn_de_run;
     strncpy(de->name, "Differential Evolution", MOA_NAME_LEN);
-    de->features = dparam;
-
-    mgn_pop_init(dparam->pop, apply, params);
+    de->features = params;
 
     return de;
 }
-
-de_param* mgn_de_getfeatures(mgnMoa* moa)
+//
+//de_param* mgn_de_alloc(size_t Np, void* iops, void* iparams)
+//{
+//    de_param* params = malloc(sizeof(*params));
+//    params->size = Np;
+//    params->pop = mgn_pop_alloc(Np,iops, iparams);
+//    params->popeval = false;
+//    params->trial = mgn_pop_alloc(Np,iops,iparams);
+//    params->D = params->pop->ops->get_iparams(params->pop->I).x->size;
+//    params->F = 1.10;
+//
+//    params->mopset = false;
+//
+//    return params;
+//}
+//
+void mgn_de_init(mgnMoa* moa
+            ,void (*apply)(void*, void*)
+            ,void* apply_params
+            )
 {
-    return (de_param*)moa->features;
+    de_param *de_p = mgn_de_getfeatures(moa);
+    mgn_pop_init(de_p->pop, apply, apply_params);
 }
 
+// TODO move to moa;
 void mgn_de_setmop(mgnMoa *de, mgnMop *mop, mgn_de_ef(ef))
 {
     de_param *prm = mgn_de_getfeatures(de);
@@ -121,6 +142,7 @@ void mgn_de_eval(mgnMoa *de)
 {
     de_param *prm = mgn_de_getfeatures(de);
     mgn_mop_eval_pop(prm->mop, prm->pop, prm->mop->params);
+    de->tot_exec += prm->pop->size;
     prm->popeval = true;
 }
 
@@ -164,6 +186,7 @@ void mgn_de_run(mgnMoa* de)
         unsigned long jrand = rnd_getUniform_int((int)m_p->D);
         mgn_de_crossover(m_p->pop, rsel.vector.data, jrand, m_p);
         mgn_mop_eval_pop_index(m_p->mop, m_p->pop, m_p->mop->params,i,1);
+        de->tot_exec++;
     }
 
     // original Selection

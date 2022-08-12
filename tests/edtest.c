@@ -48,22 +48,26 @@ int main() {
         ga_probs.mut_ulim[i] = 1;
     }
 
-
+    // Initialize and RUn DE
     size_t Np = 20;
-    de_param* de_p = mgn_de_alloc(Np,iops,&param);
-    mgn_init_LHC_init(Np,param.realSize,rlim);
-    mgnMoa *de = mgn_de_init(de_p, mgn_init_lhc, iops);
+
+    mgn_lhci *lhci = mgn_init_new_lhci(Np,param.realSize,rlim);
+    mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param);
+    mgn_de_init(de, mgn_init_lhc, lhci);
+
+    mgn_lhci_free(lhci);
+
     mgn_de_setmop(de, mop, mgn_mop_sphere_min);
     mgn_de_eval(de);
 
 
-    for (size_t i = 0; i < de_p->pop->size; ++i) {
-        mgn_indv *in = mgn_indv_get(de_p->pop,i);
+    mgn_pop *sols = mgn_de_getfeatures(de)->pop;
+    for (size_t i = 0; i < sols->size; ++i) {
+        mgn_indv *in = mgn_indv_get(sols,i);
         printf("%zu %.6f\n", i
                ,in->f->data[0]
                );
     }
-
 
     // mgn-solve
     mgn_plot_open();
@@ -78,7 +82,7 @@ int main() {
 
         if (run % plot_every == 0) {
             asprintf(&pdat.filename, "DE_run-%d", run);
-            mgn_plot((mgn_pop_proto *) de_p->pop, &pdat);
+            mgn_plot((mgn_pop_proto *) sols, &pdat);
         }
     }
     printf("total exec: %zu\n", de->tot_exec);
@@ -87,8 +91,8 @@ int main() {
 
     //
 
-    for (size_t i = 0; i < de_p->pop->size; ++i) {
-       mgn_indv *in = mgn_indv_get(de_p->pop,i);
+    for (size_t i = 0; i < sols->size; ++i) {
+       mgn_indv *in = mgn_indv_get(sols,i);
         printf("%zu %.6f\n", i
                ,in->f->data[0]
         );
