@@ -39,9 +39,10 @@ struct _mgn_pop_param_pointer {
     gsl_vector *g;
 };
 
+// TODO rename all _structs to pstructs
 // population operators
+/*struct pmgn_pop_ops *met; \*/
 #define mgn_pop_ops() \
-    struct pmgn_pop_ops *met; \
     struct _mgn_i_ops *ops; \
     unsigned int size; \
     void* I; \

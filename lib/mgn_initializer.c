@@ -13,13 +13,7 @@
 
 #include "mgn_types.h"
 #include "mgn_random.h"
-#include "mgn_pop_proto.h"
-
-// Static internal for use in LHC
-static gsl_matrix *m_LHCm;
-static bool m_LHCinit = false;
-static size_t m_LHCcur;
-
+#include "individual.h"
 
 void mgn_init_rand(void* in, void* params)
 {
@@ -33,51 +27,131 @@ void mgn_init_rand(void* in, void* params)
     }
 }
 
-void mgn_init_LHC_init(size_t psize, size_t dim, mgnLimit *lim)
+
+
+// =========== Latin HyperCube ======
+
+//static gsl_matrix *m_LHCm;
+//static bool m_LHCinit = false;
+//static size_t m_LHCcur;
+
+struct pmgn_lhc_data_priv {
+    size_t p_cur;
+};
+
+mgn_lhci*
+mgn_init_new_lhci(size_t psize, size_t dim, mgnLimit *lim)
 {
-//    1st lower,upper/psize
-//    2nd psize/psize, 2lower/psize
+    mgn_lhci *lhci = calloc(1, sizeof(*lhci));
+    lhci->psize = psize;
+    lhci->dim = dim;
+    lhci->limits = lim;
+    lhci->m_points = gsl_matrix_alloc(dim,psize);
+
+    lhci->_p = malloc(sizeof(lhci->_p));
+    lhci->_p->p_cur = 0;
+
     gsl_permutation *perm_row = gsl_permutation_calloc(psize);
     gsl_ran_shuffle (rnd_get_generator(), perm_row->data, psize, sizeof(size_t));
-    m_LHCm = gsl_matrix_alloc(dim,psize);
 
-    for (size_t i = 0; i < m_LHCm->size1; ++i) {
+    for (size_t i = 0; i < lhci->m_points->size1; ++i) {
         // each cuadrant
         double delta = lim->max[i] / psize;
         double spill = delta / 5;
         double kmin = 0;
 
-        for (size_t j = 0; j < m_LHCm->size2; ++j) {
+        for (size_t j = 0; j < lhci->m_points->size2; ++j) {
             double center = kmin + (lim->min[i] + delta) / 2;
-            gsl_matrix_set(m_LHCm,i,j,
-            rnd_getUniform_limit(
-                center - spill
-               ,center + spill)
+            gsl_matrix_set(lhci->m_points,i,j,
+                rnd_getUniform_limit(
+                    center - spill
+                    ,center + spill)
             );
-//            printf("limit: %d, %d :: %.4f, %.4f %.6f\n",i, j, kmin + lim->min[i], kmin + delta, center - delta/4);
             kmin += delta;
         }
-        gsl_vector_view cvv = gsl_matrix_row(m_LHCm,i);
-//        gsl_vector_fprintf(stdout, &cvv.vector, "%g");
+        gsl_vector_view cvv = gsl_matrix_row(lhci->m_points,i);
         gsl_permute_vector(perm_row, &cvv.vector);
-//        gsl_ran_shuffle(rnd_get_generator(),cvv.vector.data,cvv.vector.size, sizeof(*cvv.vector.data));
         gsl_ran_shuffle (rnd_get_generator(), perm_row->data, perm_row->size, sizeof(size_t));
     }
-    m_LHCcur = 0;
-    m_LHCinit = true;
+
+    gsl_permutation_free(perm_row);
+
+    return lhci;
 }
 
-gsl_matrix* mgn_LHC_get()
+void mgn_init_lhc(void *in, void *lhcip)
 {
-    return m_LHCm;
-}
+    mgn_indv *indv = (mgn_indv*) in;
+    mgn_indv_ops* ops = indv->ops;
+    mgn_lhci *lhci = (mgn_lhci*) lhcip;
 
-void mgn_init_lhc(void *in, void* pop_iops)
-{
-    struct _mgn_i_ops *ops = (struct _mgn_i_ops*)pop_iops;
     gsl_vector *x = ops->get_iparams(in).x;
 
-    gsl_matrix_get_col(x,m_LHCm,m_LHCcur);
-    m_LHCcur++;
+    gsl_matrix_get_col(x,lhci->m_points,lhci->_p->p_cur);
+    lhci->_p->p_cur++;
 }
+
+void
+mgn_lhci_reset(mgn_lhci *lhc)
+{
+    lhc->_p->p_cur = 0;
+}
+
+void
+mgn_lhci_free(mgn_lhci *lhci)
+{
+    gsl_matrix_free(lhci->m_points);
+    free(lhci->_p);
+    free(lhci);
+}
+
+
+//void mgn_init_LHC_init(size_t psize, size_t dim, mgnLimit *lim)
+//{
+//
+////    1st lower,upper/psize
+////    2nd psize/psize, 2lower/psize
+//    gsl_permutation *perm_row = gsl_permutation_calloc(psize);
+//    gsl_ran_shuffle (rnd_get_generator(), perm_row->data, psize, sizeof(size_t));
+//    m_LHCm = gsl_matrix_alloc(dim,psize);
+//
+//    for (size_t i = 0; i < m_LHCm->size1; ++i) {
+//        // each cuadrant
+//        double delta = lim->max[i] / psize;
+//        double spill = delta / 5;
+//        double kmin = 0;
+//
+//        for (size_t j = 0; j < m_LHCm->size2; ++j) {
+//            double center = kmin + (lim->min[i] + delta) / 2;
+//            gsl_matrix_set(m_LHCm,i,j,
+//            rnd_getUniform_limit(
+//                center - spill
+//               ,center + spill)
+//            );
+////            printf("limit: %d, %d :: %.4f, %.4f %.6f\n",i, j, kmin + lim->min[i], kmin + delta, center - delta/4);
+//            kmin += delta;
+//        }
+//        gsl_vector_view cvv = gsl_matrix_row(m_LHCm,i);
+////        gsl_vector_fprintf(stdout, &cvv.vector, "%g");
+//        gsl_permute_vector(perm_row, &cvv.vector);
+////        gsl_ran_shuffle(rnd_get_generator(),cvv.vector.data,cvv.vector.size, sizeof(*cvv.vector.data));
+//        gsl_ran_shuffle (rnd_get_generator(), perm_row->data, perm_row->size, sizeof(size_t));
+//    }
+//    m_LHCcur = 0;
+//    m_LHCinit = true;
+//}
+//
+//gsl_matrix* mgn_LHC_get()
+//{
+//    return m_LHCm;
+//}
+
+//void mgn_init_lhc(void *in, void* pop_iops)
+//{
+//    struct _mgn_i_ops *ops = (struct _mgn_i_ops*)pop_iops;
+//    gsl_vector *x = ops->get_iparams(in).x;
+//
+//    gsl_matrix_get_col(x,m_LHCm,m_LHCcur);
+//    m_LHCcur++;
+//}
 

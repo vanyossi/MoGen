@@ -17,16 +17,6 @@
 #include "population.h"
 #include "mgn_pareto.h"
 
-// TODO make macro of mandatory ops
-struct pmgn_indv_ops {
-    //mandatory
-    mgn_i_ops()
-    // interface for this Indtype
-    size_t (*getXSize)(mgn_indv*);
-    size_t (*getObjSize)(mgn_indv*);
-    size_t (*getConsSize)(mgn_indv*);
-};
-
 // Helper operation functions
 size_t getXSize(mgn_indv* ind) { return ind->params->realSize; }
 size_t getObjSize(mgn_indv* ind) { return ind->params->objSize; }
@@ -236,12 +226,23 @@ int mgn_ind_pareto_sort(const void* indv_a, const void* indv_b)
     return dom;
 }
 
-gsl_matrix *mgn_ind_matrix(mgn_pop *pop)
+gsl_matrix *mgn_ind_matrix_f(mgn_pop *pop)
 {
     gsl_matrix *M = gsl_matrix_alloc(pop->size, pop->ops->get_iparams(pop->I).f->size);
     char* ind = pop->I;
     for (size_t i = 0; i < pop->size; ++i) {
         gsl_matrix_set_row(M,i,pop->ops->get_iparams(ind).f);
+        ind += pop->ops->sizeofp();
+    }
+    return M;
+}
+
+gsl_matrix *mgn_ind_matrix_x(mgn_pop *pop)
+{
+    gsl_matrix *M = gsl_matrix_alloc(pop->size, pop->ops->get_iparams(pop->I).f->size);
+    char* ind = pop->I;
+    for (size_t i = 0; i < pop->size; ++i) {
+        gsl_matrix_set_row(M,i,pop->ops->get_iparams(ind).x);
         ind += pop->ops->sizeofp();
     }
     return M;
@@ -276,7 +277,7 @@ void mgn_indv_setparams(void* indv, mgn_pop_param param)
 
 void mgn_pop_prank_sort(mgn_pop *pop)
 {
-    gsl_matrix *M = mgn_ind_matrix(pop);
+    gsl_matrix *M = mgn_ind_matrix_f(pop);
     int *dranks = gsl_matrix_pareto_rank(M); //alloc
 //    mgn_indv *ind = pop->I;
     char* ind = pop->I;

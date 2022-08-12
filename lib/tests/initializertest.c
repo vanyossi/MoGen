@@ -8,6 +8,8 @@
 #include "population.h"
 #include "../mgn_initializer.h"
 
+// this test is incomplete missing validation of results.
+
 int main() {
     mgn_indv_ops *iops = mgn_indv_ops_init();
     mgn_indv_param iparam = {2,0,0};
@@ -16,18 +18,19 @@ int main() {
         limits->min[i] = 0;
         limits->max[i] = 1;
     }
-    mgn_pop* pop2d = mgn_pop_alloc(100,(void*)iops, &iparam);
+    mgn_pop* pop2d = mgn_pop_alloc(4,(void*)iops, &iparam);
 
-    mgn_init_LHC_init(pop2d->size,iparam.realSize, limits);
+    mgn_lhci *lhc_data = mgn_init_new_lhci(pop2d->size, iparam.realSize, limits);
+//    mgn_init_LHC_init(pop2d->size,iparam.realSize, limits);
 
-    gsl_matrix *hlcm = mgn_LHC_get();
+//    gsl_matrix *hlcm = mgn_LHC_get();
 //    gsl_matrix_fprintf(stdout, hlcm, "%.6f");
 //    gsl_vector_view vv = gsl_matrix_row(hlcm,0);
 //    puts("space");
 //    gsl_vector_fprintf(stdout, &vv.vector, "%g");
 //    struct mgnp_init_params ipar = {limits, pop2d->ops};
 //    mgn_pop_init(pop2d,mgn_init_rand,&ipar);
-    mgn_pop_init(pop2d,mgn_init_lhc,pop2d->ops);
+    mgn_pop_init(pop2d,mgn_init_lhc,lhc_data);
 
     for (size_t i = 0; i < pop2d->size; ++i) {
         for (size_t j = 0; j < pop2d->ops->get_iparams(pop2d->I).x->size; ++j) {
@@ -36,7 +39,7 @@ int main() {
         printf("\n");
     }
 
-    gsl_matrix_free(hlcm);
+    mgn_lhci_free(lhc_data);
     mgn_pop_free(pop2d);
 
 //    double min = 100;

@@ -6,6 +6,9 @@
 
 #include <stdbool.h>
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+
+#include "mgn_pop_proto.h"
 
 
 typedef struct pmgn_indv_ops mgn_indv_ops;
@@ -32,6 +35,15 @@ struct pmgn_indv {
     gsl_vector        *g;
 };
 
+struct pmgn_indv_ops {
+    //mandatory
+    mgn_i_ops()
+    // interface for this Indtype
+    size_t (*getXSize)(mgn_indv*);
+    size_t (*getObjSize)(mgn_indv*);
+    size_t (*getConsSize)(mgn_indv*);
+};
+
 #define indvCallOp(self,operator) self->ops->operator(self)
 #define indGetXSize(self) indvCallOp(self,getXSize)
 #define indGetObjSize(self) indvCallOp(self,getObjSize)
@@ -42,7 +54,6 @@ mgn_indv_ops* mgn_indv_ops_init();
 
 void mgn_ind_init(void* in, void* none);
 
-void mgn_ind_init(void* in, void* none);
 void mgn_ind_init_rand(void* in, void* limits);
 
 mgn_indv* mgn_indv_get(mgn_pop *pop, size_t in);
@@ -74,5 +85,8 @@ void* mgn_indv_prev(void *indv);
 void mgn_indv_set_prev(mgn_indv *dest, mgn_indv *in);
 
 void mgn_pop_prank_sort(mgn_pop *pop);
+
+gsl_matrix *mgn_ind_matrix_f(mgn_pop *pop);
+gsl_matrix *mgn_ind_matrix_x(mgn_pop *pop);
 
 #endif // _MGN_INDIVIDUAL_
