@@ -24,7 +24,7 @@ struct mgn_kmeans_data {
 
 // after kmeans calc, this can be used to
 // analyze the data members.
-// TODO contain the points themselves as matrix
+// TODO contain the m_points themselves as matrix
 struct mgn_kmeans_data_idx {
     size_t size;
     unsigned int *pos;
