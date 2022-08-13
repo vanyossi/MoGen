@@ -7,6 +7,7 @@
 
 
 #include <stdio.h>
+#include <string.h>
 
 #include "mgn_de.h"
 
@@ -14,6 +15,7 @@
 #include "population.h"
 #include "individual.h"
 
+#include "mgn_mop.h"
 #include "mgn_initializer.h"
 #include "mgn_sphere.h"
 #include "mgn_zdt.h"
@@ -52,7 +54,7 @@ int main() {
     size_t Np = 20;
 
     mgn_lhci *lhci = mgn_init_new_lhci(Np,param.realSize,rlim);
-    mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param);
+    mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param,1.3, 0.5);
     mgn_de_init(de, mgn_init_lhc, lhci);
 
     mgn_lhci_free(lhci);
@@ -61,7 +63,7 @@ int main() {
     mgn_de_eval(de);
 
 
-    mgn_pop *sols = mgn_de_getfeatures(de)->pop;
+    mgn_pop *sols = de->pop_get(de);
     for (size_t i = 0; i < sols->size; ++i) {
         mgn_indv *in = mgn_indv_get(sols,i);
         printf("%zu %.6f\n", i
@@ -98,7 +100,7 @@ int main() {
         );
     }
 
-    mgn_de_free(de);
+    mgn_moa_de_free(de);
     mgn_mop_free(mop);
     mgn_limit_free(rlim);
 

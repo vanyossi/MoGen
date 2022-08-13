@@ -6,9 +6,10 @@ add_subdirectory(solvers)
 add_subdirectory(tests)
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/lib/operators
-    ${CMAKE_SOURCE_DIR}/lib/math
+    mops
+    solvers
+    operators
+    math
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -42,6 +43,7 @@ set(MGN_LIB_SOURCES
 #    solvers/decomposition/mgn_scalarization.c
 #    solvers/decomposition/mgn_weights.c
 #    solvers/mgn_moead.c
+    solvers/mgn_de.c
     mgn_io.c
     mgn_io_datalist.c
     mgn_moa.c
