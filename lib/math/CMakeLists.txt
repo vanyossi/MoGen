@@ -9,6 +9,7 @@ set(moead_math_SOURCES
     gsl_extension.c
     gsl_vector_additional.c
     gsl_vector_map_ops.c
+    mgn_counter.c
     )
 
 add_library(moea_math STATIC ${moead_math_SOURCES})
