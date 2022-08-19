@@ -12,6 +12,8 @@
 #include "mgn_mop.h"
 #include "population.h"
 #include "mgn_poplist.h"
+#include "mgn_random.h"
+
 #include "decomposition/mgn_weights.h"
 #include "decomposition/mgn_scalarization.h"
 #include "operators/mgn_vector_distance.h"
@@ -132,6 +134,9 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
 // use sort by dominance
 void moead_update_ep(moeadf *set, mgn_pop *lpop)
 {
+    if(set->epop == NULL) {
+        return;
+    }
 //    printf("update ep\n");
     void* in_sert = mgn_pop_get(lpop,0); // pop has size 1
     gsl_vector *in_fval = lpop->ops->get_iparams(in_sert).f;
@@ -212,10 +217,10 @@ void moead_run(mgnMoa* moead)
     for (size_t i = 0; i < n_weights; ++i) {
         mgn_pop* l_pop = moead_reproduction(feat, ypop,i);
         // TODO add mop params to mop.
-        // update z
         moead->tot_exec += mgn_mop_eval_pop(feat->mop,l_pop,feat->mop->params);
-        // update rank
+        // update z
         mgn_mop_eval_pop(feat->_mop, l_pop, feat);
+        // update rank
 
         // update neighbour
         moead_update_neighbour(l_pop,feat,i);
@@ -271,8 +276,9 @@ void moead_run(mgnMoa* moead)
 }
 
 
-bool moead_stop()
+bool moead_stop(mgnMoa *moa)
 {
+    UNUSED(moa);
     return false;
 }
 
@@ -304,7 +310,7 @@ void mgnp_moead_update_z(gsl_vector* x, gsl_vector* f, gsl_vector* g, moeadf* pa
 
 
 // rpop = external reference pop
-moeadf* mgn_moead_alloc_features(size_t H, size_t nobj, size_t T, mgn_popl *rpop,mgnMop *mop)
+moeadf* mgn_moead_alloc_features(size_t H, size_t nobj, size_t T, mgn_popl *rpop,mgnMop *mop, bool external)
 {
     moeadf *fe = malloc(sizeof(*fe));
     fe->scalarize = mgn_scalar_tchebycheff;
@@ -336,14 +342,15 @@ moeadf* mgn_moead_alloc_features(size_t H, size_t nobj, size_t T, mgn_popl *rpop
 
     fe->pop = mgn_pop_alloc(fe->wei->size1,
         rpop->ops->get_iops(rpop->I),rpop->ops->get_iparams_pointer(rpop->I));
-    fe->epop = rpop;
+    fe->epop = (external)? rpop : NULL;
     fe->z = mgnp_moead_alloc_z(nobj);
     fe->size_nei = (fe->wei->size1 < T)? fe->wei->size1 : T;
-    printf("size wei %zu, %zu\n", fe->wei->size1, fe->size_nei);
+//    printf("size wei %zu, %zu\n", fe->wei->size1, fe->size_nei);
 
     fe->mop = mop;
     fe->_mop = mgn_mop_alloc();
     fe->_mop->eval = mgn_cast_eval(mgnp_moead_update_z);
+    fe->_mop->params = fe;
     fe->isalloc = true;
     return fe;
 }
@@ -379,7 +386,8 @@ void moead_pop_evaluate(mgn_pop *pop, moeadf* set)
 mgnMoa* mgn_moead_init(size_t H,size_t nobj, size_t T
                        ,mgn_popl *epop
                        ,mgnMop *mop
-                       ,void (*apply)(void*, void*), void* params)
+                       ,void (*apply)(void*, void*), void* params
+                       ,bool external)
 {
     mgnMoa* moead = (mgnMoa*)calloc(1, sizeof(mgnMoa));
     strncpy(moead->name, "MOEA/D", MOA_NAME_LEN);
@@ -387,13 +395,14 @@ mgnMoa* mgn_moead_init(size_t H,size_t nobj, size_t T
     moead->run = moead_run;
     moead->stop = moead_stop;
     moead->set_ga_vals = moead_set_prob;
-    moead->features = mgn_moead_alloc_features(H,nobj,T,epop,mop);
+    moead->features = mgn_moead_alloc_features(H,nobj,T,epop,mop,external);
 
     moeadf *fe = mgn_moead_getfeatures(moead);
     mgn_pop_init(fe->pop, apply,params); // internal pop
     //evaluate pop
 //    moead_pop_evaluate(rpop, fe); // external pop
     moead_pop_evaluate(fe->pop,fe);
+    moead->tot_exec += fe->pop->size;
 //    mgn_pop_prank_sort(fe->pop);
 
     return moead;
@@ -405,6 +414,10 @@ moeadf* mgn_moead_getfeatures(mgnMoa* moead)
     return (moeadf*)moead->features;
 }
 
+gsl_matrix* mgn_moead_get_w(mgnMoa* moead)
+{
+    return ((moeadf*)moead->features)->wei;
+}
 
 mgn_pop* mgn_moead_getpop(mgnMoa* moead)
 {

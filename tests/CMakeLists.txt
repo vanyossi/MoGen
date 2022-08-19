@@ -4,12 +4,13 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/math
     ${CMAKE_SOURCE_DIR}/lib/solvers
+    ${CMAKE_SOURCE_DIR}/lib/solvers/decomposition
     ${CMAKE_SOURCE_DIR}/lib/mops
     ${CMAKE_SOURCE_DIR}/lib/operators
 )
 
 # mgn tests
-add_executable(moeadtest mgn_moeadtest.c ${CMAKE_SOURCE_DIR}/lib/solvers/mgn_moead.c)
+add_executable(moeadtest mgn_moeadtest.c)
 target_link_libraries(moeadtest mgnmoefa)
 
 add_executable(edtest edtest.c)

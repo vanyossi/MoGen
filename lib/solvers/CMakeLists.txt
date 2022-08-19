@@ -6,6 +6,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/math
     ${CMAKE_SOURCE_DIR}/lib/operators
+    ./decomposition
 )
 
 #set_target_properties(moa PROPERTIES

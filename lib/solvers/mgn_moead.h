@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
 
 typedef struct moead_features moeadf;
 
@@ -21,9 +22,12 @@ bool moead_stop();
 mgnMoa* mgn_moead_init(size_t H,size_t nobj, size_t T
                        ,mgn_popl *epop
                        ,mgnMop *mop
-                       ,void (*apply)(void*, void*), void* params);
+                       ,void (*apply)(void*, void*), void* params
+                       ,bool external);
 
-moeadf* mgn_moead_getfeatures(mgnMoa* moead);
+//moeadf* mgn_moead_getfeatures(mgnMoa* moead);
+
+gsl_matrix* mgn_moead_get_w(mgnMoa* moead);
 
 mgn_pop* mgn_moead_getpop(mgnMoa* moead);
 

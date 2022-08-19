@@ -25,14 +25,15 @@
 int main() {
     mgn_plot_open();
 
-    mgn_indv_param params = {30,2,0};
+    mgn_indv_param params = {6,2,0};
     mgn_indv_ops *iops = mgn_indv_ops_init();
     mgn_popl *EP = mgn_popl_alloc((void*)iops,&params);
 //    mgnLimit ilimit = {0, 1};
 
-    mgnMop *mop = mgn_mop_alloc();
-    mop->eval_array = mgn_cast_eval(mgn_zdt2);
-    strcpy(mop->name, "ZDT6");
+    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
+//    mgnMop *mop  = mgn_mop_alloc();
+//    mop->eval_array = mgn_cast_eval(mgn_zdt2);
+//    strcpy(mop->name, "ZDT2");
     mop->params = &params; // same order as mgn_indv_param
     mgnLimit *moplim = mgn_limit_alloc(params.x_size);
     for (size_t i = 0; i < moplim->size; ++i) {
@@ -82,14 +83,14 @@ int main() {
 //    }
 
 
-    mgnMoa *moead = mgn_moead_init(30, 2, 20, EP, mop, mgn_ind_init,moplim);
+    mgnMoa *moead = mgn_moead_init(30, 2, 20, EP, mop, mgn_ind_init,moplim,true);
     moead->set_ga_vals(moead,&ga_probs);
 
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    int runs = 1000;
-    int plot_every = 100;
+    int runs = 20;
+    int plot_every = 5;
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
     asprintf(&pdat.title, "%s", "points");
@@ -173,6 +174,7 @@ int main() {
     free(ga_probs.mut_llim);
     free(ga_probs.mut_ulim);
 
+    mgn_limit_free(moplim);
     mgn_mop_free(mop);
     mgn_moead_free(moead);
     mgn_popl_free(EP);

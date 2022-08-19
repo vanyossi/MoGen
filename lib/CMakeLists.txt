@@ -8,6 +8,7 @@ add_subdirectory(tests)
 include_directories(
     mops
     solvers
+    solvers/decomposition
     operators
     math
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -42,7 +43,7 @@ set(MGN_LIB_SOURCES
 #    operators/mgn_vector_distance.c
 #    solvers/decomposition/mgn_scalarization.c
 #    solvers/decomposition/mgn_weights.c
-#    solvers/mgn_moead.c
+    solvers/mgn_moead.c
     solvers/mgn_de.c
     mgn_io.c
     mgn_io_datalist.c
