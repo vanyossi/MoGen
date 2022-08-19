@@ -8,19 +8,11 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 
-#include "mgn_pop_proto.h"
+#include "mgn_pop_proto.h" // TODO fix, indv should not know pop
 
 
 typedef struct pmgn_indv_ops mgn_indv_ops;
 typedef struct pmgn_indv mgn_indv;
-typedef struct pmgn_indv_params mgn_indv_param;
-
-
-struct pmgn_indv_params {
-    size_t realSize;
-    size_t objSize;
-    size_t consSize;
-};
 
 struct pmgn_indv {
     int rank;

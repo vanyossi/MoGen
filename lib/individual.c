@@ -18,9 +18,9 @@
 #include "mgn_pareto.h"
 
 // Helper operation functions
-size_t getXSize(mgn_indv* ind) { return ind->params->realSize; }
-size_t getObjSize(mgn_indv* ind) { return ind->params->objSize; }
-size_t getConsSize(mgn_indv* ind) { return ind->params->consSize; }
+size_t getXSize(mgn_indv* ind) { return ind->params->x_size; }
+size_t getObjSize(mgn_indv* ind) { return ind->params->f_size; }
+size_t getConsSize(mgn_indv* ind) { return ind->params->g_size; }
 
 
 mgn_indv_ops* mgn_indv_ops_init()
@@ -90,13 +90,15 @@ void * mgn_indv_alloc(void* indv, void* ops, void* params)
 
     nindv->rank = 0;
     nindv->params = param;
-//    nindv->size[0] = param->realSize;
-//    nindv->size[1] = param->objSize;
-//    nindv->size[2] = param->consSize;
+//    nindv->size[0] = param->x_size;
+//    nindv->size[1] = param->f_size;
+//    nindv->size[2] = param->g_size;
 
-    nindv->x = gsl_vector_alloc(param->realSize);
-    nindv->f = gsl_vector_alloc(param->objSize);
-    nindv->g = gsl_vector_alloc(param->consSize);
+//printf("alloc %zu %zu %zu\n", param->x_size, param->f_size, param->g_size);
+
+    nindv->x = gsl_vector_alloc(param->x_size);
+    nindv->f = gsl_vector_alloc(param->f_size);
+    nindv->g = gsl_vector_alloc(param->g_size);
 
     return nindv;
 }
@@ -132,6 +134,11 @@ void mgn_indv_copy(void *into, void *infrom)
 //    to->size[1] = indGetObjSize(from);
 //    to->size[2] = indGetConsSize(from);
 
+//    printf("sizes %zu/%zu %zu/%zu %zu/%zu\n"
+//           ,to->x->size,from->x->size
+//           ,to->f->size,from->f->size
+//           ,to->g->size,from->g->size
+//           );
     gsl_vector_memcpy(to->x, from->x);
     gsl_vector_memcpy(to->f, from->f);
     gsl_vector_memcpy(to->g, from->g);

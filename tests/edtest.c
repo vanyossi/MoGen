@@ -23,7 +23,7 @@
 int main() {
     mgn_indv_param param = {4, 1, 0};
     mgn_indv_ops* iops = mgn_indv_ops_init();
-    mgnLimit *rlim = mgn_limit_alloc(param.realSize);
+    mgnLimit *rlim = mgn_limit_alloc(param.x_size);
 
     // set limits
     for (size_t i = 0; i < rlim->size; ++i) {
@@ -35,7 +35,7 @@ int main() {
 
     mgnMop *mop = mgn_mop_alloc();
     mop->eval_array = mgn_cast_eval(mgn_mop_sphere);
-    mgnLimit *moplim = mgn_limit_alloc(param.realSize);
+    mgnLimit *moplim = mgn_limit_alloc(param.x_size);
     for (size_t i = 0; i < moplim->size; ++i) {
         moplim->min[i] = 0;
         moplim->max[i] = 2;
@@ -43,9 +43,9 @@ int main() {
     mop->params = moplim;
 
     mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
-    ga_probs.mut_llim = calloc(param.realSize, sizeof(ga_probs.mut_llim));
-    ga_probs.mut_ulim = calloc(param.realSize, sizeof(ga_probs.mut_ulim));
-    for (size_t i = 0; i < param.realSize; ++i) {
+    ga_probs.mut_llim = calloc(param.x_size, sizeof(ga_probs.mut_llim));
+    ga_probs.mut_ulim = calloc(param.x_size, sizeof(ga_probs.mut_ulim));
+    for (size_t i = 0; i < param.x_size; ++i) {
         ga_probs.mut_llim[i] = 0;
         ga_probs.mut_ulim[i] = 1;
     }
@@ -53,7 +53,7 @@ int main() {
     // Initialize and RUn DE
     size_t Np = 20;
 
-    mgn_lhci *lhci = mgn_init_new_lhci(Np,param.realSize,rlim);
+    mgn_lhci *lhci = mgn_init_new_lhci(Np,param.x_size,rlim);
     mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param,1.3, 0.5);
     mgn_de_init(de, mgn_init_lhc, lhci);
 

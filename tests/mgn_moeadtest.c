@@ -34,30 +34,30 @@ int main() {
     mop->eval_array = mgn_cast_eval(mgn_zdt2);
     strcpy(mop->name, "ZDT6");
     mop->params = &params; // same order as mgn_indv_param
-    mgnLimit *moplim = mgn_limit_alloc(params.realSize);
+    mgnLimit *moplim = mgn_limit_alloc(params.x_size);
     for (size_t i = 0; i < moplim->size; ++i) {
         moplim->min[i] = 0;
         moplim->max[i] = 1;
     }
     mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
-    ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
-    ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
-    for (size_t i = 0; i < params.realSize; ++i) {
+    ga_probs.mut_llim = calloc(params.x_size, sizeof(ga_probs.mut_llim));
+    ga_probs.mut_ulim = calloc(params.x_size, sizeof(ga_probs.mut_ulim));
+    for (size_t i = 0; i < params.x_size; ++i) {
         ga_probs.mut_llim[i] = 0;
         ga_probs.mut_ulim[i] = 1;
     }
 
 //    mgnMop *mop = mgn_mop_alloc();
 //    mop->eval_array = mgn_cast_eval(mgn_uf1);
-//    mgnLimit *moplim = mgn_limit_alloc(params.realSize);
+//    mgnLimit *moplim = mgn_limit_alloc(params.x_size);
 //    mgn_cec09_set_limits(cec_uf1,moplim);
 //    mop->params = &params;
 
 
 //    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
-//    ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
-//    ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
-//    for (size_t i = 0; i < params.realSize; ++i) {
+//    ga_probs.mut_llim = calloc(params.x_size, sizeof(ga_probs.mut_llim));
+//    ga_probs.mut_ulim = calloc(params.x_size, sizeof(ga_probs.mut_ulim));
+//    for (size_t i = 0; i < params.x_size; ++i) {
 //        ga_probs.mut_llim[i] = -1;
 //        ga_probs.mut_ulim[i] = 1;
 //    }
@@ -66,7 +66,7 @@ int main() {
 // custom
 //    mgnMop *mop = mgn_mop_alloc();
 //    mop->eval = mgn_cast_eval(mgn_custom);
-//    mgnLimit *moplim = mgn_limit_alloc(params.realSize);
+//    mgnLimit *moplim = mgn_limit_alloc(params.x_size);
 //    for (size_t i = 0; i < moplim->size; ++i) {
 //        moplim->min[i] = 0;
 //        moplim->max[i] = 6.3;
@@ -74,9 +74,9 @@ int main() {
 //    struct mycustom custom_vals = {1, 1, 0, 0};
 //    mop->params = &custom_vals;
 //        mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
-//    ga_probs.mut_llim = calloc(params.realSize, sizeof(ga_probs.mut_llim));
-//    ga_probs.mut_ulim = calloc(params.realSize, sizeof(ga_probs.mut_ulim));
-//    for (size_t i = 0; i < params.realSize; ++i) {
+//    ga_probs.mut_llim = calloc(params.x_size, sizeof(ga_probs.mut_llim));
+//    ga_probs.mut_ulim = calloc(params.x_size, sizeof(ga_probs.mut_ulim));
+//    for (size_t i = 0; i < params.x_size; ++i) {
 //        ga_probs.mut_llim[i] = 0;
 //        ga_probs.mut_ulim[i] = 6.3;
 //    }

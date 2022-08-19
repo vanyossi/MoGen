@@ -31,6 +31,15 @@ enum emgn_pop_type {
     MGN_MIX =           8 << 0,   // 0b000001000
 };
 
+// TODO fix this naming mess
+// individual parameters
+struct pmgn_indv_params {
+    size_t x_size;
+    size_t f_size;
+    size_t g_size;
+};
+
+
 struct _mgn_pop_param_pointer {
     int rank;
     bool feasable;

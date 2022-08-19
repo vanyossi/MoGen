@@ -6,6 +6,8 @@
 #define checkFlag(data, flag) (data & flag) == flag
 #define UNUSED(x) ((void)(x))
 
+typedef struct pmgn_indv_params mgn_indv_param;
+
 typedef struct pmgn_pop_ops mgn_pop_proto;
 typedef struct _mgn_pop mgn_pop;
 typedef struct mgn_popl_head mgn_popl;
