@@ -2,13 +2,12 @@
 // Created by Iván Yossi on 24/04/22.
 //
 
-#include <stdbool.h>
-#include <gsl/gsl_vector.h>
-
-#include "mgn_types.h"
-
 #ifndef MOGEN_MGN_POP_PROTO_H
 #define MOGEN_MGN_POP_PROTO_H
+
+#include <stdbool.h>
+#include <gsl/gsl_vector.h>
+#include "mgn_types.h"
 
 
 #define cast_get_iparams(fname) (mgn_pop_param (*)(void*))fname
@@ -52,10 +51,12 @@ struct _mgn_pop_param_pointer {
 // population operators
 /*struct pmgn_pop_ops *met; \*/
 #define mgn_pop_ops() \
-    struct _mgn_i_ops *ops; \
+    struct mgn_i_ops *ops; \
     unsigned int size; \
-    void* I; \
-    void* (*get)(void*, size_t);
+    void* I;          \
+    mgn_indv_param iparams;        \
+    void* (*get)(void*, size_t); \
+    void (*set)(void*, void* indv, size_t idx);
 
 struct pmgn_pop_ops {
     mgn_pop_ops()
@@ -79,7 +80,7 @@ struct pmgn_pop_ops {
     int (*rank_sort)(const void*, const void*); \
     void (*set_iparams)(void*, mgn_pop_param);
 
-struct _mgn_i_ops {
+struct mgn_i_ops {
     mgn_i_ops()
 };
 // TODO evaluate (goes in mop)
@@ -90,6 +91,8 @@ struct mgn_iparam_container {
     double val;
 };
 
+
+void mgn_pop_print(mgn_pop_proto *popp, FILE *stream);
 
 
 #endif //MOGEN_MGN_POP_PROTO_H

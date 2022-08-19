@@ -6,11 +6,13 @@
 #include <stdlib.h>
 
 void* pmgn_pop_get(void* pop_in, size_t index);
+void pmgn_pop_set(void* pop_in, void* indv, size_t index);
 
 mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params)
 {
     mgn_pop* pop = calloc(1, sizeof(*pop));
-    pop->ops = (struct _mgn_i_ops*)indv_ops;
+    pop->ops = (struct mgn_i_ops*)indv_ops;
+    pop->iparams = *((mgn_indv_param*)params);
     pop->size = size;
     pop->current = 0;
     pop->I = calloc(size, pop->ops->sizeofp());
@@ -25,6 +27,7 @@ mgn_pop* mgn_pop_alloc(size_t size, void*(*indv_ops)(void*), void *params)
     }
 
     pop->get = pmgn_pop_get;
+    pop->set = pmgn_pop_set;
 
     return pop;
 }
@@ -148,3 +151,10 @@ void* pmgn_pop_get(void* pop_in, size_t index)
     mgn_pop *pop = (mgn_pop*)pop_in;
     return mgn_pop_get(pop,index);
 }
+
+void pmgn_pop_set(void* pop_in, void* indv, size_t index)
+{
+    mgn_pop *pop = (mgn_pop*)pop_in;
+    pop->ops->copy(pop->get(pop,index),indv);
+}
+
