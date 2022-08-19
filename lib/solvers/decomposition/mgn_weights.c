@@ -55,15 +55,18 @@ gsl_matrix* mgn_weight_slattice_comb(size_t H, size_t nf)
 gsl_matrix* mgn_weight_slattice_perm(size_t H, size_t nf)
 {
     size_t h_with_zero = H + 1;
+    size_t nnf = (size_t) gsl_sf_fact(nf);
     gsl_combination *comb = gsl_combination_calloc(h_with_zero,nf);
     gsl_permutation *perm = gsl_permutation_calloc(nf);
-    size_t rows = (int)round(gsl_sf_choose(h_with_zero,nf)) * perm->size;
+    size_t rows = (int)round(gsl_sf_choose(h_with_zero,nf)) * nnf;
 
     gsl_vector *cval = gsl_vector_alloc(h_with_zero);
     gsl_vector_set(cval,0,1e-6);
     for (size_t i = 1; i <= H; ++i) {
         gsl_vector_set(cval,i,i/(double)H);
     }
+//    printf("H, hw0, cval_s: %zu %zu %zu\n", H, perm->size, cval->size);
+//    gsl_vector_fprintf(stdout, cval, "%.6f");
 
 //    printf("comb size: %zu  %zu", comb->k, comb->n);
     int feasable_c = 0;
@@ -74,7 +77,7 @@ gsl_matrix* mgn_weight_slattice_perm(size_t H, size_t nf)
     for (size_t i = 0; i < rows; ++i) {
         gsl_vector_view crow = gsl_matrix_row(W,i);
         gsl_vector_ulong_view combv = gsl_vector_ulong_view_array(comb->data, nf);
-        for (size_t j = 0; j < perm->size; ++j) {
+        for (size_t j = 0; j < nf; ++j) {
             gsl_vector_ulong_set(pcomb,j, combv.vector.data[gsl_permutation_get(perm,j)]);
         }
         for (size_t j = 0; j < nf; ++j) {
@@ -92,7 +95,7 @@ gsl_matrix* mgn_weight_slattice_perm(size_t H, size_t nf)
 
         gsl_permutation_next(perm);
 
-        if ((i+1) % perm->size == 0) {
+        if ((i+1) % nnf == 0) {
             gsl_permutation_init(perm);
             gsl_combination_next(comb);
         }
