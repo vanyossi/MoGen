@@ -49,7 +49,10 @@ set(MGN_LIB_SOURCES
     mgn_moa.c
     mgn_initializer.c
     mgn_random.c
+    mgn_pop_proto.c
     mgn_poplist.c
+    mgn_pop_matrix.c
+    mgn_pop_helper.c
     individual.c
     population.c
 #    mgn_types.c
