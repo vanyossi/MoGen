@@ -44,11 +44,12 @@ kmeans_data* gsl_kmeans(gsl_matrix *X, size_t k, size_t maxiter)
     do {
         gsl_kmeans_update_index(X,km->index,km->centers);
         gsl_kmeans_update_c(X,km->centers,km->index);
-    } while (++iter < maxiter || gsl_kmeans_index_changed(prev_idx,km->index));
+    } while (++iter < maxiter && gsl_kmeans_index_changed(prev_idx,km->index));
     km->iter = iter;
 //    gsl_matrix_fprintf(stdout,km->centers,"::%.6f ");
 //    gsl_vector_int_fprintf(stdout,km->index,"%d ");
 
+    gsl_vector_int_free(prev_idx);
     return km;
 }
 
@@ -104,6 +105,9 @@ gsl_kmeans_update_index(gsl_matrix *X, gsl_vector_int *idx, gsl_matrix *C)
         }
         gsl_vector_int_set(idx,s, (int) gsl_vector_min_index(dist));
     }
+
+    gsl_matrix_free(base);
+    gsl_vector_free(dist);
 }
 
 void
