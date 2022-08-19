@@ -24,15 +24,18 @@ mgn_rbf_create_phi(gsl_matrix *X
                    , kmeans_data *km
                    , gsl_vector *sigma
                    , void (*rbf)(gsl_vector *r, double s)
-                   );
+                   , gsl_matrix *ophi);
 
 
 gsl_matrix *
-mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y);
+mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y, gsl_matrix *m_w);
 
 
 // helpers should probably go in another file
 // caluclate mean square error
-double mgn_math_mse(gsl_vector *y, gsl_vector *yp);
+double mgn_math_mse(const gsl_vector *y, gsl_vector *yp);
+
+// caluclate mean square error of entire matrix
+double mgn_math_mse_matrix(gsl_matrix *y, gsl_matrix *yp);
 
 #endif //MOGEN_MGN_RBF_H

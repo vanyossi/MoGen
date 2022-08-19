@@ -53,10 +53,12 @@ gsl_matrix*
 mgn_rbf_create_phi(gsl_matrix *X
                    , kmeans_data *km
                    , gsl_vector *sigma
-                   , void (*rbf)(gsl_vector *r, double s))
+                   , void (*rbf)(gsl_vector *r, double s)
+                   , gsl_matrix *m_phi)
 {
-
-    gsl_matrix *m_phi = gsl_matrix_alloc(X->size1,km->k);
+    if (m_phi == NULL){
+        m_phi = gsl_matrix_alloc(X->size1,km->k);
+    }
 
     double r;
     gsl_matrix *m_rep_c = gsl_matrix_alloc(X->size1, X->size2);
@@ -77,14 +79,16 @@ mgn_rbf_create_phi(gsl_matrix *X
         v_work_col = gsl_matrix_column(m_phi,i); // TODO was column
         rbf(&v_work_col.vector,gsl_vector_get(sigma,i));
     }
+    gsl_vector_free(v_work_c);
+    gsl_matrix_free(m_rep_c);
     return m_phi;
 }
 
+// returns new W matrix vector, or uses m_w
 gsl_matrix *
-mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y)
+mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y, gsl_matrix *m_w)
 {
-    //returns
-    gsl_matrix *m_w;
+    gsl_error_handler_t *e_handle = gsl_set_error_handler_off();
 
     gsl_matrix *m_x_xt = gsl_matrix_calloc(m_phi->size2,m_phi->size2);
     gsl_blas_dsyrk(CblasUpper,CblasTrans,1,m_phi,1,m_x_xt);
@@ -98,20 +102,36 @@ mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y)
     gsl_matrix *m_phiy = gsl_matrix_calloc(m_phi->size2, y->size2);
     gsl_blas_dgemm(CblasTrans,CblasNoTrans,1,m_phi,y,0,m_phiy);
 
-    m_w = gsl_matrix_calloc(m_phi->size2,m_phiy->size2);
+    if (m_w == NULL){
+        m_w = gsl_matrix_calloc(m_phi->size2,m_phiy->size2);
+    }
     // solve the system Ax = b
     // A = m_x_xt,  x = w,  b = m_phiy
     int s;
+    bool err = false;
     gsl_matrix *m_x_xt_cpy = gsl_matrix_alloc(m_x_xt->size1, m_x_xt->size2);
     gsl_vector *w_vec = gsl_vector_alloc (m_phi->size2);
     gsl_permutation *p = gsl_permutation_alloc(m_x_xt->size1);
     gsl_vector_view y_i;
     for (size_t i = 0; i < m_phiy->size2; ++i) {
+        bool error = 0;
         gsl_matrix_memcpy(m_x_xt_cpy,m_x_xt);
         y_i = gsl_matrix_column(m_phiy,i);
 
         gsl_linalg_LU_decomp (m_x_xt_cpy, p, &s);
-        gsl_linalg_LU_solve (m_x_xt_cpy, p, &y_i.vector, w_vec);
+
+        error = gsl_linalg_LU_solve (m_x_xt_cpy, p, &y_i.vector, w_vec);
+        if (error !=0) {
+            err = true;
+        }
+//        double det = gsl_linalg_LU_det(m_x_xt_cpy, 0);
+        // dont try to solve if there is no solution.
+//        printf("det == %g\n", det);
+//        if (det >= 0) {
+//        } else {
+//            err= true;
+//            break;
+//        }
 //        gsl_vector_fprintf(stdout,w_vec,"%.7f "); puts("");
 
         gsl_matrix_set_col(m_w,i,w_vec);
@@ -132,6 +152,10 @@ mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y)
     gsl_vector_free(w_vec);
     gsl_permutation_free(p);
 
+    if (err) {
+        gsl_matrix_set_all(m_w,NAN);
+    }
+    gsl_set_error_handler(e_handle);
     return m_w;
     // multiply X * X' -> A
     // CblasNoTrans, A*A'
@@ -143,7 +167,7 @@ mgn_rbf_new_weight(gsl_matrix *m_phi, gsl_matrix *y)
 
 // helpers should probably go in another file
 // caluclate mean square error
-double mgn_math_mse(gsl_vector *y, gsl_vector *yp)
+double mgn_math_mse(const gsl_vector *y, gsl_vector *yp)
 {
     gsl_vector *y_copy = gsl_vector_calloc(y->size);
     gsl_vector_memcpy(y_copy,yp);
@@ -155,4 +179,17 @@ double mgn_math_mse(gsl_vector *y, gsl_vector *yp)
 
     gsl_vector_free(y_copy);
     return sum_y / (double) y->size;
+}
+
+double mgn_math_mse_matrix(gsl_matrix *y, gsl_matrix *yp)
+{
+    double mse = 0;
+    double mse_step;
+    for (size_t i = 0; i < y->size2; ++i) {
+        gsl_vector_view v_row = gsl_matrix_column(y,i);
+        gsl_vector_view y_rowyp = gsl_matrix_column(yp,i);
+        mse_step = mgn_math_mse(&v_row.vector,&y_rowyp.vector);
+        mse += mse_step;
+    }
+    return mse / (double) y->size2;
 }
