@@ -270,7 +270,10 @@ bool test_popl_ops()
     mgn_popl_push(popl, mgn_indv_alloc(0,(void*)iops, &param));
     init_value_f(mgn_popl_get_last(popl), &val);
 
-    pass &= popl->size == 6;
+    mgn_popl_alloc_last(popl);
+    popl->ops->copy(mgn_popl_get_last(popl), mgn_popl_get(popl,1));
+
+    pass &= popl->size == 7;
 //    mgn_popl_cursor_reset(popl);
 //    printf("size %d\n", popl->size);
 //    for (size_t i = 0; i < popl->size; ++i) {
