@@ -55,7 +55,7 @@ set(MGN_LIB_SOURCES
 #    mgn_types.c
     mgn_mop.c
     mgn_gnuplot.c
-#    mgn_pareto.c
+    mgn_pareto.c
 #    mgn_pop_init.c
 #    individual.c
 #    population.c
