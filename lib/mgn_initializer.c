@@ -46,37 +46,68 @@ mgn_init_new_lhci(size_t psize, size_t dim, mgnLimit *lim)
     lhci->psize = psize;
     lhci->dim = dim;
     lhci->limits = lim;
-    lhci->m_points = gsl_matrix_alloc(dim,psize);
+    lhci->m_points = gsl_matrix_alloc(psize,dim);
 
     lhci->_p = malloc(sizeof(lhci->_p));
     lhci->_p->p_cur = 0;
 
+//    gsl_permutation *perm_row = gsl_permutation_calloc(psize);
+//    gsl_ran_shuffle (rnd_get_generator(), perm_row->data, psize, sizeof(size_t));
+//
+//    for (size_t i = 0; i < lhci->m_points->size2; ++i) {
+//        // each cuadrant
+//        double delta = lim->max[i] / psize;
+//        double spill = delta / 5;
+//        double kmin = 0;
+//
+//        for (size_t j = 0; j < lhci->m_points->size1; ++j) {
+//            double center = kmin + (lim->min[i] + delta) / 2;
+//            gsl_matrix_set(lhci->m_points,j,i,
+//                rnd_getUniform_limit(
+//                    center - spill
+//                    ,center + spill)
+//            );
+//            kmin += delta;
+//        }
+//        gsl_vector_view cvv = gsl_matrix_column(lhci->m_points,i);
+//        gsl_permute_vector(perm_row, &cvv.vector);
+//        gsl_ran_shuffle (rnd_get_generator(), perm_row->data, perm_row->size, sizeof(size_t));
+//    }
+//
+//    gsl_permutation_free(perm_row);
+    mgn_init_lhc_to_matrix(lhci->m_points, lim);
+
+    return lhci;
+}
+
+void
+mgn_init_lhc_to_matrix(gsl_matrix *m_a, mgnLimit *lim)
+{
+    size_t psize = m_a->size1;
     gsl_permutation *perm_row = gsl_permutation_calloc(psize);
     gsl_ran_shuffle (rnd_get_generator(), perm_row->data, psize, sizeof(size_t));
 
-    for (size_t i = 0; i < lhci->m_points->size1; ++i) {
+    for (size_t i = 0; i < m_a->size2; ++i) {
         // each cuadrant
-        double delta = lim->max[i] / psize;
+        double delta = lim->max[i] / (double)psize;
         double spill = delta / 5;
         double kmin = 0;
 
-        for (size_t j = 0; j < lhci->m_points->size2; ++j) {
+        for (size_t j = 0; j < m_a->size1; ++j) {
             double center = kmin + (lim->min[i] + delta) / 2;
-            gsl_matrix_set(lhci->m_points,i,j,
+            gsl_matrix_set(m_a,j,i,
                 rnd_getUniform_limit(
                     center - spill
                     ,center + spill)
             );
             kmin += delta;
         }
-        gsl_vector_view cvv = gsl_matrix_row(lhci->m_points,i);
+        gsl_vector_view cvv = gsl_matrix_column(m_a,i);
         gsl_permute_vector(perm_row, &cvv.vector);
         gsl_ran_shuffle (rnd_get_generator(), perm_row->data, perm_row->size, sizeof(size_t));
     }
 
     gsl_permutation_free(perm_row);
-
-    return lhci;
 }
 
 void mgn_init_lhc(void *in, void *lhcip)
@@ -87,7 +118,7 @@ void mgn_init_lhc(void *in, void *lhcip)
 
     gsl_vector *x = ops->get_iparams(in).x;
 
-    gsl_matrix_get_col(x,lhci->m_points,lhci->_p->p_cur);
+    gsl_matrix_get_row(x,lhci->m_points,lhci->_p->p_cur);
     lhci->_p->p_cur++;
 }
 

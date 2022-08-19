@@ -12,7 +12,7 @@
 
 struct mgnp_init_params {
     mgnLimit *limit;
-    struct _mgn_i_ops *ops;
+    struct mgn_i_ops *ops;
 };
 
 void mgn_init_rand(void* in, void* limits);
@@ -32,6 +32,8 @@ struct mgn_lhc {
 };
 
 mgn_lhci* mgn_init_new_lhci(size_t psize, size_t dim, mgnLimit *lim);
+
+void mgn_init_lhc_to_matrix(gsl_matrix *m_a, mgnLimit *lim);
 
 void mgn_init_lhc(void *in, void* param);
 
