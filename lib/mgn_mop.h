@@ -12,7 +12,16 @@
 
 
 #define mgn_cast_eval(fname) (void (*)(void*, void*, void*, void*))fname
+typedef void (*mgn_mop_f)(void*, void*, void*, void*);
+
 #define castDouble(A,B) double* B = (double*)A
+
+#define mgn_mop_param_common() \
+    size_t pos;
+
+typedef struct mgnp_mop_param {
+    mgn_mop_param_common()
+} mgn_mop_p;
 
 struct _mgn_mop {
     char name[32];

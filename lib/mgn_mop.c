@@ -17,18 +17,22 @@ void mgn_mop_free(mgnMop *mop)
 
 size_t mgn_mop_eval_pop(mgnMop *mop, mgn_pop *pop, void *params)
 {
+    UNUSED(params);
     for (size_t i = 0; i < pop->size; i++) {
-        pop->ops->eval(mop, mgn_pop_get(pop,i),params);
+//        ((mgn_mop_p*)mop->params)->pos = i;
+        pop->ops->eval(mop, mgn_pop_get(pop,i),mop->params);
     }
     return pop->size;
 }
 
 size_t mgn_mop_eval_pop_index(mgnMop *mop, mgn_pop *pop, void *params, size_t pos, size_t size)
 {
+    UNUSED(params);
     if (pos + size > pop->size) return 0;
 
     for (size_t i = pos; i < (pos + size); i++) {
-        pop->ops->eval(mop, mgn_pop_get(pop,i),params);
+//        mop->params->pos = i;
+        pop->ops->eval(mop, mgn_pop_get(pop,i),mop->params);
     }
     return size;
 }
