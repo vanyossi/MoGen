@@ -11,6 +11,7 @@ include_directories(
     solvers/decomposition
     operators
     math
+    3rdparty
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -39,12 +40,11 @@ endif()
 
 set(MGN_LIB_SOURCES
 #    math/gsl_vector_additional.c
-    operators/mgn_gen_operator.c
-#    operators/mgn_vector_distance.c
 #    solvers/decomposition/mgn_scalarization.c
-#    solvers/decomposition/mgn_weights.c
+    solvers/decomposition/mgn_weights.c
     solvers/mgn_moead.c
     solvers/mgn_de.c
+    solvers/mgn_moead-rbf.c
     mgn_io.c
     mgn_io_datalist.c
     mgn_moa.c
