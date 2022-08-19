@@ -92,13 +92,17 @@ int main() {
     int plot_every = 100;
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
-    strcpy(pdat.title, "MOEAD");
+    asprintf(&pdat.title, "%s", "points");
+//    strcpy(pdat.title, "MOEAD");
     for (int run = 1; run <= runs; ++run) {
         mgn_moa_solve(moead, 1);
 
         if (run % plot_every == 0) {
             asprintf(&pdat.filename, "%s-%s_run-%d", pdat.title, mop->name, run);
-            mgn_plot((mgn_pop_proto *) EP, &pdat);
+            mgn_plot_fast((mgn_pop_proto *) EP, pdat.filename, "title");
+            FILE *out = fopen("sols.txt","w");
+            mgn_pop_print(EP, out);
+            fclose(out);
         }
     }
     printf("total exec: %zu\n", moead->tot_exec);
