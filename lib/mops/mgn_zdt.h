@@ -5,25 +5,19 @@
 #ifndef MOGEN_MGN_ZDT_H
 #define MOGEN_MGN_ZDT_H
 
-#include <gsl/gsl_vector.h>
 #include <math.h>
+#include <string.h>
+#include <gsl/gsl_vector.h>
 
+#include "mgn_mop.h"
 #include "mgn_gen_operator.h" //mgn_pow
 
 #define zdt_unused(x) ((void)(x))
 
-//typedef enum mop_zdt_e {
-//    ZDT1,
-//    ZDT2,
-//    ZDT3,
-//    ZDT4,
-//    ZDT6,
-//    ZDTM1
-//} ZDTVariant;
-
 typedef struct mgn_zdt_param zdt_param;
 
 struct mgn_zdt_param {
+    mgn_mop_param_common()
     size_t xsize;
     size_t fsize;
     size_t gsize;
@@ -62,7 +56,12 @@ void mgn_zdt1_vector(gsl_vector *x, gsl_vector* f, gsl_vector* g, void* p)
     gc = 1.0 + 9.0 * sum / (x->size - 1.0);
     h = 1.0 - sqrt(f1 / gc);
     f2 = gc * h;
-//    printf("f1, gc, h:: %.6f %.6f %.6f\n", f1, gc, h);
+
+//    for (size_t i = 0; i < x->size; ++i) {
+//        printf("%g, ", gsl_vector_get(x,i));
+//    }
+//    puts("");
+//    printf("f1 f2, gc, h:: %.6f %.6f %.6f\n", f1,f2, gc, h);
 
     gsl_vector_set(f,0,f1);
     gsl_vector_set(f,1,f2);
@@ -162,6 +161,52 @@ void mgn_zdt6(double *x, double* f, double* g, void* sizes)
 
     f[0] = f1;
     f[1] = f2;
+}
+
+typedef enum mop_zdt_e {
+    ZDT1,
+    ZDT2,
+    ZDT3,
+    ZDT4,
+    ZDT5,
+    ZDT6,
+    ZDTM1
+} MGN_ZDT_VAR;
+
+mgnMop* mgn_zdt_init(MGN_ZDT_VAR variant, mgn_indv_param *param)
+{
+    mgnMop *mop = mgn_mop_alloc();
+    mop->params = param;
+    switch (variant) {
+        case ZDT1:
+            strcpy(mop->name, "ZDT1");
+            mop->eval_array = mgn_cast_eval(mgn_zdt1);
+            mop->eval = mgn_cast_eval(mgn_zdt1_vector);
+            break;
+        case ZDT2:
+            strcpy(mop->name, "ZDT2");
+            mop->eval_array = mgn_cast_eval(mgn_zdt2);
+//            mop->eval = mgn_cast_eval(mgn_zdt2_vector);
+            break;
+        case ZDT3:
+            strcpy(mop->name, "ZDT3");
+//            mop->eval_array = mgn_cast_eval(mgn_zdt3);
+            mop->eval = mgn_cast_eval(mgn_zdt3_vector);
+            break;
+        case ZDT4:
+            strcpy(mop->name, "ZDT4");
+            mop->eval_array = mgn_cast_eval(mgn_zdt4);
+//            mop->eval = mgn_cast_eval(mgn_zdt1_vector);
+            break;
+        case ZDT6:
+            strcpy(mop->name, "ZDT6");
+            mop->eval_array = mgn_cast_eval(mgn_zdt6);
+//            mop->eval = mgn_cast_eval(mgn_zdt1_vector);
+            break;
+        default:
+            break;
+    }
+    return mop;
 }
 
 #endif //MOGEN_MGN_ZDT_H
