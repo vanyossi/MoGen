@@ -59,11 +59,12 @@ int main() {
 
     mgn_lhci_free(lhci);
 
-    mgn_de_setmop(de, mop, mgn_mop_sphere_min);
+    mgn_de_ef_param ef_params = {0, &param.f_size};
+    mgn_de_setmop(de, mop, mgn_cast_de_ef(mgn_mop_sphere_min), &ef_params);
     mgn_de_eval(de);
 
 
-    mgn_pop *sols = de->pop_get(de);
+    mgn_pop *sols = (mgn_pop*)de->pop_get(de);
     for (size_t i = 0; i < sols->size; ++i) {
         mgn_indv *in = mgn_indv_get(sols,i);
         printf("%zu %.6f\n", i

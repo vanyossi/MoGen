@@ -49,6 +49,7 @@ struct mgn_de_param {
     mgn_pop* trial;
     mgnMop *mop;
     mgn_de_ef(ef);
+    mgn_de_ef_param* ef_param;
 };
 
 typedef struct mgnp_de_cross_param {
@@ -70,9 +71,9 @@ de_param* mgn_de_getfeatures(mgnMoa* moa)
     return (de_param*)moa->features;
 }
 
-mgn_pop* mgn_de_pop_get(mgnMoa* moa)
+mgn_pop_proto* mgn_de_pop_get(mgnMoa* moa)
 {
-    return mgn_de_getfeatures(moa)->pop;
+    return (mgn_pop_proto*)mgn_de_getfeatures(moa)->pop;
 }
 
 /*
@@ -82,14 +83,15 @@ mgn_pop* mgn_de_pop_get(mgnMoa* moa)
  * x = -|
  *      -- x    otherwise
  */
-void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgn_de_ef(ef))
+void mgn_de_selection(mgn_pop *pop, mgn_pop *trial, mgn_de_ef(ef), mgn_de_ef_param* ef_p)
 {
 //    mgn_mop_eval_pop(mop, trial, mop->params);
     for (size_t i = 0; i < pop->size; ++i) {
         gsl_vector *x = pop_get_iparam(pop,i).f;
         gsl_vector *v = pop_get_iparam(trial,i).f;
-        if (ef(x->data,v->data,v->size) == 1){
-//            printf("true x < v\n");
+        ef_p->pos = i;
+        if (ef(x,v,ef_p) == 1){
+//            printf("true x > v\n");
             mgn_pop_copy(pop,trial,i,i,1);
         }
     }
@@ -181,7 +183,7 @@ void mgn_de_run(mgnMoa* de)
 
     // original Selection
     mgn_mop_eval_pop(m_p->mop, m_p->trial, m_p->mop->params);
-    mgn_de_selection(m_p->pop,m_p->trial,m_p->ef);
+    mgn_de_selection(m_p->pop,m_p->trial,m_p->ef, m_p->ef_param);
 //    mgn_pop_copy(m_p->trial, m_p->pop, 0, 0, m_p->trial->size);
 
     // A sel
@@ -270,11 +272,12 @@ void mgn_de_init(mgnMoa* moa
 }
 
 // TODO move to moa;
-void mgn_de_setmop(mgnMoa *de, mgnMop *mop, mgn_de_ef(ef))
+void mgn_de_setmop(mgnMoa *de, mgnMop *mop, mgn_de_ef(ef), mgn_de_ef_param* ef_p)
 {
     de_param *prm = mgn_de_getfeatures(de);
     prm->mop = mop;
     prm->ef = ef;
+    prm->ef_param = ef_p;
     prm->mopset = true;
 }
 

@@ -12,6 +12,7 @@
 typedef struct mgn_mop_param mop_param;
 
 struct mgn_mop_param {
+//    mgn_mop_param_common();
     size_t xsize;
     size_t fsize;
     size_t gsize;
@@ -31,16 +32,20 @@ void mgn_mop_sphere(double *x, double* f, double* g, void* param)
     }
 }
 
-int mgn_mop_sphere_min(double *x, double *v, size_t size)
+int mgn_mop_sphere_min(const gsl_vector *x, const gsl_vector *v, mgn_de_ef_param* ef_p)
 {
-    double sx = 0;
-    double sv = 0;
+    UNUSED(ef_p);
+//    double sx = 0;
+//    double sv = 0;
+//    size_t *size = ef_p->extra;
 
     // min is 0, use abs to measure min distance to origin
-    for (size_t i = 0; i < size; ++i) {
-        sx += x[i];
-        sv += v[i];
-    }
+    double sx = gsl_vector_sum(x);
+    double sv = gsl_vector_sum(v);
+//    for (size_t i = 0; i < *size; ++i) {
+//        sx += x[i];
+//        sv += v[i];
+//    }
 //    printf("min %g %g:: ", fabs(sx),fabs(sv));
     return (fabs(sx) <= fabs(sv))? -1 : 1;
 }
