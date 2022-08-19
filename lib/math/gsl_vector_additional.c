@@ -22,7 +22,7 @@ int cmp_double(const void *a, const void *b)
     struct gsl_vector_qsort_idx *ad = (struct gsl_vector_qsort_idx*)a;
     struct gsl_vector_qsort_idx *bd = (struct gsl_vector_qsort_idx*)b;
 
-    return (ad->value < bd->value)? -1 : 1;;
+    return (ad->value <= bd->value)? -1 : 1;
 }
 
 // public functions
