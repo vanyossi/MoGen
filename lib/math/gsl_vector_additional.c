@@ -121,3 +121,22 @@ void gsl_matrix_printf(gsl_matrix *M, FILE *stream)
         fprintf(stream, "\n");
     }
 }
+
+void gsl_matrix_save(gsl_matrix *M, char* filename){
+    return;
+    FILE *out = fopen(filename, "w");
+    gsl_matrix_printf(M, out);
+    fclose(out);
+}
+
+// general print matrix
+//    gsl_matrix_printf(m_dist, stdout);
+//    gsl_matrix *m_dist_i_double = gsl_matrix_alloc(m_dist_i->size1, m_dist_i->size2);
+//    for (size_t i = 0; i < m_dist_i->size1; ++i) {
+//        for (size_t j = 0; j < m_dist_i->size2; ++j) {
+//            gsl_matrix_set(m_dist_i_double,i,j,(double)gsl_matrix_int_get(m_dist_i,i,j));
+//        }
+//    }
+//    puts("====");
+//    gsl_matrix_printf(m_dist_i_double, stdout);
+//    gsl_matrix_free(m_dist_i_double);

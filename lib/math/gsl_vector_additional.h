@@ -24,4 +24,7 @@ gsl_matrix* gsl_matrix_get_row_indexes(gsl_matrix *v, int *idx, size_t size);
 
 void gsl_matrix_printf(gsl_matrix *M, FILE *stream);
 
+void gsl_matrix_save(gsl_matrix *M, char* filename);
+
+
 #endif // _INDITEST_LIB_GSL_VECTOR_ADDITIONAL_H_
