@@ -12,12 +12,14 @@
 
 struct mgn_moa_t {
     char name[MOA_NAME_LEN];
+    size_t c_run;
     size_t tot_exec;
+    mgnMop *mop;
     void (*run)(mgnMoa*);
-    bool (*stop)();
+    bool (*stop)(mgnMoa*);
     void (*set_ga_vals)(mgnMoa*, mgn_ga_sets*);
     void* features;
-    mgn_pop* (*pop_get)(mgnMoa*);
+    mgn_pop_proto* (*pop_get)(mgnMoa*);
 };
 
 struct mgn_moa_ga_set {
@@ -29,6 +31,6 @@ struct mgn_moa_ga_set {
 
 bool mgn_moa_solve(mgnMoa *moa, size_t runs);
 
-void mgn_moa_set_mop();
+void mgn_moa_set_mop(mgnMoa *moa, mgnMop *mop);
 
 #endif // _LIB_MGN_MOA_H_

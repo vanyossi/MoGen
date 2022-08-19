@@ -11,7 +11,13 @@ bool mgn_moa_solve(mgnMoa *moa, size_t runs)
     size_t i = 0;
 
     for (i = 0; i < runs; ++i) {
+        moa->c_run++;
         moa->run(moa);
     }
     return true;
+}
+
+void mgn_moa_set_mop(mgnMoa *moa, mgnMop *mop)
+{
+    moa->mop = mop;
 }
