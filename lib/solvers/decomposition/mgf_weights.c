@@ -16,11 +16,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
+// TODO 1: migrate to mogen
+// TODO 2: design a better error handling strat
+//      maybe global with static struct for report (?)
 #include "mgf_weights.h"
 
 #include <assert.h>
-#include <stdio.h> //@TODO move error showing to another library
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 

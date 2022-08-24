@@ -381,6 +381,7 @@ void mgnp_moeadrbf_select(mgn_count_ciclic *sel_idx
         size_t i_sel = d_row.vector.data[sel_idx->value];
 
         // TODO make subfunction (helpers)
+        //      check uhash examples for quick idea
         // sh is NULL if not found
         HASH_FIND(hh,hashes
                   ,mgn_indv_getx_vec(p_orig,i_sel)->data
@@ -750,7 +751,7 @@ void mgn_moeadrbf_run(mgnMoa *moa)
     // mgn_popl pop_p: has all nondom aprox solutions
     // S set size of RBF cluster vectors.
     printf("ws %zu %zu", ((gsl_matrix*)m_w_ptr->p)->size1, ((gsl_matrix*)m_w_ptr->p)->size2);
-    size_t ws_size = 30; // TODO input
+    size_t ws_size = 30; // TODO input <- really is the supplied w_matrix
     // TODO initialize inside using mgn_ptr (probably)
     gsl_matrix *m_ws = mgn_weight_slattice_perm(ws_size-1,((gsl_matrix*)m_w_ptr->p)->size2);
 
@@ -901,6 +902,7 @@ void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf)
     moeadrbf->tot_exec += mrbf->solution->size;
 
     // TODO print pop
+    //      done? mgn_pop_print(mrbf->solution, stdout);
 //    for (size_t i = 0; i < mrbf->solution->size; ++i) {
 //        gsl_vector *f = ((mgn_indv*) mrbf->solution->get(mrbf->solution,i))->f;
 //        printf("%.3f, %.3f", gsl_vector_get(f,0), gsl_vector_get(f,1));

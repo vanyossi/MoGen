@@ -38,11 +38,6 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
 
 void mgn_moa_moeadrbf_free(mgnMoa* moeadrbf);
 
-//void mgn_de_setmop(
-//    mgnMoa *mrbf
-//    , mgnMop *mop
-//    , void* todo);
-
 
 void mgn_moa_moeadrbf_free(mgnMoa *mrbf);
 

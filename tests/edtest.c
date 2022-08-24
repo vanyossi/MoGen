@@ -81,7 +81,7 @@ int main() {
     strcpy(pdat.title, "DE");
 
     for (int run = 0; run < runs; ++run) {
-        mgn_moa_solve(de, 1); // TODO recieve solver_plot_function
+        mgn_moa_solve(de, 1); // TODO receive solver_plot_function callback
 
         if (run % plot_every == 0) {
             asprintf(&pdat.filename, "DE_run-%d", run);

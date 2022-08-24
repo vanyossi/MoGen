@@ -272,6 +272,7 @@ void mgn_de_init(mgnMoa* moa
 }
 
 // TODO move to moa;
+//      how to allow inheritance (no this)
 void mgn_de_setmop(mgnMoa *de, mgnMop *mop, mgn_de_ef(ef), mgn_de_ef_param* ef_p)
 {
     de_param *prm = mgn_de_getfeatures(de);

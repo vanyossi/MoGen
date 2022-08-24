@@ -76,7 +76,7 @@ mgn_rbf_create_phi(gsl_matrix *X
 //            r = pow(r,2);
             gsl_matrix_set(m_phi,j,i,r);
         }
-        v_work_col = gsl_matrix_column(m_phi,i); // TODO was column
+        v_work_col = gsl_matrix_column(m_phi,i);
         rbf(&v_work_col.vector,gsl_vector_get(sigma,i));
     }
     gsl_vector_free(v_work_c);

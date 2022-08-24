@@ -16,6 +16,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+// TODO migrate to Mogen
 #include <stdio.h>
 
 //#include "mogen_mop.h"
@@ -83,7 +84,7 @@ int main(int argc, char const *argv[]) {
     Mop *problem = mop_houseoptim();
     // moead creates its own population and initializes it.
     Moa *moead = moa_moead(problem, W_RES_210K);
-    mgf_moa_set_scalarization(&mgf_moa_moead_data(moead)->s_m, SCLM_TCH); // @TODO need API
+    mgf_moa_set_scalarization(&mgf_moa_moead_data(moead)->s_m, SCLM_TCH);
     moa_stopat_eval(moead,1500);
     // mop_set_params(problem, 2, 0, 0, 2, 0);
 //    double min = 0;

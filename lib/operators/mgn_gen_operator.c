@@ -225,6 +225,7 @@ void mgn_genop_pbm(double n, double pm, double *p, const double *lb, const doubl
     double d;
 
     // TODO mutate for each
+    //      meaning: use an array of pm.
     for (size_t i = 0; i < size; ++i) {
         if (pm < rnd_getUniform()) continue;
 
