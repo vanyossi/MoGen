@@ -36,8 +36,13 @@ void gsl_vector_map(gsl_vector *V, double (*func)(double, void*), void* param)
 
 double gsl_vector_pnorm(gsl_vector *v, double pvalue)
 {
-    gsl_vector_map(v, map_hpow, (void *) &pvalue);
-    double sumv = gsl_vector_sum(v);
+    gsl_vector *tmp_vec = gsl_vector_alloc(v->size);
+    gsl_vector_memcpy(tmp_vec,v);
+
+    gsl_vector_map(tmp_vec, map_hpow, (void *) &pvalue);
+    double sumv = gsl_vector_sum(tmp_vec);
+
+    gsl_vector_free(tmp_vec);
     return pow(sumv,1.0/pvalue);
 }
 
