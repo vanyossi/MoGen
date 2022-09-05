@@ -6,10 +6,15 @@
 #include <math.h>
 #include <float.h>
 
+#include <gsl/gsl_randist.h>
+
 #include "../mgn_scalarization.h"
 #include "../mgn_weights.h"
 #include "mops/mgn_zdt.h"
 #include "mgn_types.h"
+
+#include "mgn_random.h"
+
 
 static size_t nobj;
 
@@ -55,11 +60,27 @@ int main() {
         gsl_vector_memcpy(vcc, &wcur.vector);
         gsl_ran_shuffle(rnd_get_generator(),vcc->data, vcc->size, sizeof(double));
 
-        vecres = mgn_scalar_tchebycheff(vcc,vf,z);
+        vecres = mgn_scalar_tchebycheff(vcc,vf,z,NULL);
         refres = ref_tch(vf->data,vcc->data,z->data,0);
 
         printf("(%.6f,%.6f) %.6f == %.6f\n" , vcc->data[0], vcc->data[1], vecres, refres);
     }
+
+    puts ("comparing PBI results");
+    double theta = 0.5;
+    for (size_t i = 0; i < w->size1; ++i) {
+        gsl_vector_view wcur = gsl_matrix_row(w,i);
+        gsl_vector_memcpy(vcc, &wcur.vector);
+        gsl_ran_shuffle(rnd_get_generator(),vcc->data, vcc->size, sizeof(double));
+
+
+        vecres = mgn_scalar_pbi(vcc,vf,z,&theta);
+        refres = mgn_scalar_pbi_ori(vcc,vf,z,&theta);
+
+        printf("(%.6f,%.6f) %.6f == %.6f\n" , vcc->data[0], vcc->data[1], vecres, refres);
+    }
+
+
     gsl_vector_free(vcc);
 
     gsl_vector_free(vf);

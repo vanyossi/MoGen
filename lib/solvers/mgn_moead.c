@@ -43,7 +43,8 @@ struct moead_features {
     gsl_matrix *wei;
     gsl_matrix *dist;
     gsl_matrix_int *dindex;
-    double (*scalarize)(gsl_vector*, gsl_vector*, gsl_vector*);
+    mgnf_decomp_scalar scalarize;
+//    double (*scalarize)(gsl_vector*, gsl_vector*, gsl_vector*);
 };
 
 
@@ -116,10 +117,12 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
         double g1 = set->scalarize(&wcur.vector
                                    , lpop->ops->get_iparams(mgn_pop_get(lpop,0)).f
                                    , &zview.vector
+                                   , NULL
         );
         double g2 = set->scalarize(&wcur.vector
                                    , set->pop->ops->get_iparams(mgn_pop_get(set->pop,id)).f
                                    , &zview.vector
+                                   , NULL
         );
 
         if (g1 < g2) {
