@@ -12,6 +12,11 @@ double map_hpow(double value, void* pvalue) {
     return fabs(pow(value, *p));
 }
 
+double map_pow(double value, void* pvalue) {
+    double *p = (double*)pvalue;
+    return pow(value, *p);
+}
+
 double map_invmul(double value, void* pvalue) {
     UNUSED(pvalue);
     return 1.0 / value;

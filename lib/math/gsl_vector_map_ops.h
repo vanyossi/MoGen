@@ -13,6 +13,8 @@
 
 double map_hpow(double value, void* pvalue);
 
+double map_pow(double value, void* pvalue);
+
 double map_invmul(double value, void* pvalue);
 
 #define pmap_func_double_header(FNAME) \
