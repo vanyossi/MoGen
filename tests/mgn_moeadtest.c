@@ -21,6 +21,7 @@
 #include "individual.h"
 #include "population.h"
 #include "mgn_poplist.h"
+#include "mgn_scalarization.h"
 
 int main() {
     mgn_plot_open();
@@ -84,6 +85,7 @@ int main() {
 
 
     mgnMoa *moead = mgn_moead_init(30, 2, 20, EP, mop, mgn_ind_init,moplim,true);
+    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
     moead->set_ga_vals(moead,&ga_probs,5,30);
 
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);

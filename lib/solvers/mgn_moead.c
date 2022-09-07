@@ -107,16 +107,16 @@ void moead_update_neighbour(mgn_pop *lpop, moeadf *set, size_t Ni)
 
 //        gsl_vector_memcpy(wperm, &wcur.vector);
 //        gsl_ran_shuffle(rnd_get_generator(),wperm->data, wperm->size, sizeof(double));
-
+        double theta = 0.5;
         double g1 = set->scalarize(&wcur.vector
                                    , lpop->ops->get_iparams(mgn_pop_get(lpop,0)).f
                                    , &zview.vector
-                                   , NULL
+                                   , &theta
         );
         double g2 = set->scalarize(&wcur.vector
                                    , set->pop->ops->get_iparams(mgn_pop_get(set->pop,id)).f
                                    , &zview.vector
-                                   , NULL
+                                   , &theta
         );
 
         if (g1 < g2) {
@@ -408,6 +408,13 @@ mgnMoa* mgn_moead_init(size_t H,size_t nobj, size_t T
     return moead;
 }
 
+
+void mgn_moead_set_scalarization(mgnMoa* moead
+                                 ,mgnf_decomp_scalar f)
+{
+    moeadf *moaf = mgn_moead_getfeatures(moead);
+    moaf->scalarize = f;
+}
 
 moeadf* mgn_moead_getfeatures(mgnMoa* moead)
 {

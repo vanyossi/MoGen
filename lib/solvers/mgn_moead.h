@@ -7,6 +7,8 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 
+#include "decomposition/mgn_scalarization.h"
+
 typedef struct moead_features moeadf;
 
 moeadf* mgn_moead_getfeatures(mgnMoa* moead);
@@ -26,6 +28,9 @@ mgnMoa* mgn_moead_init(size_t H,size_t nobj, size_t T
                        ,bool external);
 
 //moeadf* mgn_moead_getfeatures(mgnMoa* moead);
+
+void mgn_moead_set_scalarization(mgnMoa* moead
+                                 ,mgnf_decomp_scalar f);
 
 gsl_matrix* mgn_moead_get_w(mgnMoa* moead);
 
