@@ -20,19 +20,13 @@
 #include "operators/mgn_gen_operator.h"
 #include "mgn_pareto.h"
 
-// TODO integrate to crossover struct
-#ifndef MGN_SBX_N
-#define MGN_SBX_N 20
-#endif
-
-#ifndef MGN_PBM_N
-#define MGN_PBM_N 20
-#endif
 
 struct moead_features {
     bool isalloc;
     bool ismopset;
     bool isprobset;
+    size_t pbm_n;
+    size_t sbx_n;
     mgn_ga_sets *ga_set;
     size_t size_nei;
     double *z;
@@ -66,7 +60,7 @@ mgn_pop* moead_reproduction(moeadf* set, mgn_pop* y_pop, size_t Ni)
     //          ,set->pop->ops->get_iparams( mgn_pop_get(set->pop,gsl_vector_int_get(rand_sel,0))).x->data
 
     if(set->ga_set->cross_rate > rnd_getUniform()) {
-        mgn_genop_sbx(MGN_SBX_N
+        mgn_genop_sbx(set->sbx_n
                       , pop_get_iparam(set->pop, rand_sel->data[0]).x->data
                       ,set->pop->ops->get_iparams( mgn_pop_get(set->pop,gsl_vector_int_get(rand_sel,1))).x->data
                       ,l_pop->ops->get_iparams(mgn_pop_get(l_pop,0)).x->data
@@ -83,7 +77,7 @@ mgn_pop* moead_reproduction(moeadf* set, mgn_pop* y_pop, size_t Ni)
     gsl_vector_int_free(rand_sel);
 
     // mut_rate
-    mgn_genop_pbm(MGN_PBM_N, set->ga_set->mut_rate
+    mgn_genop_pbm(set->pbm_n, set->ga_set->mut_rate
                   ,l_pop->ops->get_iparams(mgn_pop_get(l_pop,0)).x->data
                   ,set->ga_set->mut_llim
                   ,set->ga_set->mut_ulim
@@ -219,7 +213,7 @@ void moead_run(mgnMoa* moead)
     mgn_pop* ypop = pop_alloc_pop(1, feat->pop);
     for (size_t i = 0; i < n_weights; ++i) {
         mgn_pop* l_pop = moead_reproduction(feat, ypop,i);
-        // TODO add mop params to mop.
+        // TODO add mop params to mop (?)
         moead->tot_exec += mgn_mop_eval_pop(feat->mop,l_pop,feat->mop->params);
         // update z
         mgn_mop_eval_pop(feat->_mop, l_pop, feat);
@@ -372,9 +366,12 @@ void mgn_moead_free(mgnMoa *moead){
 }
 
 
-void moead_set_prob(mgnMoa*moead, mgn_ga_sets *gasets){
+void moead_set_prob(mgnMoa*moead, mgn_ga_sets *gasets, size_t pbm, size_t sbx)
+{
     moeadf* feat = mgn_moead_getfeatures(moead);
     feat->ga_set = gasets;
+    feat->pbm_n = pbm;
+    feat->sbx_n = sbx;
     feat->isprobset = true;
 }
 

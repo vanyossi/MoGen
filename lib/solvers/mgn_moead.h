@@ -33,7 +33,10 @@ mgn_pop* mgn_moead_getpop(mgnMoa* moead);
 
 void mgn_moead_set_mop(mgnMoa* moead, mgnMop *mop, int type);
 
-void moead_set_prob(mgnMoa*moead, mgn_ga_sets *gasets);
+void moead_set_prob(mgnMoa*moead
+                    , mgn_ga_sets *gasets
+                    , size_t pbm
+                    , size_t sbx);
 
 void mgn_moead_free(mgnMoa *moead);
 

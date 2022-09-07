@@ -315,7 +315,7 @@ void mgnp_moeadrbf_mdl_optim(mgnp_moeadrbf_mdl_p *mdl_p, mgn_pop *p_e, mgn_ptr *
     mgn_popl *tmppe = mgn_popl_alloc(p_e->ops, params);
     mgnMoa *moead = mgn_moead_init(mdl_p->w_size, params->f_size, T, tmppe, mop
                                    , mgn_init_lhc,mdl_p->lhci,false);
-    moead->set_ga_vals(moead,&ga_probs);
+    moead->set_ga_vals(moead,&ga_probs, 5, 30);
 
     mgn_moa_solve(moead, runs); // 30_000
 //    printf("tot_exec %zu\n", moead->tot_exec);

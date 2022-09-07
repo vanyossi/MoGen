@@ -2,13 +2,13 @@
 // Created by Iván Yossi on 17/04/22.
 //
 
-#ifndef MGN_SBX_N
-#define MGN_SBX_N 30
-#endif
-
-#ifndef MGN_PBM_N
-#define MGN_PBM_N 5
-#endif
+//#ifndef MGN_SBX_N
+//#define MGN_SBX_N 30
+//#endif
+//
+//#ifndef MGN_PBM_N
+//#define MGN_PBM_N 5
+//#endif
 
 #include <string.h>
 
@@ -84,12 +84,12 @@ int main() {
 
 
     mgnMoa *moead = mgn_moead_init(30, 2, 20, EP, mop, mgn_ind_init,moplim,true);
-    moead->set_ga_vals(moead,&ga_probs);
+    moead->set_ga_vals(moead,&ga_probs,5,30);
 
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    int runs = 20;
+    int runs = 100;
     int plot_every = 5;
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
@@ -140,7 +140,7 @@ int main() {
 //       ,in->f->data[0], in->f->data[1]);
 //    }
 
-    FILE *ofile = fopen("../../moead_tmp2.txt","w");
+    FILE *ofile = fopen("../../moead_tmp3.txt","w");
 
     mgn_popl_cursor_reset(EP);
     while(mgn_popl_current(EP) != 0) {

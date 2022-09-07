@@ -17,7 +17,7 @@ struct mgn_moa_t {
     mgnMop *mop;
     void (*run)(mgnMoa*);
     bool (*stop)(mgnMoa*);
-    void (*set_ga_vals)(mgnMoa*, mgn_ga_sets*);
+    void (*set_ga_vals)(mgnMoa*, mgn_ga_sets*, size_t, size_t);
     void* features;
     mgn_pop_proto* (*pop_get)(mgnMoa*);
 };
