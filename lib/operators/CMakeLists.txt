@@ -10,7 +10,9 @@ include_directories(
 set(MOGEN_OP_SOURCES
     mgn_vector_distance.c
     mgn_gen_operator.c
+    mgn_cluster_m.c
     gsl_kmeans_new.c
+    mgn_fcmeans.c
     mgn_rbf.c
     )
 
