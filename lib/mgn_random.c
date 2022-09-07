@@ -21,6 +21,11 @@ void rnd_initialize()
     return;
 }
 
+void rnd_gen_free()
+{
+    gsl_rng_free(randGenerator);
+}
+
 void rnd_set_seed(unsigned long seed)
 {
     gsl_rng_set(randGenerator, seed);
