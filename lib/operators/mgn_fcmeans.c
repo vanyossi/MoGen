@@ -110,6 +110,9 @@ mgn_fcmeans_update_c(gsl_matrix *m_x
 
         gsl_vector_set_all(v_sum,0);
     }
+    gsl_vector_free(v_sum);
+    gsl_vector_free(v_xtmp);
+    gsl_vector_free(v_utmp);
 }
 
 void

@@ -5,6 +5,7 @@
  *  SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+
 #include "mgn_fcmeans.h"
 #include "mgn_random.h"
 
@@ -72,6 +73,9 @@ int main(int argc, char const *argv[]) {
     }
 
     mgn_cluster_data_extra_free(fcm_extra);
+
+
+
 //    kmeans_data_extra *kdat = gsl_kmeans_calc(kmd);
 
 //    for (size_t l = 0; l < kdat->size; ++l) {
@@ -96,15 +100,12 @@ int main(int argc, char const *argv[]) {
     fclose(train_center);
 
     FILE *train_assign = fopen("fcm_train_assign.txt","w");
-//    for (size_t i = 0; i < kmd->index->size; ++i) {
-        gsl_matrix_printf(kmd->m_u, train_center);
-//        fprintf(train_assign, "%d", gsl_vector_int_get(kmd->index,i));
-//        if(i != kmd->index->size -1) {
-//            fprintf(train_assign," ");
-//        }
-//    }
+    gsl_matrix_printf(kmd->m_u, train_center);
     fclose(train_assign);
 
+    gsl_matrix_free(X);
+    gsl_matrix_free(B);
     mgn_fcmeans_free(kmd);
+    rnd_gen_free();
     return 0;
 }
