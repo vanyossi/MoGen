@@ -113,7 +113,7 @@ gsl_matrix* gsl_matrix_get_row_indexes(gsl_matrix *v, int *idx, size_t size)
 
 void gsl_matrix_printf(gsl_matrix *M, FILE *stream)
 {
-    const char *format = "%.6f";
+    const char *format = "%1.6e";
 
     for (size_t c = 0; c < M->size1; ++c) {
         gsl_vector_view crow = gsl_matrix_row(M, c);
