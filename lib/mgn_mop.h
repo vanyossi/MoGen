@@ -10,6 +10,7 @@
 
 #include "mgn_types.h"
 
+typedef struct mgnp_mop_param mgn_mop_param;
 
 #define mgn_cast_eval(fname) (void (*)(void*, void*, void*, void*))fname
 typedef void (*mgn_mop_f)(void*, void*, void*, void*);
@@ -28,9 +29,12 @@ struct _mgn_mop {
     void* params;
     void (*eval)(void*, void*, void*,void*);
     void (*eval_array)(void*, void*, void*,void*);
+    void (*free)(mgnMop*); // mandatory
 };
 
+
 mgnMop* mgn_mop_alloc();
+
 void mgn_mop_free(mgnMop *mop);
 
 size_t mgn_mop_eval_pop(mgnMop *mop, mgn_pop *pop, void *params);

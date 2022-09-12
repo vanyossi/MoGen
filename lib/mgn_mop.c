@@ -2,6 +2,7 @@
 // Created by Iván Yossi on 29/07/22.
 //
 #include "mgn_mop.h"
+#include "mgn_pop_proto.h"
 #include "population.h"
 
 mgnMop* mgn_mop_alloc()
@@ -12,6 +13,7 @@ mgnMop* mgn_mop_alloc()
 
 void mgn_mop_free(mgnMop *mop)
 {
+    if (mop->free) { mop->free(mop); }
     free(mop);
 }
 
