@@ -161,6 +161,7 @@ size_t mgn_sizeofp()
 
 void mgn_indv_eval(mgnMop *mop, void* indv, void* param)
 {
+    UNUSED(param);
     mgn_indv *in = (mgn_indv*)indv;
     if (mop->eval) {
         mop->eval(in->x, in->f, in->g, mop->params);
