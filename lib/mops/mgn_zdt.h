@@ -18,9 +18,9 @@ typedef struct mgn_zdt_param zdt_param;
 
 struct mgn_zdt_param {
     mgn_mop_param_common()
-    size_t xsize;
-    size_t fsize;
-    size_t gsize;
+    size_t x_size;
+    size_t f_size;
+    size_t g_size;
 };
 
 
@@ -32,10 +32,10 @@ void mgn_zdt1(double *x, double* f, double* g, void* sizes)
 
     f1 = x[0];
     sum = 0.0;
-    for (size_t i = 1; i < size->xsize; i++) {
+    for (size_t i = 1; i < size->x_size; i++) {
         sum += x[i];
     }
-    gc = 1.0 + 9.0 * sum / (size->xsize - 1.0);
+    gc = 1.0 + 9.0 * sum / (size->x_size - 1.0);
     h = 1.0 - sqrt(f1 / gc);
     f2 = gc * h;
     f[0] = f1;
@@ -78,10 +78,10 @@ void mgn_zdt2(double *x, double* f, double* g, void* sizes)
 
     f1 = x[0];
     sum = 0.0;
-    for (size_t i = 1; i < size->xsize; i++) {
+    for (size_t i = 1; i < size->x_size; i++) {
         sum += x[i];
     }
-    gc = 1.0 + 9.0 * sum / (size->xsize - 1.0);
+    gc = 1.0 + 9.0 * sum / (size->x_size - 1.0);
     h = 1.0 - mgn_pow(f1 / gc,2.0);
     f2 = gc * h;
 
@@ -123,11 +123,11 @@ void mgn_zdt4(double *x, double* f, double* g, void* sizes)
 
     f1 = x[0];
     sum = 0.0;
-    for (size_t i = 1; i < size->xsize; i++)
+    for (size_t i = 1; i < size->x_size; i++)
     {
         sum += (mgn_pow(x[i], 2.0) - 10.0 * cos(4.0 * M_PI * x[i]));
     }
-    gc = 1.0 + 10.0 * (size->xsize - 1.0) + sum;
+    gc = 1.0 + 10.0 * (size->x_size - 1.0) + sum;
     h = 1.0 - sqrt(f1 / gc);
     f2 = gc * h;
 
@@ -151,11 +151,11 @@ void mgn_zdt6(double *x, double* f, double* g, void* sizes)
 
     f1 = 1.0 - exp(-4.0 * x[0]) * pow(sin(6.0 * M_PI * x[0]), 6.0);
     sum = 0.0;
-    for (size_t i = 1; i < size->xsize; i++)
+    for (size_t i = 1; i < size->x_size; i++)
     {
         sum += x[i];
     }
-    gc = 1.0 + 9.0 * mgn_pow((sum / (size->xsize - 1.0)), 0.25);
+    gc = 1.0 + 9.0 * mgn_pow((sum / (size->x_size - 1.0)), 0.25);
     h = 1.0 - mgn_pow((f1 / gc), 2.0);
     f2 = gc * h;
 
@@ -173,10 +173,25 @@ typedef enum mop_zdt_e {
     ZDTM1
 } MGN_ZDT_VAR;
 
+
+void mgn_zdt_free(mgnMop* mop)
+{
+    zdt_param* cp = (zdt_param*)mop->params;
+    free(cp);
+}
+
 mgnMop* mgn_zdt_init(MGN_ZDT_VAR variant, mgn_indv_param *param)
 {
-    mgnMop *mop = mgn_mop_alloc();
-    mop->params = param;
+    mgnMop *mop = mgn_mop_alloc(param);
+    mop->free = mgn_zdt_free;
+    zdt_param* cp = malloc(sizeof(*cp));
+    cp->pos = 0;
+    cp->x_size = param->x_size;
+    cp->f_size = param->f_size;
+    cp->g_size = param->g_size;
+
+    mop->params = cp;
+
     switch (variant) {
         case ZDT1:
             strcpy(mop->name, "ZDT1");

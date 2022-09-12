@@ -31,12 +31,6 @@ enum emgn_pop_type {
 };
 
 // TODO fix this naming mess
-// individual parameters
-struct pmgn_indv_params {
-    size_t x_size;
-    size_t f_size;
-    size_t g_size;
-};
 
 
 struct _mgn_pop_param_pointer {

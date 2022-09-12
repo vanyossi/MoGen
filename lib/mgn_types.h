@@ -8,6 +8,14 @@
 
 typedef struct pmgn_indv_params mgn_indv_param;
 
+// individual parameters
+struct pmgn_indv_params {
+    size_t x_size;
+    size_t f_size;
+    size_t g_size;
+};
+
+
 typedef struct pmgn_pop_ops mgn_pop_proto;
 typedef struct _mgn_pop mgn_pop;
 typedef struct mgn_popl_head mgn_popl;
