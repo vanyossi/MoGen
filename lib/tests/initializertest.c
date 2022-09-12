@@ -16,13 +16,13 @@ int main() {
     rnd_set_seed(454235);
 
     mgn_indv_ops *iops = mgn_indv_ops_init();
-    mgn_indv_param iparam = {2,0,0};
+    mgn_indv_param iparam = {6,2,0};
     mgnLimit *limits = mgn_limit_alloc(iparam.x_size);
     for (size_t i = 0; i < limits->size; ++i) {
         limits->min[i] = 0;
         limits->max[i] = 1;
     }
-    mgn_pop* pop2d = mgn_pop_alloc(4,(void*)iops, &iparam);
+    mgn_pop* pop2d = mgn_pop_alloc(6,(void*)iops, &iparam);
 
     mgn_lhci *lhc_data = mgn_init_new_lhci(pop2d->size, iparam.x_size, limits);
 //    mgn_init_LHC_init(pop2d->size,iparam.x_size, limits);
