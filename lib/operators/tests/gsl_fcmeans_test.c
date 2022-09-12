@@ -62,7 +62,7 @@ int main(int argc, char const *argv[]) {
     fcmeans_data * kmd = mgn_fcmeans(B, k, 300, 0.005);
     printf("---maxiter %d\n", kmd->iter);
 
-    cluster_data_extra *fcm_extra = mgn_fcmeans_calc(kmd,0.98, 1);
+    cluster_data_extra *fcm_extra = mgn_fcmeans_calc(kmd,0.30, 1);
 
     for (size_t l = 0; l < fcm_extra->size; ++l) {
         for (size_t i1 = 0; i1 < fcm_extra->mpos[l].size; ++i1) {
