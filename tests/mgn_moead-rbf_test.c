@@ -19,14 +19,19 @@
 #include "individual.h"
 #include "population.h"
 #include "mgn_poplist.h"
+#include "mgn_random.h"
 
 #include "mgn_initializer.h" // latin hyperube
 #include "mgn_gnuplot.h"
 
 #include "mops/mgn_zdt.h"
+#include "mops/mgn_cec09.h"
 #include "mgn_rbf.h"
 
 int main(int argc, char const *argv[]) {
+//    rnd_initialize();
+//    rnd_set_seed(23);
+
     mgn_plot_open();
 
 //    double y[3] = {4,7,-8};
@@ -47,7 +52,7 @@ int main(int argc, char const *argv[]) {
     {
         // External referenced variables (input)
         size_t Nt = 100; //Number of m_points in tset set
-        size_t N = 25;
+        size_t N = 20;
 
         // non dom sol
         mgn_popl *pl_a = mgn_popl_alloc((void*)indv_ops,&params);
@@ -67,7 +72,7 @@ int main(int argc, char const *argv[]) {
         moead_rbf->mop = mgn_zdt_init(ZDT3,&params); // don't forget to free
         mgn_moa_moeadrbf_init(moead_rbf);
 
-        mgn_moa_solve(moead_rbf,22);
+        mgn_moa_solve(moead_rbf,45);
 
 
         FILE *ofile = fopen("mrbf_test_cmean_2c.txt","w");

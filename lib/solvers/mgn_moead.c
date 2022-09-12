@@ -25,8 +25,6 @@ struct moead_features {
     bool isalloc;
     bool ismopset;
     bool isprobset;
-    size_t pbm_n;
-    size_t sbx_n;
     mgn_ga_sets *ga_set;
     size_t size_nei;
     double *z;
@@ -60,7 +58,7 @@ mgn_pop* moead_reproduction(moeadf* set, mgn_pop* y_pop, size_t Ni)
     //          ,set->pop->ops->get_iparams( mgn_pop_get(set->pop,gsl_vector_int_get(rand_sel,0))).x->data
 
     if(set->ga_set->cross_rate > rnd_getUniform()) {
-        mgn_genop_sbx(set->sbx_n
+        mgn_genop_sbx(set->ga_set->sbx_m
                       , pop_get_iparam(set->pop, rand_sel->data[0]).x->data
                       ,set->pop->ops->get_iparams( mgn_pop_get(set->pop,gsl_vector_int_get(rand_sel,1))).x->data
                       ,l_pop->ops->get_iparams(mgn_pop_get(l_pop,0)).x->data
@@ -77,7 +75,7 @@ mgn_pop* moead_reproduction(moeadf* set, mgn_pop* y_pop, size_t Ni)
     gsl_vector_int_free(rand_sel);
 
     // mut_rate
-    mgn_genop_pbm(set->pbm_n, set->ga_set->mut_rate
+    mgn_genop_pbm(set->ga_set->pbm_n, set->ga_set->mut_rate
                   ,l_pop->ops->get_iparams(mgn_pop_get(l_pop,0)).x->data
                   ,set->ga_set->mut_llim
                   ,set->ga_set->mut_ulim
@@ -366,12 +364,10 @@ void mgn_moead_free(mgnMoa *moead){
 }
 
 
-void moead_set_prob(mgnMoa*moead, mgn_ga_sets *gasets, size_t pbm, size_t sbx)
+void moead_set_prob(mgnMoa*moead, mgn_ga_sets *gasets)
 {
     moeadf* feat = mgn_moead_getfeatures(moead);
     feat->ga_set = gasets;
-    feat->pbm_n = pbm;
-    feat->sbx_n = sbx;
     feat->isprobset = true;
 }
 

@@ -36,11 +36,13 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     , mgnLimit *limits
     );
 
+void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf);
+
 void mgn_moa_moeadrbf_free(mgnMoa* moeadrbf);
 
 
-void mgn_moa_moeadrbf_free(mgnMoa *mrbf);
+//void mgn_moeadrbf_mdl_set_psize(mgnMoa* moeadrbf);
 
-void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf);
+
 
 #endif // _MGN_MOEADRBF_SOLVER_

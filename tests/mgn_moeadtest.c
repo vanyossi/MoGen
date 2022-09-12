@@ -41,7 +41,8 @@ int main() {
         moplim->min[i] = 0;
         moplim->max[i] = 1;
     }
-    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
+    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL
+                            ,5, 20};
     ga_probs.mut_llim = calloc(params.x_size, sizeof(ga_probs.mut_llim));
     ga_probs.mut_ulim = calloc(params.x_size, sizeof(ga_probs.mut_ulim));
     for (size_t i = 0; i < params.x_size; ++i) {
@@ -83,16 +84,17 @@ int main() {
 //        ga_probs.mut_ulim[i] = 6.3;
 //    }
 
-
+    mgn_cec09_set_limits(UF1,moplim);
+    mop = mgn_cec09_init(UF1, &params);
     mgnMoa *moead = mgn_moead_init(30, 2, 20, EP, mop, mgn_ind_init,moplim,true);
-    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
-    moead->set_ga_vals(moead,&ga_probs,5,30);
+//    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
+    moead->set_ga_vals(moead,&ga_probs);
 
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    int runs = 100;
-    int plot_every = 5;
+    int runs = 8000;
+    int plot_every = 30;
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
     asprintf(&pdat.title, "%s", "points");
@@ -142,7 +144,7 @@ int main() {
 //       ,in->f->data[0], in->f->data[1]);
 //    }
 
-    FILE *ofile = fopen("../../moead_tmp3.txt","w");
+    FILE *ofile = fopen("../../moead_ceUF1.txt","w");
 
     mgn_popl_cursor_reset(EP);
     while(mgn_popl_current(EP) != 0) {

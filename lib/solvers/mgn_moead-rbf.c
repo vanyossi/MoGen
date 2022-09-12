@@ -43,6 +43,8 @@ typedef struct mgn_pointer {
 } mgn_ptr;
 
 typedef struct mgn_moeadrbf_data mgnp_moeadrbf_data;
+typedef struct mgnp_moeadrbf_mdl_p mgnp_moeadrbf_mdl_p; // moead model params
+
 // TODO add function pointers as types
 typedef void (*mgn_kernel_f)(gsl_vector *r, double s);
 
@@ -66,6 +68,7 @@ struct mgn_moeadrbf_data {
     struct mgnp_rbf_weigts mdl_rbf[3]; // used for internal model
     mgn_pop *p_aprox;
     mgn_count_ciclic sel_idx;
+    mgnp_moeadrbf_mdl_p *model_data;
 };
 
 mgnp_moeadrbf_data* mgn_moeadrbf_features(mgnMoa* moa)
@@ -166,7 +169,7 @@ void mgnp_moeadrbf_optim_s(
         rlim->max[i] = s_max;
     }
 
-    mgnMop *mop = mgn_mop_alloc();
+    mgnMop *mop = mgn_mop_alloc(&param);
     mop->eval = mgn_cast_eval(mgnp_moeadrbf_s_optim_mop);
     gsl_matrix *tmp_f_p = gsl_matrix_alloc(tset->f->size1, tset->f->size2);
     gsl_matrix *tmp_w_p = gsl_matrix_alloc(km->k, tset->f->size2);
@@ -242,8 +245,9 @@ gsl_vector *mgnp_moeadrbf_find_lambda(mgn_pop_matrix *tset, struct mgnp_rbf_weig
 }
 
 
+// TODO add all dynamic parameters
 // ======== MOEA/D model =========
-typedef struct mgnp_moeadrbf_mdl_p {
+struct mgnp_moeadrbf_mdl_p {
     size_t w_size;
     size_t mdl_size;// scalarization function, this is fixed to PBI
     size_t mdl_k;
@@ -253,8 +257,40 @@ typedef struct mgnp_moeadrbf_mdl_p {
     gsl_vector *lambda;
     kmeans_data *km;
     gsl_matrix *mphi;
-} mgnp_moeadrbf_mdl_p;
+    size_t neighbours;
+    size_t runs;
+    mgn_ga_sets *ga_probs;
+};
 
+void mgnp_moeadrbf_mdl_defparam(mgnp_moeadrbf_data *moeadrbf, size_t popsize, double cr, double mr)
+{
+    mgnp_moeadrbf_mdl_p *data = moeadrbf->model_data;
+    data->w_size = popsize;
+    data->mdl_size = moeadrbf->mdl_size;
+    data->mdl_k = moeadrbf->mdl_k;
+    data->lhci = moeadrbf->lhci;
+    data->kernel = moeadrbf->kernel;
+    data->mdl_rbf = moeadrbf->mdl_rbf;
+
+    data->runs = 1000;
+    data->neighbours = 20;
+
+    mgn_ga_sets *gaprob = calloc(1, sizeof(*gaprob));
+    gaprob->cross_rate = cr;
+    gaprob->mut_rate = mr;
+    gaprob->pbm_n = 5;
+    gaprob->sbx_m = 20;
+
+    size_t xsize = moeadrbf->solution->iparams.x_size;
+    gaprob->mut_llim = calloc(xsize, sizeof(gaprob->mut_llim));
+    gaprob->mut_ulim = calloc(xsize, sizeof(gaprob->mut_ulim));
+    for (size_t i = 0; i < xsize; ++i) {
+        gaprob->mut_llim[i] = 0;
+        gaprob->mut_ulim[i] = 1;
+    }
+
+    data->ga_probs = gaprob;
+}
 
 void mgnp_moeadrbf_mdl_mop(gsl_vector *x, gsl_vector *f, gsl_vector *g, mgnp_moeadrbf_mdl_p* prm)
 {
@@ -288,34 +324,30 @@ void mgnp_moeadrbf_mdl_mop(gsl_vector *x, gsl_vector *f, gsl_vector *g, mgnp_moe
     gsl_matrix_free(m_fres);
 }
 
+void mgnp_moeadrbf_mdl_mop_param_free(mgnp_moeadrbf_data *moeadrbf)
+{
+    free(moeadrbf->model_data->ga_probs->mut_ulim);
+    free(moeadrbf->model_data->ga_probs->mut_llim);
+    free(moeadrbf->model_data);
+}
+
 
 void mgnp_moeadrbf_mdl_optim(mgnp_moeadrbf_mdl_p *mdl_p, mgn_pop *p_e, mgn_ptr *m_wl)
 {
-    size_t T = 25; // neighbourg size
-    size_t runs = 5000;
-    double cr = 0.9;
-    double mr = 0.1;
+    size_t T = mdl_p->neighbours; // neighbour size
+    size_t runs = mdl_p->runs;
 
+    mgn_indv_param *params = &p_e->iparams;
     mgnMop *mop = mgn_mop_alloc();
     mop->eval = (mgn_mop_f) mgnp_moeadrbf_mdl_mop;
     mop->params = mdl_p;
 
-    mgn_indv_param *params = &p_e->iparams;
-
-    // TODO reduce initialize probs
-    mgn_ga_sets ga_probs = {cr, mr, NULL, NULL};
-    ga_probs.mut_llim = calloc(params->x_size, sizeof(ga_probs.mut_llim));
-    ga_probs.mut_ulim = calloc(params->x_size, sizeof(ga_probs.mut_ulim));
-    for (size_t i = 0; i < params->x_size; ++i) {
-        ga_probs.mut_llim[i] = 0;
-        ga_probs.mut_ulim[i] = 1;
-    }
 
     // TODO use given weight v
     mgn_popl *tmppe = mgn_popl_alloc(p_e->ops, params);
     mgnMoa *moead = mgn_moead_init(mdl_p->w_size, params->f_size, T, tmppe, mop
                                    , mgn_init_lhc,mdl_p->lhci,false);
-    moead->set_ga_vals(moead,&ga_probs, 5, 30);
+    moead->set_ga_vals(moead,mdl_p->ga_probs);
 
     mgn_moa_solve(moead, runs); // 30_000
 //    printf("tot_exec %zu\n", moead->tot_exec);
@@ -330,9 +362,6 @@ void mgnp_moeadrbf_mdl_optim(mgnp_moeadrbf_mdl_p *mdl_p, mgn_pop *p_e, mgn_ptr *
 
     // free --------------
     mgn_popl_free(tmppe);
-
-    free(ga_probs.mut_llim);
-    free(ga_probs.mut_ulim);
 
     mgn_moead_free(moead);
     mgn_mop_free(mop);
@@ -725,20 +754,14 @@ void mgn_moeadrbf_run(mgnMoa *moa)
 
     //mdl training value init
     gsl_matrix *m_1phi = gsl_matrix_alloc(1,moeadrbf->mdl_k);
-    mgnp_moeadrbf_mdl_p mdl_p = {
-        100
-        ,moeadrbf->mdl_size
-        ,moeadrbf->mdl_k
-        ,moeadrbf->lhci
-        ,moeadrbf->kernel
-        ,moeadrbf->mdl_rbf
-        ,lambda
-        ,km
-        ,m_1phi
-    };
+
+    moeadrbf->model_data->lhci = moeadrbf->lhci;
+    moeadrbf->model_data->lambda = lambda;
+    moeadrbf->model_data->km = km;
+    moeadrbf->model_data->mphi = m_1phi;
 
     mgn_ptr *m_w_ptr = malloc(sizeof(*m_w_ptr));
-    mgnp_moeadrbf_mdl_optim(&mdl_p, moeadrbf->p_aprox, m_w_ptr);
+    mgnp_moeadrbf_mdl_optim(moeadrbf->model_data, moeadrbf->p_aprox, m_w_ptr);
 
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
@@ -751,7 +774,7 @@ void mgn_moeadrbf_run(mgnMoa *moa)
     // mgn_popl pop_p: has all nondom aprox solutions
     // S set size of RBF cluster vectors.
     printf("ws %zu %zu", ((gsl_matrix*)m_w_ptr->p)->size1, ((gsl_matrix*)m_w_ptr->p)->size2);
-    size_t ws_size = 30; // TODO input <- really is the supplied w_matrix
+    size_t ws_size = moeadrbf->m_w->size1; // TODO input <- really is the supplied w_matrix
     // TODO initialize inside using mgn_ptr (probably)
     gsl_matrix *m_ws = mgn_weight_slattice_perm(ws_size-1,((gsl_matrix*)m_w_ptr->p)->size2);
 
@@ -863,6 +886,10 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     moa->features = mrbf;
     moa->pop_get = mgn_moeadrbf_pop_get;
 
+    // initialize model parameters
+    mrbf->model_data = calloc(1, sizeof(*mrbf->model_data));
+    mgnp_moeadrbf_mdl_defparam(mrbf,100,0.9,0.1);
+
     return moa;
 }
 
@@ -881,7 +908,8 @@ void mgn_moa_moeadrbf_free(mgnMoa* moeadrbf)
         mgn_limit_free(mrbf->lhci->limits);
     }
     mgn_lhci_free(mrbf->lhci);
-//    gsl_matrix_free(mrbf->pm);
+    mgnp_moeadrbf_mdl_mop_param_free(mrbf);
+
     free(mrbf);
     free(moeadrbf);
 }
