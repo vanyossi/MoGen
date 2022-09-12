@@ -7,30 +7,38 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #include "mgn_moead-rbf.h"
 #include "mgn_weights.h"
 
-#include "mgn_zdt.h"
-#include "gsl_vector_additional.h"
-
 // TODO ? sustitute by mogen.h with all types and function declarations
 #include "mgn_mop.h"
 #include "individual.h"
-#include "population.h"
 #include "mgn_poplist.h"
 #include "mgn_random.h"
 
-#include "mgn_initializer.h" // latin hyperube
 #include "mgn_gnuplot.h"
-
-#include "mops/mgn_zdt.h"
 #include "mops/mgn_cec09.h"
-#include "mgn_rbf.h"
 
 int main(int argc, char const *argv[]) {
-//    rnd_initialize();
-//    rnd_set_seed(23);
+    char ch;
+    size_t run = 1;
+    while ((ch = getopt(argc, argv, "r:")) != -1) {
+        switch (ch) {
+            case 'r':
+                run = strtod(optarg, NULL);
+                break;
+                // case 'n':
+                //     bitsize = strtoumax(optarg, NULL, 10);
+                //     break;
+            case '?':
+            default:
+                break;
+        }
+    }
+    argc -= optind;
+    argv += optind;
 
     mgn_plot_open();
 
@@ -69,21 +77,19 @@ int main(int argc, char const *argv[]) {
         }
 
         mgnMoa *moead_rbf = mgn_moa_moeadrbf_alloc(1000,Nt,params.f_size*2+1,m_w,pl_a,limits);
-        moead_rbf->mop = mgn_zdt_init(ZDT3,&params); // don't forget to free
+        mgn_cec09_set_limits(UF1,limits);
+        moead_rbf->mop = mgn_cec09_init(UF1, &params);
+//        moead_rbf->mop = mgn_zdt_init(ZDT3,&params); // don't forget to free
         mgn_moa_moeadrbf_init(moead_rbf);
 
-        mgn_moa_solve(moead_rbf,45);
+        mgn_moa_solve(moead_rbf,2);
 
-
-        FILE *ofile = fopen("mrbf_test_cmean_2c.txt","w");
-        mgn_popl_cursor_reset(pl_a);
-        while(mgn_popl_current(pl_a) != 0) {
-            mgn_indv *in = mgn_popl_next(pl_a);
-            double *in_f = mgn_indv_get_params(in).f->data;
-            fprintf(ofile, "%.6f %.6f\n"
-                    ,in_f[0], in_f[1]);
-        }
-        fclose(ofile);
+        // print results
+        char* filename = malloc(sizeof(char) * 64);
+        asprintf(&filename, "mrbf_uf1_%zu.txt", run);
+        FILE *out = fopen(filename,"w");
+        mgn_pop_print(moead_rbf->pop_get(moead_rbf), out);
+        free(filename);
 
 
         gsl_matrix_free(m_w);
