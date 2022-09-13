@@ -12,7 +12,13 @@
 #include <stdbool.h>
 #include <gsl/gsl_matrix.h>
 
+typedef struct mgn_cluster_data cluster_data;
 typedef struct pmgn_cluster_data_extra cluster_data_extra;
+
+struct mgn_cluster_data {
+    gsl_matrix *centers;
+    size_t k;
+};
 
 struct pmgn_cluster_data_idx {
     size_t size;

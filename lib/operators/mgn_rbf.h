@@ -9,6 +9,7 @@
 #include <gsl/gsl_matrix.h>
 
 #include "gsl_kmeans_new.h"
+#include "mgn_cluster_m.h"
 
 // Kernels
 // r <- distance || x - c ||
@@ -21,7 +22,7 @@ void rbf_kernel_imqua(gsl_vector *r, double sigma);
 
 gsl_matrix*
 mgn_rbf_create_phi(gsl_matrix *X
-                   , kmeans_data *km
+                   , cluster_data *km
                    , gsl_vector *sigma
                    , void (*rbf)(gsl_vector *r, double s)
                    , gsl_matrix *ophi);

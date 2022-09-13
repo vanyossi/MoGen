@@ -98,7 +98,7 @@ struct mgnp_moeadrbf_s_optim_ef_p {
 struct mgnp_moeadrbf_s_optim_p {
     mgn_mop_param_common();
     mgn_pop_matrix *tset; //training matrix
-    kmeans_data *km;
+    cluster_data *km;
     gsl_matrix *f_p;
     gsl_matrix *m_w;
     gsl_matrix *m_phi;
@@ -152,7 +152,7 @@ void mgnp_moeadrbf_s_optim_mop(gsl_vector *x
 
 void mgnp_moeadrbf_optim_s(
     struct mgnp_rbf_weigts *vals
-    , kmeans_data *km
+    , cluster_data *km
     , mgn_pop_matrix *tset
     , mgn_kernel_f rbf
     )
@@ -255,7 +255,7 @@ struct mgnp_moeadrbf_mdl_p {
     mgn_kernel_f *kernel;
     struct mgnp_rbf_weigts *mdl_rbf;
     gsl_vector *lambda;
-    kmeans_data *km;
+    cluster_data *km;
     gsl_matrix *mphi;
     size_t neighbours;
     size_t runs;
@@ -680,8 +680,9 @@ void mgn_moeadrbf_run(mgnMoa *moa)
 {
     mgnp_moeadrbf_data *moeadrbf = mgn_moeadrbf_features(moa);
     // === Model building
-    kmeans_data *km = gsl_kmeans(moeadrbf->tset->x,moeadrbf->mdl_k, 1000);
+    kmeans_data *km = gsl_kmeans(moeadrbf->tset->f,moeadrbf->mdl_k, 1000);
     kmeans_data_extra *kme = gsl_kmeans_calc(km);
+    cluster_data cdat = {km->centers, km->k};
 
     char* filename = malloc(sizeof(char) * 64);
 
@@ -694,7 +695,7 @@ void mgn_moeadrbf_run(mgnMoa *moa)
 //        puts("_-___________-");
 
         // DEBUG
-        moeadrbf->mdl_rbf[i].m_phi = mgn_rbf_create_phi(moeadrbf->tset->x,km
+        moeadrbf->mdl_rbf[i].m_phi = mgn_rbf_create_phi(moeadrbf->tset->x,&cdat
                                                         ,moeadrbf->mdl_rbf[i].p_s
                                                         ,moeadrbf->kernel[i]
                                                         ,moeadrbf->mdl_rbf[i].m_phi);
@@ -715,12 +716,12 @@ void mgn_moeadrbf_run(mgnMoa *moa)
         // end DEBUG
 
         mgnp_moeadrbf_optim_s(&moeadrbf->mdl_rbf[i]
-                              , km
+                              , &cdat
                               ,moeadrbf->tset
                               , moeadrbf->kernel[i]);
 
 //        gsl_vector_fprintf(stdout,moeadrbf->mdl_rbf[i].p_s, "%.4f");
-        moeadrbf->mdl_rbf[i].m_phi = mgn_rbf_create_phi(moeadrbf->tset->x,km
+        moeadrbf->mdl_rbf[i].m_phi = mgn_rbf_create_phi(moeadrbf->tset->x,&cdat
                                       ,moeadrbf->mdl_rbf[i].p_s
                                       ,moeadrbf->kernel[i]
                                       ,moeadrbf->mdl_rbf[i].m_phi);
@@ -757,7 +758,7 @@ void mgn_moeadrbf_run(mgnMoa *moa)
 
     moeadrbf->model_data->lhci = moeadrbf->lhci;
     moeadrbf->model_data->lambda = lambda;
-    moeadrbf->model_data->km = km;
+    moeadrbf->model_data->km = &cdat;
     moeadrbf->model_data->mphi = m_1phi;
 
     mgn_ptr *m_w_ptr = malloc(sizeof(*m_w_ptr));

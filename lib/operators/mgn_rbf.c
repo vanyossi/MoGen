@@ -13,7 +13,7 @@
 #include <gsl/gsl_permutation.h>
 #include <gsl/gsl_linalg.h>
 
-#include "gsl_kmeans_new.h"
+#include "mgn_cluster_m.h"
 #include "gsl_vector_additional.h"
 
 // Kernels
@@ -51,7 +51,7 @@ void rbf_kernel_imqua(gsl_vector *r, double sigma)
 
 gsl_matrix*
 mgn_rbf_create_phi(gsl_matrix *X
-                   , kmeans_data *km
+                   , cluster_data *km
                    , gsl_vector *sigma
                    , void (*rbf)(gsl_vector *r, double s)
                    , gsl_matrix *m_phi)
