@@ -45,6 +45,7 @@ set(MGN_LIB_SOURCES
     solvers/mgn_moead.c
     solvers/mgn_de.c
     solvers/mgn_moead-rbf.c
+    solvers/mgn_moead_fcrbf.c
     mgn_io.c
     mgn_io_datalist.c
     mgn_moa.c

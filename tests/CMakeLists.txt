@@ -18,3 +18,6 @@ target_link_libraries(edtest mgnmoefa)
 
 add_executable(moead-rbftest mgn_moead-rbf_test.c)
 target_link_libraries(moead-rbftest mgnmoefa)
+
+add_executable(moead_fcrbf_test mgn_moead_fcrbf_test.c)
+target_link_libraries(moead_fcrbf_test mgnmoefa)
