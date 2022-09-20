@@ -29,7 +29,10 @@ void mgn_plot(mgn_pop_proto *pop, mgn_plot_data *gdata);
 
 void mgn_plot_fast(mgn_pop_proto *i_pop, char* filename, char* title);
 
-void mgn_plot_matrix_2d(gsl_matrix *m_mat, char* filename, char* title, size_t *idx);
+void mgn_plot_matrix_2d(gsl_matrix *m_mat
+                        , const char* filename
+                        , const char* title
+                        , size_t *idx);
 
 void mgn_plot_close();
 

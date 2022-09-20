@@ -21,6 +21,7 @@ void mgnp_plot_w_headers(mgn_plot_data* gdata)
     fprintf(gnuplot, "\nreset\n");
     fprintf(gnuplot, "set terminal png\n");
     fprintf(gnuplot, "set output \"%s.png\"\n", gdata->filename);
+//    fprintf(gnuplot, "plot 1 - sqrt(x), ", gdata->filename);
     fprintf(gnuplot, "plot '-' title \"%s\"\n", gdata->title);
 }
 
@@ -54,6 +55,9 @@ void mgn_plot(mgn_pop_proto *popp, mgn_plot_data *gdata)
 
 void mgn_plot_fast(mgn_pop_proto *i_pop, char* filename, char* title)
 {
+    if ( i_pop->iparams.f_size != 2) {
+        return;
+    }
     mgn_pop* pop = (mgn_pop*)i_pop;
     mgn_plot_data gdata = {filename, title
                            , "", "", 0,0,0,0};
@@ -67,11 +71,15 @@ void mgn_plot_fast(mgn_pop_proto *i_pop, char* filename, char* title)
     mgnp_plot_w_closure();
 }
 
-void mgn_plot_matrix_2d(gsl_matrix *m_mat, char* filename, char* title, size_t *idx)
+void mgn_plot_matrix_2d(gsl_matrix *m_mat
+                        , const char *filename
+                        , const char *title
+                        , size_t *idx)
 {
-    if (idx == 0) {
-        size_t idx_l[2] = {0, 1};
-        idx = idx_l;
+    size_t idx_l[2] = {0, 1};
+    if (idx != 0) {
+        idx_l[0] = idx[0];
+        idx_l[1] = idx[1];
     }
     mgn_plot_data gdata = {filename, title
         , "", "", 0,0,0,0};
@@ -79,7 +87,7 @@ void mgn_plot_matrix_2d(gsl_matrix *m_mat, char* filename, char* title, size_t *
 
     for (size_t i = 0; i < m_mat->size1; ++i) {
         gsl_vector_view vv = gsl_matrix_row(m_mat,i);
-        fprintf(gnuplot, "%g %g\n", vv.vector.data[idx[0]], vv.vector.data[idx[1]]);
+        fprintf(gnuplot, "%.8f %.8f\n", vv.vector.data[idx_l[0]], vv.vector.data[idx_l[1]]);
     }
 
     mgnp_plot_w_closure();
