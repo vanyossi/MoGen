@@ -128,7 +128,6 @@ void gsl_matrix_printf(gsl_matrix *M, FILE *stream)
 }
 
 void gsl_matrix_save(gsl_matrix *M, char* filename){
-    return;
     FILE *out = fopen(filename, "w");
     gsl_matrix_printf(M, out);
     fclose(out);
