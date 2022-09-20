@@ -11,9 +11,8 @@
 
 #define fcomp(a,b,ep) fabs(a - b) < ep
 
-gsl_matrix* mgn_weight_slattice_comb(size_t H, size_t nf);
 
-gsl_matrix* mgn_weight_slattice_perm(size_t H, size_t nf);
+gsl_matrix* mgn_weight_slattice(size_t H, size_t nf);
 
 
 #endif //MOGEN_MNG_WEIGHTS_H

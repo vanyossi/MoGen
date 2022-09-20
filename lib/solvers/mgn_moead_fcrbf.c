@@ -796,7 +796,7 @@ void mgn_moead_fcrbf_run(mgnMoa *moa)
     printf("ws %zu %zu", ((gsl_matrix*)m_w_ptr->p)->size1, ((gsl_matrix*)m_w_ptr->p)->size2);
     size_t ws_size = moead_fcrbf->m_w->size1; // TODO input <- really is the supplied w_matrix
     // TODO initialize inside using mgn_ptr (probably)
-    gsl_matrix *m_ws = mgn_weight_slattice_perm(ws_size-1,((gsl_matrix*)m_w_ptr->p)->size2);
+    gsl_matrix *m_ws = mgn_weight_slattice(ws_size-1,((gsl_matrix*)m_w_ptr->p)->size2);
 
     mgn_pop *pop_sel = mgn_pop_alloc(m_ws->size1
                                      ,moead_fcrbf->solution->ops, &moead_fcrbf->solution->iparams);

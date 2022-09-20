@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]) {
         // non dom sol
         mgn_popl *pl_a = mgn_popl_alloc((void*)indv_ops,&params);
 
-        gsl_matrix *m_w = mgn_weight_slattice_perm(N,pl_a->iparams.f_size);
+        gsl_matrix *m_w = mgn_weight_slattice(N,pl_a->iparams.f_size);
         size_t idx[2] = {0,1};
         mgn_plot_matrix_2d(m_w,"mrbf-m_w.txt", "weights",idx);
 

@@ -17,7 +17,7 @@ include_directories(
 #    )
 
 add_executable(testweight decomposition/tests/testweight.c)
-target_link_libraries(testweight ${GSL_LIBRARIES} ${BLAS_LIBRARIES})
+target_link_libraries(testweight mgnmoefa ${GSL_LIBRARIES} ${BLAS_LIBRARIES})
 if(APPLE)
     target_link_libraries(testweight ${vecLib_LINKER_LIBS})
 endif()

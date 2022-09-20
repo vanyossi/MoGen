@@ -39,7 +39,7 @@ int main() {
     size_t fsize = 2;
     nobj = fsize;
 
-    gsl_matrix *w = mgn_weight_slattice_comb(4, fsize);
+    gsl_matrix *w = mgn_weight_slattice(4, fsize);
 //    gsl_matrix_fprintf(stdout,w, "%.6f");
 
     double vecres;
