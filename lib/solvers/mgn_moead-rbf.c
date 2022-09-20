@@ -11,6 +11,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_statistics.h>
+#include <gsl/gsl_sf.h>
 
 #include "population.h"
 #include "mgn_poplist.h"
@@ -58,12 +59,13 @@ struct mgn_moeadrbf_data {
     pmgn_moeadrbf_templatep()
     /* private */
     mgn_pop_matrix *tset; // tset pop size(nt)
-    mgn_lhci *lhci; // for internal moead pop init
+    mgn_lhci *lhci; // for training pop init
     bool l_lhci_lim; // true to free lhci limits
 //    gsl_matrix *pm;    // pop for eval with model size(n)
     int scalarf;
     size_t mdl_size;// scalarization function, this is fixed to PBI
     size_t mdl_k;
+    size_t mdl_wsize;
     mgn_kernel_f kernel[3];
     struct mgnp_rbf_weigts mdl_rbf[3]; // used for internal model
     mgn_pop *p_aprox;
@@ -177,10 +179,10 @@ void mgnp_moeadrbf_optim_s(
     struct mgnp_moeadrbf_s_optim_p mop_p = {0, tset, km, tmp_f_p, tmp_w_p, tmp_m_phi, rbf};
     mop->params = &mop_p;
 
-    size_t Np = 50; // de pop size
+    size_t Np = 20; // de pop size
 
     mgn_lhci *lhci = mgn_init_new_lhci(Np,param.x_size,rlim);
-    mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param,1.4, 0.7);
+    mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param,1, 0.5);
     mgn_de_init(de, mgn_init_lhc, lhci);
     mgn_lhci_free(lhci);
 
@@ -190,7 +192,7 @@ void mgnp_moeadrbf_optim_s(
     mgn_de_setmop(de, mop, mgn_cast_de_ef(mgnp_moeadrbf_s_optim_mop_min),(mgn_de_ef_param*)ef_prm);
     mgn_de_eval(de);
 
-    mgn_moa_solve(de, 10);
+    mgn_moa_solve(de, 50);
 
     mgn_pop *sols = (mgn_pop*)de->pop_get(de); // fisrt one is the lowest
     for (size_t i = 0; i < 1; ++i) {
@@ -249,8 +251,9 @@ gsl_vector *mgnp_moeadrbf_find_lambda(mgn_pop_matrix *tset, struct mgnp_rbf_weig
 // ======== MOEA/D model =========
 struct mgnp_moeadrbf_mdl_p {
     size_t w_size;
-    size_t mdl_size;// scalarization function, this is fixed to PBI
-    size_t mdl_k;
+    size_t mdl_size;
+    size_t mdl_k; // scalarization function, this is fixed to PBI
+    gsl_matrix *iW;
     mgn_lhci *lhci;
     mgn_kernel_f *kernel;
     struct mgnp_rbf_weigts *mdl_rbf;
@@ -262,18 +265,48 @@ struct mgnp_moeadrbf_mdl_p {
     mgn_ga_sets *ga_probs;
 };
 
-void mgnp_moeadrbf_mdl_defparam(mgnp_moeadrbf_data *moeadrbf, size_t popsize, double cr, double mr)
+
+void pmgn_moeadrbf_lchi_update(mgn_lhci **lhci, gsl_matrix *x, size_t size)
+{
+    mgnLimit *limits = mgn_limit_alloc(x->size2);
+    for (size_t i = 0; i < limits->size; ++i) {
+        gsl_vector_view c_col = gsl_matrix_column(x,i);
+        double r_mean = gsl_stats_mean(c_col.vector.data,1,c_col.vector.size);
+        limits->min[i] = fmax(gsl_vector_min(&c_col.vector) - r_mean,0);
+        limits->max[i] = fmin(gsl_vector_max(&c_col.vector) + r_mean,1);
+    }
+
+//    printf("refreshing lhci\n");
+//    fflush(stdout);
+    if (*lhci != NULL) {
+//        printf("free lhci %p\n", (*lhci));
+        mgn_limit_free((*lhci)->limits);
+        mgn_lhci_free(*lhci);
+    }
+
+    *lhci = mgn_init_new_lhci(size
+                              ,x->size2,limits);
+}
+
+void mgnp_moeadrbf_mdl_defparam(mgnp_moeadrbf_data *moeadrbf, size_t w_size, double cr, double mr)
 {
     mgnp_moeadrbf_mdl_p *data = moeadrbf->model_data;
-    data->w_size = popsize;
     data->mdl_size = moeadrbf->mdl_size;
     data->mdl_k = moeadrbf->mdl_k;
+
+    pmgn_moeadrbf_lchi_update(&(moeadrbf->lhci)
+                              ,moeadrbf->tset->x
+                              ,data->iW->size1);
     data->lhci = moeadrbf->lhci;
+    data->w_size = moeadrbf->lhci->psize;
+//    mrbf->lhci =
+//    mrbf->l_lhci_lim = false;
+
     data->kernel = moeadrbf->kernel;
     data->mdl_rbf = moeadrbf->mdl_rbf;
 
     data->runs = 1000;
-    data->neighbours = 20;
+    data->neighbours = 10;
 
     mgn_ga_sets *gaprob = calloc(1, sizeof(*gaprob));
     gaprob->cross_rate = cr;
@@ -328,6 +361,7 @@ void mgnp_moeadrbf_mdl_mop_param_free(mgnp_moeadrbf_data *moeadrbf)
 {
     free(moeadrbf->model_data->ga_probs->mut_ulim);
     free(moeadrbf->model_data->ga_probs->mut_llim);
+    gsl_matrix_free(moeadrbf->model_data->iW);
     free(moeadrbf->model_data);
 }
 
@@ -345,9 +379,10 @@ void mgnp_moeadrbf_mdl_optim(mgnp_moeadrbf_mdl_p *mdl_p, mgn_pop *p_e, mgn_ptr *
 
     // TODO use given weight v
     mgn_popl *tmppe = mgn_popl_alloc(p_e->ops, params);
-    mgnMoa *moead = mgn_moead_init(mdl_p->w_size, params->f_size, T, tmppe, mop
+    mgnMoa *moead = mgn_moead_init(mdl_p->iW, params->f_size, T, tmppe, mop
                                    , mgn_init_lhc,mdl_p->lhci,false);
     moead->set_ga_vals(moead,mdl_p->ga_probs);
+    mgn_moead_set_scalarization(moead, mgn_scalar_pbi_ori);
 
     mgn_moa_solve(moead, runs); // 30_000
 //    printf("tot_exec %zu\n", moead->tot_exec);
@@ -403,6 +438,7 @@ void mgnp_moeadrbf_select(mgn_count_ciclic *sel_idx
     mgnp_selhash *hashes = NULL;
     mgnp_selhash *sh, *cur_sh; // = malloc(sizeof(*sh));
     for (size_t i = 0; i < m_ws->size1; ++i) {
+//        printf("searching %zu\n", i);
         gsl_vector_int_view d_row = gsl_matrix_int_row(m_dist_i,i);
 //        sel->data[i] = d_row.vector.data[*sel_idx];
 
@@ -439,7 +475,8 @@ void mgnp_moeadrbf_select(mgn_count_ciclic *sel_idx
                           ,sizeof(double) * p_orig->iparams.x_size
                           ,sh);
                 j++;
-                if(j == sel_idx->max) {
+
+                if(j >= sel_idx->max) {
                     break;
                 }
             } while (sh != NULL);
@@ -566,7 +603,7 @@ void mgnp_moeadrbf_update_refine(mgn_pop *pop_newt, mgn_pop *pop_sel)
         sh = NULL;
     }
 
-    if(miss > 0 ) {
+    if( miss > 0 ) {
 
         mgn_pop_matrix *m_newt = mgn_pop_to_popm(pop_newt);
         // make matrix with missing members
@@ -580,7 +617,7 @@ void mgnp_moeadrbf_update_refine(mgn_pop *pop_newt, mgn_pop *pop_sel)
         int pos;
         bool found;
         for (size_t i = 0, j = 0, l_pos; i < sel_pos_in_newt->size; ++i) {
-            j = 0;
+
             pos = sel_pos_in_newt->data[i];
             if(pos == -1) {
                 // find in vector
@@ -592,7 +629,7 @@ void mgnp_moeadrbf_update_refine(mgn_pop *pop_newt, mgn_pop *pop_sel)
                         if(k == l_pos) { found = true; }
                     }
                     j++;
-                } while (found);
+                } while (found && j <= d_row.vector.size);
                 // copy indv
                 mgn_pop_copy(pop_newt,pop_sel,j,i,1);
             }
@@ -636,6 +673,7 @@ void mgnp_moeadrbf_update(mgnp_moeadrbf_data *mrbf, mgn_pop *pop_sel)
     mgn_pop_free(pop_tset);
 }
 
+
 void mgnp_moeadrbf_pop_update(mgnp_moeadrbf_data *mrbf)
 {
 //    double mean = gsl_stats_mean(mrbf->tset->x->data
@@ -644,26 +682,29 @@ void mgnp_moeadrbf_pop_update(mgnp_moeadrbf_data *mrbf)
 //    );
 //    double max = gsl_matrix_max(mrbf->tset->x) + mean;
 //    double min = gsl_matrix_min(mrbf->tset->x) - mean;
+//pmgn_moeadrbf_lchi_update(mgn_lhci **lhci, gsl_matrix *x, size_t size);
+    pmgn_moeadrbf_lchi_update(&mrbf->lhci, mrbf->tset->x, mrbf->model_data->iW->size1);
 
 //    printf("min max:: %.6f, %6f %.6f\n", mean, min, max);
 
-    mgnLimit *limits = mgn_limit_alloc(mrbf->tset->x->size2);
-    for (size_t i = 0; i < limits->size; ++i) {
-        gsl_vector_view c_col = gsl_matrix_column(mrbf->tset->x,i);
-        double r_mean = gsl_stats_mean(c_col.vector.data,1,c_col.vector.size);
-        limits->min[i] = fmax(gsl_vector_min(&c_col.vector) - r_mean,0);
-        limits->max[i] = fmin(gsl_vector_max(&c_col.vector) + r_mean,1);
-    }
-
-    // TODO make wrapper for this free
-    // or accept change in all limits.
-    if (mrbf->l_lhci_lim == true) {
-        mgn_limit_free(mrbf->lhci->limits);
-    }
-    mgn_lhci_free(mrbf->lhci);
-    mrbf->lhci = mgn_init_new_lhci(mrbf->tset->size * 2
-        ,mrbf->solution->iparams.x_size,limits);
-    mrbf->l_lhci_lim = true;
+//
+//    mgnLimit *limits = mgn_limit_alloc(mrbf->tset->x->size2);
+//    for (size_t i = 0; i < limits->size; ++i) {
+//        gsl_vector_view c_col = gsl_matrix_column(mrbf->tset->x,i);
+//        double r_mean = gsl_stats_mean(c_col.vector.data,1,c_col.vector.size);
+//        limits->min[i] = fmax(gsl_vector_min(&c_col.vector) - r_mean,0);
+//        limits->max[i] = fmin(gsl_vector_max(&c_col.vector) + r_mean,1);
+//    }
+//
+//    // TODO make wrapper for this free
+//    // or accept change in all limits.
+//    if (mrbf->l_lhci_lim == true) {
+//        mgn_limit_free(mrbf->lhci->limits);
+//    }
+//    mgn_lhci_free(mrbf->lhci);
+//    mrbf->lhci = mgn_init_new_lhci(mrbf->tset->size * 2
+//        ,mrbf->solution->iparams.x_size,limits);
+//    mrbf->l_lhci_lim = true;
 }
 
 /*
@@ -680,7 +721,7 @@ void mgn_moeadrbf_run(mgnMoa *moa)
 {
     mgnp_moeadrbf_data *moeadrbf = mgn_moeadrbf_features(moa);
     // === Model building
-    kmeans_data *km = gsl_kmeans(moeadrbf->tset->f,moeadrbf->mdl_k, 1000);
+    kmeans_data *km = gsl_kmeans(moeadrbf->tset->x,moeadrbf->mdl_k, 1000);
     kmeans_data_extra *kme = gsl_kmeans_calc(km);
     cluster_data cdat = {km->centers, km->k};
 
@@ -709,11 +750,13 @@ void mgn_moeadrbf_run(mgnMoa *moa)
                        ,moeadrbf->mdl_rbf[i].p_m_w,0
                        ,y_p);
 
+#ifdef DEBUG
         asprintf(&filename, "mrbf_pset-%zu-%zu",moa->c_run,i);
         mgn_plot_matrix_2d(y_p,filename,"p",0);
         asprintf(&filename, "mrbf_pset-%zu-%zu.txt",moa->c_run,i);
         gsl_matrix_save(y_p, filename);
         // end DEBUG
+#endif
 
         mgnp_moeadrbf_optim_s(&moeadrbf->mdl_rbf[i]
                               , &cdat
@@ -740,8 +783,10 @@ void mgn_moeadrbf_run(mgnMoa *moa)
                        ,y_p);
 
         // TODO add plot multi dataset, train vs predictions
+#ifdef DEBUG
         asprintf(&filename, "mrbf_pset-%zu-%zu_p.txt",moa->c_run,i);
         gsl_matrix_save(y_p, filename);
+#endif
     }
 
 
@@ -764,48 +809,57 @@ void mgn_moeadrbf_run(mgnMoa *moa)
     mgn_ptr *m_w_ptr = malloc(sizeof(*m_w_ptr));
     mgnp_moeadrbf_mdl_optim(moeadrbf->model_data, moeadrbf->p_aprox, m_w_ptr);
 
+#ifdef DEBUG
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
     asprintf(&pdat.title, "MOEAD_RBF");
     asprintf(&pdat.filename, "%s-test_run_i_%s_%zu", pdat.title,moa->mop->name, moa->tot_exec);
     mgn_plot((mgn_pop_proto *) moeadrbf->p_aprox, &pdat);
     free(pdat.filename);
+#endif
 
     // === Select Points
     // mgn_popl pop_p: has all nondom aprox solutions
     // S set size of RBF cluster vectors.
-    printf("ws %zu %zu", ((gsl_matrix*)m_w_ptr->p)->size1, ((gsl_matrix*)m_w_ptr->p)->size2);
+//    printf("ws %zu %zu", ((gsl_matrix*)m_w_ptr->p)->size1, ((gsl_matrix*)m_w_ptr->p)->size2);
     size_t ws_size = moeadrbf->m_w->size1; // TODO input <- really is the supplied w_matrix
-    // TODO initialize inside using mgn_ptr (probably)
-    gsl_matrix *m_ws = mgn_weight_slattice_perm(ws_size-1,((gsl_matrix*)m_w_ptr->p)->size2);
 
-    mgn_pop *pop_sel = mgn_pop_alloc(m_ws->size1
-        ,moeadrbf->solution->ops, &moeadrbf->solution->iparams);
+    // TODO initialize inside using mgn_ptr (probably)
+//    size_t Hs = (size_t)round(gsl_sf_choose(10,moeadrbf->p_aprox->iparams.f_size));
+//    gsl_matrix *m_ws = mgn_weight_slattice_perm(10,((gsl_matrix*)m_w_ptr->p)->size2);
+
+    mgn_pop *pop_sel = mgn_pop_alloc(moeadrbf->m_w->size1
+        ,(void*)moeadrbf->solution->ops, &moeadrbf->solution->iparams);
 
     mgnp_moeadrbf_select(&moeadrbf->sel_idx
-                               ,m_w_ptr->p
-                               ,m_ws,pop_sel
-                               ,moeadrbf->p_aprox);
+                         ,m_w_ptr->p
+                         ,moeadrbf->m_w
+                         ,pop_sel
+                         ,moeadrbf->p_aprox);
 
 //    printf("sel index %zu\n",moeadrbf->sel_idx.value);
 
     // === Update population
     mgn_mop_eval_pop(moa->mop, pop_sel, NULL);
+
     moa->tot_exec += pop_sel->size;
+
+#ifdef DEBUG
     asprintf(&filename, "rbf_pop_sel-%zu.txt",moa->c_run);
     mgn_plot_fast(pop_sel, filename, "sel");
+#endif
 
     mgnp_moeadrbf_update(moeadrbf, pop_sel);
-
     mgnp_moeadrbf_pop_update(moeadrbf);
 
-
+#ifdef DEBUG
     printf("msize: %zu %zu,,,, %zu %zu\n", m_ws->size1, m_ws->size2
            , ((gsl_matrix*)m_w_ptr->p)->size1, ((gsl_matrix*)m_w_ptr->p)->size2);
     printf("run %zu: tot_exec %zu, idx %zu\n",moa->c_run,moa->tot_exec, moeadrbf->sel_idx.value);
+#endif
 
     // === free all
-    gsl_matrix_free(m_ws);
+//    gsl_matrix_free(m_ws);
     mgn_pop_free(pop_sel);
 //    gsl_vector_int_free(sel_indexes);
 
@@ -817,11 +871,13 @@ void mgn_moeadrbf_run(mgnMoa *moa)
     gsl_kmeans_data_extra_free(kme);
     gsl_kmeans_free(km);
 
+#ifdef NDEBUG
     asprintf(&filename, "rbf_final-%zu.txt",moa->c_run);
     FILE *out = fopen(filename,"w");
     mgn_pop_print(moeadrbf->solution, out);
     fclose(out);
     mgn_plot_fast(moeadrbf->solution, filename, "sol");
+#endif
 
     free(filename);
 }
@@ -839,6 +895,7 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     , gsl_matrix *W
     , mgn_popl *A
     , mgnLimit *limits
+    , size_t Nw
     )
 {
     mgnMoa *moa = malloc(sizeof(*moa));
@@ -861,6 +918,7 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     // model training initilize
     mrbf->mdl_size = 3;
     mrbf->mdl_k = k;
+    mrbf->mdl_wsize = Nw;
 //    mrbf->kernel = malloc(sizeof(mrbf->kernel) * mrbf->mdl_size);
     mrbf->kernel[0] = rbf_kernel_gauss;
     mrbf->kernel[1] = rbf_kernel_mqua;
@@ -873,12 +931,11 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
 
     // used to keep control of selected Neigbourh
     mrbf->sel_idx = (mgn_count_ciclic){5,0};
+    mrbf->lhci = NULL;
     mgn_init_lhc_to_matrix(mrbf->tset->x, limits);
-    mrbf->lhci = mgn_init_new_lhci(nt*2,x_size,limits);
-    mrbf->l_lhci_lim = false;
 
     // initialize tset population
-    strncpy(moa->name, "MOEA/D-RBF", MOA_NAME_LEN);
+    strncpy(moa->name, "MOEAD-RBF", MOA_NAME_LEN);
     moa->tot_exec = 0;
     moa->c_run = 0;
     moa->run = mgn_moeadrbf_run;
@@ -889,7 +946,8 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
 
     // initialize model parameters
     mrbf->model_data = calloc(1, sizeof(*mrbf->model_data));
-    mgnp_moeadrbf_mdl_defparam(mrbf,100,0.9,0.1);
+    mrbf->model_data->iW = mgn_weight_slattice(Nw, f_size);
+    mgnp_moeadrbf_mdl_defparam(mrbf,Nw,0.9,0.1);
 
     return moa;
 }
@@ -920,9 +978,10 @@ void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf)
     mgnp_moeadrbf_data *mrbf = mgn_moeadrbf_features(moeadrbf);
     mgn_pop_matrix_eval(mrbf->tset,moeadrbf->mop);
 
-//    size_t idx[2] = {0 ,1};
+#ifdef DEBUG
     mgn_plot_matrix_2d(mrbf->tset->f,"mrbf_tset_init", "f",0);
     gsl_matrix_save(mrbf->tset->f, "mrbf_tset_init_p.txt");
+#endif
 
 //    gsl_matrix_printf(mrbf->tset->x,stdout);
 //    printf("max min, %.6f %.6f\n", gsl_matrix_min(mrbf->tset->x), gsl_matrix_max(mrbf->tset->x));

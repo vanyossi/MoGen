@@ -34,6 +34,7 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     , gsl_matrix *W
     , mgn_popl *A
     , mgnLimit *limits
+    , size_t Nw /* size of internal weight vector */
     );
 
 void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf);

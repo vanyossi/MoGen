@@ -21,7 +21,7 @@ void moead_run(mgnMoa* moead);
 
 bool moead_stop();
 
-mgnMoa* mgn_moead_init(size_t H,size_t nobj, size_t T
+mgnMoa* mgn_moead_init(gsl_matrix *W,size_t nobj, size_t T
                        ,mgn_popl *epop
                        ,mgnMop *mop
                        ,void (*apply)(void*, void*), void* params
