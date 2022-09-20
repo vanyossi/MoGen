@@ -7,6 +7,7 @@
 
 #include <gsl/gsl_vector.h>
 #include <math.h>
+#include <string.h>
 
 #include "mgn_types.h"
 #include "mgn_gen_operator.h"
@@ -36,6 +37,34 @@ typedef enum mop_cec09_e {
     UF9,
     UF10
 } MGN_CEC09_VAR;
+
+MGN_CEC09_VAR mop_cec09_str_toenum(char *type)
+{
+
+    MGN_CEC09_VAR etype = 0;
+    if ( strcasecmp(type,"UF1") == 0 ) {
+        etype = UF1;
+    } else if ( strcasecmp(type,"UF2") == 0 ) {
+        etype = UF2;
+    } else if ( strcasecmp(type,"UF3") == 0 ) {
+        etype = UF3;
+    } else if ( strcasecmp(type,"UF4") == 0 ) {
+        etype = UF4;
+    } else if ( strcasecmp(type,"UF5") == 0 ) {
+        etype = UF5;
+    } else if ( strcasecmp(type,"UF6") == 0 ) {
+        etype = UF6;
+    } else if ( strcasecmp(type,"UF7") == 0 ) {
+        etype = UF7;
+    } else if ( strcasecmp(type,"UF8") == 0 ) {
+        etype = UF8;
+    } else if ( strcasecmp(type,"UF9") == 0 ) {
+        etype = UF9;
+    } else {
+        etype = UF10;
+    }
+    return etype;
+}
 
 void mgn_cec09_set_limits(MGN_CEC09_VAR cec_mop, mgnLimit *limits)
 {
