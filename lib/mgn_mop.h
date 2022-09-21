@@ -26,6 +26,7 @@ typedef struct mgnp_mop_param {
 
 struct _mgn_mop {
     char name[32];
+    mgnLimit *limits;
     void* params;
     void (*eval)(void*, void*, void*,void*);
     void (*eval_array)(void*, void*, void*,void*);
