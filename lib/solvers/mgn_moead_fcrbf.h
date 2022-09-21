@@ -1,12 +1,5 @@
-/*
- *
- *  SPDX-FileCopyrightText: 2022$ Iván Yossi <ghevan@gmail.com>
- *
- *  SPDX-License-Identifier: GPL-2.0-or-later
- */
-
-#ifndef MOGEN_MGN_MOEAD_FCRBF_H
-#define MOGEN_MGN_MOEAD_FCRBF_H
+#ifndef _MGN_MOEAD_FCRBF_SOLVER_
+#define _MGN_MOEAD_FCRBF_SOLVER_
 
 
 #include "mgn_types.h"
@@ -41,6 +34,7 @@ mgnMoa* mgn_moa_moead_fcrbf_alloc(
     , gsl_matrix *W
     , mgn_popl *A
     , mgnLimit *limits
+    , size_t Nw /* size of internal weight vector */
 );
 
 void mgn_moa_moead_fcrbf_init(mgnMoa* moead_fcrbf);
@@ -52,4 +46,4 @@ void mgn_moa_moead_fcrbf_free(mgnMoa* moead_fcrbf);
 
 
 
-#endif //MOGEN_MGN_MOEAD_FCRBF_H
+#endif // _MGN_MOEAD_FCRBF_SOLVER_
