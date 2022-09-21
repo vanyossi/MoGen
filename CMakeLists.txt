@@ -21,6 +21,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x1000000")
 set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO  "-O3")
@@ -91,3 +92,4 @@ include_directories(
 add_subdirectory(lib)
 add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(fronts)
