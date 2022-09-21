@@ -169,7 +169,7 @@ void mgn_de_run(mgnMoa* de)
     gsl_vector_ulong *rindex = gsl_vector_ulong_alloc(m_p->size - 1);
 
     for (size_t i = 0; i < m_p->size; ++i) {
-        // select 3 random position and set last to current one.
+        // select 4 random position and set last to current one.
         mgnp_de_rndseq_except(rindex,i);
         gsl_vector_ulong_view rsel = gsl_vector_ulong_subvector(rindex,0,4);
         gsl_vector_ulong_set(&rsel.vector,3,i);
