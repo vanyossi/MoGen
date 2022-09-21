@@ -82,11 +82,11 @@ int main(int argc, char const *argv[]) {
     argc -= optind;
     argv += optind;
 
-    xsize = 4;
-    fsize = 2;
-    wsize = 299;
-    iwsize = 35;
-    maxeval = 300;
+//    xsize = 4;
+//    fsize = 2;
+//    wsize = 299;
+//    iwsize = 35;
+//    maxeval = 300;
 //    train_pop_size = 100;
 //    wsize = (size_t)round(gsl_sf_choose(60,fsize));
 //    wsize = 20;
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[]) {
         printf("weight size %zu\n", m_w->size1);
         gsl_matrix_save(m_w,"weight_vector_p.txt");
         mgn_plot_matrix_2d(m_w,"weight_vector", "weights",0);
-        exit(0);
+
         // Prepare Latin Hypercube// set limits
         mgnLimit *limits = mgn_limit_alloc(params.x_size);
         for (size_t i = 0; i < limits->size; ++i) {
