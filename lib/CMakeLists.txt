@@ -42,7 +42,9 @@ set(MGN_LIB_SOURCES
 #    math/gsl_vector_additional.c
     solvers/decomposition/mgn_scalarization.c
     solvers/decomposition/mgn_weights.c
+    solvers/mgn_moead_common.c
     solvers/mgn_moead.c
+    solvers/mgn_moead_de.c
     solvers/mgn_de.c
     solvers/mgn_moead-rbf.c
     solvers/mgn_moead_fcrbf.c

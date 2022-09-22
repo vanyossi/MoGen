@@ -22,6 +22,7 @@
 #include "population.h"
 #include "mgn_poplist.h"
 #include "mgn_scalarization.h"
+#include "mgn_weights.h"
 
 int main() {
     mgn_plot_open();
@@ -86,7 +87,8 @@ int main() {
 
     mgn_cec09_set_limits(UF1,moplim);
     mop = mgn_cec09_init(UF1, &params);
-    mgnMoa *moead = mgn_moead_init(30, 2, 20, EP, mop, mgn_ind_init,moplim,true);
+    gsl_matrix *W = mgn_weight_slattice(30, params.f_size);
+    mgnMoa *moead = mgn_moead_init(W, 2, 20, EP, mop, mgn_ind_init,moplim,true);
 //    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
     moead->set_ga_vals(moead,&ga_probs);
 
@@ -178,6 +180,7 @@ int main() {
     free(ga_probs.mut_llim);
     free(ga_probs.mut_ulim);
 
+    gsl_matrix_free(W);
     mgn_limit_free(moplim);
     mgn_mop_free(mop);
     mgn_moead_free(moead);
