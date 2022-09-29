@@ -30,7 +30,7 @@
 #include "mgn_rbf.h"
 #include "mgn_fcmeans.h"
 #include "mgn_de.h"
-#include "mgn_moead.h"
+#include "mgn_moead_de.h"
 
 #include "uthash.h"
 #include "mgn_gnuplot.h"
@@ -73,6 +73,7 @@ struct mgn_moead_fcrbf_data {
     mgn_pop *p_aprox;
     mgn_count_ciclic sel_idx;
     mgnp_moead_fcrbf_mdl_p *model_data;
+    mgn_popl *arc;
 };
 
 mgnp_moead_fcrbf_data* mgn_moead_fcrbf_features(mgnMoa* moa)
@@ -261,6 +262,7 @@ struct mgnp_moead_fcrbf_mdl_p {
     gsl_vector *lambda;
     cluster_data *km;
     gsl_matrix *mphi;
+    mgnLimit *mop_limits;
     size_t neighbours;
     size_t runs;
     mgn_ga_sets *ga_probs;
@@ -306,8 +308,8 @@ void mgnp_moead_fcrbf_mdl_defparam(mgnp_moead_fcrbf_data *moead_fcrbf, size_t w_
     data->kernel = moead_fcrbf->kernel;
     data->mdl_rbf = moead_fcrbf->mdl_rbf;
 
-    data->runs = 1000;
-    data->neighbours = 10;
+    data->runs = 2000;
+    data->neighbours = 20;
 
     mgn_ga_sets *gaprob = calloc(1, sizeof(*gaprob));
     gaprob->cross_rate = cr;
@@ -376,14 +378,15 @@ void mgnp_moead_fcrbf_mdl_optim(mgnp_moead_fcrbf_mdl_p *mdl_p, mgn_pop *p_e, mgn
     mgnMop *mop = mgn_mop_alloc();
     mop->eval = (mgn_mop_f) mgnp_moead_fcrbf_mdl_mop;
     mop->params = mdl_p;
+    mop->limits = mdl_p->mop_limits;
 
 
     // TODO use given weight v
     mgn_popl *tmppe = mgn_popl_alloc(p_e->ops, params);
-    mgnMoa *moead = mgn_moead_init(mdl_p->iW, params->f_size, T, tmppe, mop
+    mgnMoa *moead = mgn_moead_de_init(mdl_p->iW, params->f_size, T, tmppe, mop
                                    , mgn_init_lhc,mdl_p->lhci,false);
     moead->set_ga_vals(moead,mdl_p->ga_probs);
-    mgn_moead_set_scalarization(moead, mgn_scalar_pbi_ori);
+//    mgn_moead_set_scalarization(moead, mgn_scalar_pbi_ori);
 
     mgn_moa_solve(moead, runs); // 30_000
 //    printf("tot_exec %zu\n", moead->tot_exec);
@@ -606,9 +609,9 @@ void mgnp_moead_fcrbf_update_refine(mgn_pop *pop_newt, mgn_pop *pop_sel)
 
     if( miss > 0 ) {
 
-        mgn_pop_matrix *m_newt = mgn_pop_to_popm(pop_newt);
+        mgn_pop_matrix *m_newt = mgn_pop_to_popm((mgn_pop_proto*)pop_newt);
         // make matrix with missing members
-        mgn_pop_matrix *m_sel = mgn_pop_to_popm(pop_sel);
+        mgn_pop_matrix *m_sel = mgn_pop_to_popm((mgn_pop_proto*)pop_sel);
         // meassure distance from missing to all
         gsl_matrix *m_dist = gsl_matrix_dist(m_sel->f,m_newt->f,2.0);
         gsl_matrix_int *m_dist_i = gsl_matrix_int_alloc(m_dist->size1, m_dist->size2);
@@ -668,7 +671,7 @@ void mgnp_moead_fcrbf_update(mgnp_moead_fcrbf_data *mrbf, mgn_pop *pop_sel)
     mgnp_moead_fcrbf_update_refine(pop_tset,pop_sel);
 
     mgn_pop_matrix_free(mrbf->tset);
-    mrbf->tset = mgn_pop_to_popm(pop_tset);
+    mrbf->tset = mgn_pop_to_popm((mgn_pop_proto*)pop_tset);
 
     mgn_pop_free(pop_u);
     mgn_pop_free(pop_tset);
@@ -714,7 +717,16 @@ void mgnp_moead_fcrbf_pop_update(mgnp_moead_fcrbf_data *mrbf)
  *
  *
  */
-
+void mgn_moeadfc_rbf_update_training(mgnp_moead_fcrbf_data* data)
+{
+    // set cluster size
+    data->mdl_k = data->tset->size;
+    // clean mphi matrix
+    for (size_t i = 0; i < data->mdl_size; ++i) {
+        gsl_matrix_free(data->mdl_rbf[i].m_phi);
+        data->mdl_rbf[i].m_phi = NULL;
+    }
+}
 
 // this represents one loop
 // TODO remove comments, polish args + API
@@ -722,6 +734,10 @@ void mgn_moead_fcrbf_run(mgnMoa *moa)
 {
     mgnp_moead_fcrbf_data *moead_fcrbf = mgn_moead_fcrbf_features(moa);
     // === Model building
+    // use archive for training
+    mgn_pop_matrix_free(moead_fcrbf->tset);
+    moead_fcrbf->tset = mgn_pop_to_popm((mgn_pop_proto*)moead_fcrbf->arc);
+
     fcmeans_data *fcdat = mgn_fcmeans(moead_fcrbf->tset->x,moead_fcrbf->mdl_k, 1000, 1e-5);
     double low_e = (moa->c_run < moead_fcrbf->max_run * 0.6)? 0 : (moa->c_run - 1.0) / moead_fcrbf->max_run * 0.001;
 
@@ -861,6 +877,7 @@ void mgn_moead_fcrbf_run(mgnMoa *moa)
 
     // === Update population
     mgn_mop_eval_pop(moa->mop, pop_sel, NULL);
+    mgn_popl_insert_pop(moead_fcrbf->arc,(mgn_pop_proto*)pop_sel);
 
     moa->tot_exec += pop_sel->size;
 
@@ -880,6 +897,7 @@ void mgn_moead_fcrbf_run(mgnMoa *moa)
 
     // === free all
 //    gsl_matrix_free(m_ws);
+    mgn_moeadfc_rbf_update_training(moead_fcrbf);
     mgn_pop_free(pop_sel);
 //    gsl_vector_int_free(sel_indexes);
 
@@ -930,6 +948,7 @@ mgnMoa* mgn_moa_moead_fcrbf_alloc(
     mrbf->nt = nt;
     mrbf->m_w = W;
     mrbf->solution = A;
+    mrbf->arc = mgn_popl_alloc((void*)A->ops,&A->iparams);
     // p_aprox size is not important as it gets exchanged by internal pop of moead
     mrbf->p_aprox = mgn_pop_alloc(1,A->ops,&A->iparams);
     mrbf->tset = mgn_pop_matrix_alloc(nt,x_size
@@ -951,7 +970,7 @@ mgnMoa* mgn_moa_moead_fcrbf_alloc(
     }
 
     // used to keep control of selected Neigbourh
-    mrbf->sel_idx = (mgn_count_ciclic){5,0};
+    mrbf->sel_idx = (mgn_count_ciclic){10,0};
     mrbf->lhci = NULL;
     mgn_init_lhc_to_matrix(mrbf->tset->x, limits);
 
@@ -968,7 +987,8 @@ mgnMoa* mgn_moa_moead_fcrbf_alloc(
     // initialize model parameters
     mrbf->model_data = calloc(1, sizeof(*mrbf->model_data));
     mrbf->model_data->iW = mgn_weight_slattice(Nw, f_size);
-    mgnp_moead_fcrbf_mdl_defparam(mrbf,Nw,0.9,0.1);
+    mrbf->model_data->mop_limits = limits;
+    mgnp_moead_fcrbf_mdl_defparam(mrbf,Nw,0.9,0.02);
 
     return moa;
 }
@@ -998,6 +1018,7 @@ void mgn_moa_moead_fcrbf_init(mgnMoa* moead_fcrbf)
 {
     mgnp_moead_fcrbf_data *mrbf = mgn_moead_fcrbf_features(moead_fcrbf);
     mgn_pop_matrix_eval(mrbf->tset,moead_fcrbf->mop);
+    mgn_popl_insert_popm(mrbf->arc,mrbf->tset);
 
 #ifdef DEBUG
     mgn_plot_matrix_2d(mrbf->tset->f,"mrbf_tset_init", "f",0);
@@ -1007,7 +1028,7 @@ void mgn_moa_moead_fcrbf_init(mgnMoa* moead_fcrbf)
 //    gsl_matrix_printf(mrbf->tset->x,stdout);
 //    printf("max min, %.6f %.6f\n", gsl_matrix_min(mrbf->tset->x), gsl_matrix_max(mrbf->tset->x));
 
-    mgn_pop_copy_mp(mrbf->solution,mrbf->tset);
+    mgn_pop_copy_mp((mgn_pop_proto*) mrbf->solution,mrbf->tset);
     moead_fcrbf->tot_exec += mrbf->solution->size;
 
     // TODO print pop

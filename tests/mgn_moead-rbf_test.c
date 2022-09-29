@@ -22,7 +22,7 @@
 #include "mgn_gnuplot.h"
 
 #include "mops/mgn_cec09.h"
-//#include "mops/mgn_zdt.h"
+#include "mops/mgn_zdt.h"
 
 int main(int argc, char const *argv[]) {
 #ifdef NDEBUG
@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
 #endif
     // default values
     size_t run = 1;
-    size_t xsize = 6;
+    size_t xsize = 8;
     size_t fsize = 2;
     size_t train_pop_size = 100;
     size_t wsize = 11; // weight vector size external
@@ -113,24 +113,28 @@ int main(int argc, char const *argv[]) {
         mgn_plot_matrix_2d(m_w,"weight_vector", "weights",0);
 
         // Prepare Latin Hypercube// set limits
-        mgnLimit *limits = mgn_limit_alloc(params.x_size);
-        for (size_t i = 0; i < limits->size; ++i) {
-            limits->min[i] = 0;
-            limits->max[i] = 1;
-        }
+//        mgnLimit *limits = mgn_limit_alloc(params.x_size);
+//        for (size_t i = 0; i < limits->size; ++i) {
+//            limits->min[i] = 0;
+//            limits->max[i] = 1;
+//        }
+
+//        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
+//        mgnMop* mop = mgn_zdt_init(moptype, &params);
+
+        MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
+        mgnMop* mop = mgn_cec09_init(moptype, &params);
+
 
         mgnMoa *moead_rbf = mgn_moa_moeadrbf_alloc(maxeval
             ,Nt
             ,params.f_size*2+1
             ,m_w
             ,pl_a
-            ,limits
+            ,mop->limits
             ,iwsize);
 
-        MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
-        mgn_cec09_set_limits(moptype,limits);
-        moead_rbf->mop = mgn_cec09_init(moptype, &params);
-//        moead_rbf->mop = mgn_zdt_init(ZDT3,&params);
+        moead_rbf->mop = mop;
         mgn_moa_moeadrbf_init(moead_rbf);
 
         printf("expected total runs %zu\n", total_runs);
@@ -164,9 +168,8 @@ int main(int argc, char const *argv[]) {
 
 
         gsl_matrix_free(m_w);
-        mgn_mop_free(moead_rbf->mop);
+        mgn_mop_free(mop);
         mgn_moa_moeadrbf_free(moead_rbf);
-        mgn_limit_free(limits);
         mgn_popl_free(pl_a);
     }
 

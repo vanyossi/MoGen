@@ -29,7 +29,7 @@
 
 #include "mgn_rbf.h"
 #include "mgn_de.h"
-#include "mgn_moead.h"
+#include "mgn_moead_de.h"
 
 #include "uthash.h"
 #include "mgn_gnuplot.h"
@@ -260,6 +260,7 @@ struct mgnp_moeadrbf_mdl_p {
     gsl_vector *lambda;
     cluster_data *km;
     gsl_matrix *mphi;
+    mgnLimit *mop_limits;
     size_t neighbours;
     size_t runs;
     mgn_ga_sets *ga_probs;
@@ -305,7 +306,7 @@ void mgnp_moeadrbf_mdl_defparam(mgnp_moeadrbf_data *moeadrbf, size_t w_size, dou
     data->kernel = moeadrbf->kernel;
     data->mdl_rbf = moeadrbf->mdl_rbf;
 
-    data->runs = 1000;
+    data->runs = 200;
     data->neighbours = 10;
 
     mgn_ga_sets *gaprob = calloc(1, sizeof(*gaprob));
@@ -375,11 +376,12 @@ void mgnp_moeadrbf_mdl_optim(mgnp_moeadrbf_mdl_p *mdl_p, mgn_pop *p_e, mgn_ptr *
     mgnMop *mop = mgn_mop_alloc();
     mop->eval = (mgn_mop_f) mgnp_moeadrbf_mdl_mop;
     mop->params = mdl_p;
+    mop->limits = mdl_p->mop_limits;
 
 
     // TODO use given weight v
     mgn_popl *tmppe = mgn_popl_alloc(p_e->ops, params);
-    mgnMoa *moead = mgn_moead_init(mdl_p->iW, params->f_size, T, tmppe, mop
+    mgnMoa *moead = mgn_moead_de_init(mdl_p->iW, params->f_size, T, tmppe, mop
                                    , mgn_init_lhc,mdl_p->lhci,false);
     moead->set_ga_vals(moead,mdl_p->ga_probs);
     mgn_moead_set_scalarization(moead, mgn_scalar_pbi_ori);
@@ -930,7 +932,7 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     }
 
     // used to keep control of selected Neigbourh
-    mrbf->sel_idx = (mgn_count_ciclic){5,0};
+    mrbf->sel_idx = (mgn_count_ciclic){10,0}; // selection neighbourhood
     mrbf->lhci = NULL;
     mgn_init_lhc_to_matrix(mrbf->tset->x, limits);
 
@@ -947,7 +949,8 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     // initialize model parameters
     mrbf->model_data = calloc(1, sizeof(*mrbf->model_data));
     mrbf->model_data->iW = mgn_weight_slattice(Nw, f_size);
-    mgnp_moeadrbf_mdl_defparam(mrbf,Nw,0.9,0.1);
+    mrbf->model_data->mop_limits = limits;
+    mgnp_moeadrbf_mdl_defparam(mrbf,Nw,0.9,0.02);
 
     return moa;
 }
@@ -978,6 +981,7 @@ void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf)
     mgnp_moeadrbf_data *mrbf = mgn_moeadrbf_features(moeadrbf);
     mgn_pop_matrix_eval(mrbf->tset,moeadrbf->mop);
 
+
 #ifdef DEBUG
     mgn_plot_matrix_2d(mrbf->tset->f,"mrbf_tset_init", "f",0);
     gsl_matrix_save(mrbf->tset->f, "mrbf_tset_init_p.txt");
@@ -986,7 +990,7 @@ void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf)
 //    gsl_matrix_printf(mrbf->tset->x,stdout);
 //    printf("max min, %.6f %.6f\n", gsl_matrix_min(mrbf->tset->x), gsl_matrix_max(mrbf->tset->x));
 
-    mgn_pop_copy_mp(mrbf->solution,mrbf->tset);
+    mgn_pop_copy_mp((mgn_pop_proto*)mrbf->solution,mrbf->tset);
     moeadrbf->tot_exec += mrbf->solution->size;
 
     // TODO print pop
