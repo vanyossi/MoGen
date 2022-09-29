@@ -174,10 +174,46 @@ typedef enum mop_zdt_e {
 } MGN_ZDT_VAR;
 
 
+MGN_ZDT_VAR mop_zdt_str_toenum(char *type)
+{
+
+    MGN_ZDT_VAR etype = 0;
+    if ( strcasecmp(type,"ZDT1") == 0 ) {
+        etype = ZDT1;
+    } else if ( strcasecmp(type,"ZDT2") == 0 ) {
+        etype = ZDT2;
+    } else if ( strcasecmp(type,"ZDT3") == 0 ) {
+        etype = ZDT3;
+    } else if ( strcasecmp(type,"ZDT4") == 0 ) {
+        etype = ZDT4;
+    } else if ( strcasecmp(type,"ZDT5") == 0 ) {
+        etype = ZDT5;
+    } else if ( strcasecmp(type,"ZDT6") == 0 ) {
+        etype = ZDT6;
+    } else if ( strcasecmp(type,"ZDTM1") == 0 ) {
+        etype = ZDTM1;
+    } else {
+        etype = ZDT1;
+    }
+    return etype;
+}
+
 void mgn_zdt_free(mgnMop* mop)
 {
     zdt_param* cp = (zdt_param*)mop->params;
+    mgn_limit_free(mop->limits);
     free(cp);
+}
+
+mgnLimit* mgn_zdt_alloc_limits(MGN_ZDT_VAR variant, size_t x_size)
+{
+    UNUSED(variant);
+    mgnLimit *moplim = mgn_limit_alloc(x_size);
+    for (size_t i = 0; i < moplim->size; ++i) {
+        moplim->min[i] = 0;
+        moplim->max[i] = 1;
+    }
+    return moplim;
 }
 
 mgnMop* mgn_zdt_init(MGN_ZDT_VAR variant, mgn_indv_param *param)
@@ -185,6 +221,7 @@ mgnMop* mgn_zdt_init(MGN_ZDT_VAR variant, mgn_indv_param *param)
     mgnMop *mop = mgn_mop_alloc(param);
     mop->free = mgn_zdt_free;
     zdt_param* cp = malloc(sizeof(*cp));
+    mop->limits = mgn_zdt_alloc_limits(variant, param->x_size);
     cp->pos = 0;
     cp->x_size = param->x_size;
     cp->f_size = param->f_size;

@@ -516,6 +516,7 @@ void mgn_uf10(double *x, double *f, double *g, void *params)
 void pmgn_cec09_free(mgnMop* mop)
 {
     cec09_param* cp = (cec09_param*)mop->params;
+    mgn_limit_free(mop->limits);
     free(cp);
 }
 
@@ -524,7 +525,13 @@ mgnMop* mgn_cec09_init(MGN_CEC09_VAR variant, mgn_indv_param * param)
 {
     mgnMop *mop = mgn_mop_alloc(param);
     mop->free = pmgn_cec09_free;
+
+    mgnLimit *limit = mgn_limit_alloc(param->x_size);
+    mgn_cec09_set_limits(variant, limit);
+    mop->limits = limit;
+
     cec09_param* cp = malloc(sizeof(*cp));
+
     cp->pos = 0;
     cp->x_size = param->x_size;
     cp->f_size = param->f_size;
