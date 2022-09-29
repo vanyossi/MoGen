@@ -11,7 +11,6 @@ bool mgn_moa_solve(mgnMoa *moa, size_t runs)
     size_t i = 0;
 
     for (i = 0; i < runs; ++i) {
-        moa->c_run++;
         moa->run(moa);
     }
     return true;

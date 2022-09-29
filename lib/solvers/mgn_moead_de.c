@@ -11,6 +11,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_permutation.h>
 
+#include "mgn_gnuplot.h"
 
 // DE operators
 //same as de
@@ -136,6 +137,7 @@ void moead_update_neighbour_de(mgn_pop *lpop
 //void moead_run(mgnMop *mop, void* features)
 void moead_de_run(mgnMoa* moead)
 {
+    bool count = true; //tmp var while we count exec from moa
     moeadf* feat = mgn_moead_getfeatures(moead);
     // need check since init alloc are external calls
     if (!(feat->isalloc || feat->ismopset || feat->isprobset)) {
@@ -146,6 +148,10 @@ void moead_de_run(mgnMoa* moead)
     size_t n_weights = feat->wei->size1;
     mgn_pop* ypop = pop_alloc_pop(1, feat->pop);
     for (size_t i = 0; i < n_weights; ++i) {
+        if (moead->tot_exec >= moead->max_exec){
+            count = false;
+            break;
+        }
 //        mgn_pop* l_pop = moead_de_reproduction(feat, ypop,i);
         mgn_pop* l_pop = mgn_de_recombination(feat->pop, i
                                               ,feat->size_nei
@@ -172,9 +178,17 @@ void moead_de_run(mgnMoa* moead)
 
         moead_update_ep(feat, l_pop);
         mgn_pop_free(l_pop);
-    }
-    mgn_pop_free(ypop);
 
+//        if ( moead->tot_exec % 300 == 0) {
+//            char *filename = malloc(64);
+//            asprintf(&filename, "MOEAD_DE_%s_%zu", moead->mop->name, moead->tot_exec);
+//            mgn_plot_fast((mgn_pop_proto*) feat->epop, filename, "sol");
+//            free(filename);
+//        }
+    }
+
+    if (count) { moead->c_run++; }
+    mgn_pop_free(ypop);
 }
 
 mgnMoa* mgn_moead_de_init(gsl_matrix *W,size_t nobj, size_t T
@@ -190,6 +204,7 @@ mgnMoa* mgn_moead_de_init(gsl_matrix *W,size_t nobj, size_t T
                         ,params
                         ,external);
     moead_de->run = moead_de_run;
+    moead_de->max_exec = 5000;
 
     return moead_de;
 }

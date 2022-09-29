@@ -13,6 +13,7 @@
 struct mgn_moa_t {
     char name[MOA_NAME_LEN];
     size_t c_run;
+    size_t max_exec;
     size_t tot_exec;
     mgnMop *mop;
     void (*run)(mgnMoa*);

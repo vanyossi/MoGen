@@ -26,16 +26,7 @@ int main() {
     mgn_indv_param params = {6,2,0};
     mgn_indv_ops *iops = mgn_indv_ops_init();
     mgn_popl *EP = mgn_popl_alloc((void*)iops,&params);
-//    mgnLimit ilimit = {0, 1};
 
-    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
-
-    mop->params = &params; // same order as mgn_indv_param
-    mgnLimit *moplim = mgn_limit_alloc(params.x_size);
-    for (size_t i = 0; i < moplim->size; ++i) {
-        moplim->min[i] = 0;
-        moplim->max[i] = 1;
-    }
     mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL
         ,5, 20};
     ga_probs.mut_llim = calloc(params.x_size, sizeof(ga_probs.mut_llim));
@@ -44,22 +35,20 @@ int main() {
         ga_probs.mut_llim[i] = 0;
         ga_probs.mut_ulim[i] = 1;
     }
-//    mop->limits = moplim;
 
-    mgn_cec09_set_limits(UF1,moplim);
-    mop = mgn_cec09_init(UF1, &params);
-    mop->limits = moplim;
+//    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
+    mgnMop *mop = mgn_cec09_init(UF1, &params);
 
     gsl_matrix *W = mgn_weight_slattice(30, params.f_size);
-    mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_ind_init,moplim,true);
+    mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_ind_init,mop->limits,true);
 //    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
     moead->set_ga_vals(moead,&ga_probs);
 
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    int runs = 8000;
-    int plot_every = 100;
+    int runs = 1000;
+    int plot_every = 500;
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
     asprintf(&pdat.title, "%s", "points");
@@ -76,7 +65,7 @@ int main() {
         }
     }
     printf("total exec: %zu\n", moead->tot_exec);
-    printf("gens: %d\n", runs);
+    printf("gens: %zu\n", moead->c_run);
 
 //    mgn_pop_prank_sort(EP);
     mgn_pop *pfinal = mgn_pop_alloc(EP->size,(void*)iops,&params);
@@ -113,7 +102,6 @@ int main() {
 
     gsl_matrix_free(W);
 
-    mgn_limit_free(moplim);
     mgn_mop_free(mop);
     mgn_moead_free(moead);
     mgn_popl_free(EP);
