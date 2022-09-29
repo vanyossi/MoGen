@@ -2,26 +2,7 @@
 #define _MGN_MOEADRBF_SOLVER_
 
 
-#include "mgn_types.h"
-#include "mgn_moa.h"
-
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-
-
-typedef struct mgn_features_moeadrbf mgn_moeadrbff;
-
-
-#define pmgn_moeadrbf_templatep() \
-    size_t max_eval;              \
-    size_t nt; /* size of tset population */ \
-    gsl_matrix *m_w; /* matrix of weight vectors */ \
-    mgn_popl *solution;
-
-
-struct mgn_features_moeadrbf {
-    pmgn_moeadrbf_templatep()
-};
+#include "mgn_moead-rbf_common.h"
 
 
 // public functions and structures
@@ -35,7 +16,8 @@ mgnMoa* mgn_moa_moeadrbf_alloc(
     , mgn_popl *A
     , mgnLimit *limits
     , size_t Nw /* size of internal weight vector */
-    );
+);
+
 
 void mgn_moa_moeadrbf_init(mgnMoa* moeadrbf);
 

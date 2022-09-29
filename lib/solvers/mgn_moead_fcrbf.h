@@ -1,33 +1,13 @@
-#ifndef _MGN_MOEAD_FCRBF_SOLVER_
-#define _MGN_MOEAD_FCRBF_SOLVER_
+#ifndef MGN_MOEAD_FCRBF_SOLVER
+#define MGN_MOEAD_FCRBF_SOLVER
 
-
-#include "mgn_types.h"
-#include "mgn_moa.h"
-
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-
-
-typedef struct mgn_features_moead_fcrbf mgn_moead_fcrbff;
-
-
-#define pmgn_moead_fcrbf_templatep() \
-    size_t max_eval;              \
-    size_t nt; /* size of tset population */ \
-    gsl_matrix *m_w; /* matrix of weight vectors */ \
-    mgn_popl *solution;
-
-
-struct mgn_features_moead_fcrbf {
-    pmgn_moead_fcrbf_templatep()
-};
+#include "mgn_moead-rbf_common.h"
 
 
 // public functions and structures
-// moead_fcrbf_data is for public use
+// moeadrbf_data is for public use
 // used for initialization data retrieval and else
-mgnMoa* mgn_moa_moead_fcrbf_alloc(
+mgnMoa* mgn_moa_moeadrbf_fc_alloc(
     size_t max_eval
     , size_t nt
     , size_t k
@@ -37,13 +17,9 @@ mgnMoa* mgn_moa_moead_fcrbf_alloc(
     , size_t Nw /* size of internal weight vector */
 );
 
-void mgn_moa_moead_fcrbf_init(mgnMoa* moead_fcrbf);
+void mgn_moa_moeadrbf_fc_init(mgnMoa* moeadrbf);
 
-void mgn_moa_moead_fcrbf_free(mgnMoa* moead_fcrbf);
-
-
-//void mgn_moead_fcrbf_mdl_set_psize(mgnMoa* moead_fcrbf);
+void mgn_moa_moeadrbf_fc_free(mgnMoa* moeadrbf);
 
 
-
-#endif // _MGN_MOEAD_FCRBF_SOLVER_
+#endif // MGN_MOEAD_FCRBF_SOLVER

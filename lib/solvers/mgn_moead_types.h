@@ -10,4 +10,6 @@
 
 typedef struct moead_features moeadf;
 
+typedef struct mgn_features_moeadrbf mgn_moeadrbff;
+
 #endif //MOGEN_MGN_MOEAD_TYPES_H

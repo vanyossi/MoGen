@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]) {
     size_t maxeval = train_pop_size + wsize;
     size_t iwsize = 100;
     char* mop_name =  malloc(sizeof(char) * 64);
-    strcpy(mop_name, "UF1");
+    strcpy(mop_name, "ZDT3");
 
     char ch;
     while ((ch = getopt(argc, argv, "E:r:x:f:t:w:m:p:")) != -1) {
@@ -119,7 +119,7 @@ int main(int argc, char const *argv[]) {
             limits->max[i] = 1;
         }
 
-        mgnMoa *moead_fcrbf = mgn_moa_moead_fcrbf_alloc(maxeval
+        mgnMoa *moead_fcrbf = mgn_moa_moeadrbf_fc_alloc(maxeval
                                                    ,Nt
                                                    ,Nt
                                                    ,m_w
@@ -127,13 +127,13 @@ int main(int argc, char const *argv[]) {
                                                    ,limits
                                                    ,iwsize);
 
-//        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
-//        moead_fcrbf->mop = mgn_zdt_init(moptype, &params);
-        MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
-        moead_fcrbf->mop = mgn_cec09_init(moptype, &params);
-
+        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
+        moead_fcrbf->mop = mgn_zdt_init(moptype, &params);
         moead_fcrbf->mop->limits = limits;
-        mgn_moa_moead_fcrbf_init(moead_fcrbf);
+
+//        MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
+//        moead_fcrbf->mop = mgn_cec09_init(moptype, &params);
+        mgn_moa_moeadrbf_fc_init(moead_fcrbf);
 
         printf("expected total runs %zu\n", total_runs);
         mgn_moa_solve(moead_fcrbf,total_runs);
@@ -167,7 +167,7 @@ int main(int argc, char const *argv[]) {
 
         gsl_matrix_free(m_w);
         mgn_mop_free(moead_fcrbf->mop);
-        mgn_moa_moead_fcrbf_free(moead_fcrbf);
+        mgn_moa_moeadrbf_fc_free(moead_fcrbf);
 //        mgn_limit_free(limits);
         mgn_popl_free(pl_a);
     }

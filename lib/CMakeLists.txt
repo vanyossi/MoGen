@@ -43,6 +43,7 @@ set(MGN_LIB_SOURCES
     solvers/decomposition/mgn_scalarization.c
     solvers/decomposition/mgn_weights.c
     solvers/mgn_moead_common.c
+    solvers/mgn_moead-rbf_common.c
     solvers/mgn_moead.c
     solvers/mgn_moead_de.c
     solvers/mgn_de.c

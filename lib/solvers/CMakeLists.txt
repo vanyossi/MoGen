@@ -4,6 +4,7 @@ add_subdirectory(mono)
 include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/lib
+    ${CMAKE_SOURCE_DIR}/lib/3rdparty
     ${CMAKE_SOURCE_DIR}/lib/math
     ${CMAKE_SOURCE_DIR}/lib/operators
     ./decomposition
