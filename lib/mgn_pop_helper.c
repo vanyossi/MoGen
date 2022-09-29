@@ -23,7 +23,25 @@ void mgn_pop_copy_mp(mgn_pop_proto *pop, mgn_pop_matrix *mpop){
     }
 }
 
-mgn_pop_matrix* mgn_pop_to_popm(mgn_pop *pop)
+void mgn_popl_insert_popm(mgn_popl *dst, mgn_pop_matrix *src)
+{
+    for (size_t i = 0; i < src->size; ++i) {
+        mgn_indv *indv = mgn_popl_alloc_last(dst);
+        gsl_matrix_get_row(indv->x, src->x,i);
+        gsl_matrix_get_row(indv->f, src->f,i);
+        gsl_matrix_get_row(indv->g, src->g,i);
+    }
+}
+
+void mgn_popl_insert_pop(mgn_popl *dst, mgn_pop_proto *src)
+{
+    for (size_t i = 0; i < src->size; ++i) {
+        mgn_indv *indv = mgn_popl_alloc_last(dst);
+        dst->ops->copy(indv, src->get(src,i));
+    }
+}
+
+mgn_pop_matrix* mgn_pop_to_popm(mgn_pop_proto *pop)
 {
     mgn_pop_matrix *pop_m = mgn_pop_matrix_alloc(
         pop->size,pop->iparams.x_size
@@ -33,7 +51,7 @@ mgn_pop_matrix* mgn_pop_to_popm(mgn_pop *pop)
 
     // TODO indv prototype need
     for (size_t i = 0; i < pop->size; ++i) {
-        mgn_indv *in = mgn_pop_get(pop,i);
+        mgn_indv *in = pop->get(pop,i);
         gsl_matrix_set_row(pop_m->x,i,in->x);
         gsl_matrix_set_row(pop_m->f,i,in->f);
         gsl_matrix_set_row(pop_m->g,i,in->g);

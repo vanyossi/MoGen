@@ -17,7 +17,11 @@
 
 void mgn_pop_copy_mp(mgn_pop_proto *pop, mgn_pop_matrix *mpop);
 
-mgn_pop_matrix* mgn_pop_to_popm(mgn_pop *pop);
+mgn_pop_matrix* mgn_pop_to_popm(mgn_pop_proto *pop);
+
+void mgn_popl_insert_popm(mgn_popl *dst, mgn_pop_matrix *src);
+
+void mgn_popl_insert_pop(mgn_popl *dst, mgn_pop_proto *src);
 
 mgn_pop* mgn_pop_matrix_to_pop(mgn_pop_matrix *pop_m
                                ,mgn_indv_ops *ops
