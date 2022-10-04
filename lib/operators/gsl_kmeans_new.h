@@ -12,8 +12,9 @@
 #include <gsl/gsl_vector_int.h>
 #include <stdbool.h>
 
+#include "mgn_cluster_m.h"
+
 typedef struct mgn_kmeans_data kmeans_data;
-typedef struct mgn_kmeans_data_extra kmeans_data_extra;
 
 struct mgn_kmeans_data {
     gsl_vector_int *index;
@@ -22,36 +23,21 @@ struct mgn_kmeans_data {
     size_t k;
 };
 
-// after kmeans calc, this can be used to
-// analyze the data members.
-// TODO contain the m_points themselves as matrix
-//      tricky as each row could be different size
-struct mgn_kmeans_data_idx {
-    size_t size;
-    unsigned int *pos;
-};
-
-struct mgn_kmeans_data_extra {
-    size_t size;
-    struct mgn_kmeans_data_idx *mpos;
-};
 
 kmeans_data* gsl_kmeans(gsl_matrix *X, size_t k, size_t maxiter);
 
-
-void gsl_kmeans_data_extra_free(kmeans_data_extra *data);
 void gsl_kmeans_free(kmeans_data *kmeans);
 
 // Groups all member indexes and sizes
-kmeans_data_extra*
+cluster_data_extra *
 gsl_kmeans_calc(kmeans_data *km);
 
 gsl_matrix *
-mgn_kmeans_cluster_var(kmeans_data *km, kmeans_data_extra *kme
+mgn_kmeans_cluster_var(kmeans_data *km, cluster_data_extra *kme
                        , gsl_matrix *X, bool get_sd);
 
 gsl_vector *
-mgn_kmeans_cluster_var_dist(kmeans_data *km, kmeans_data_extra *kme
+mgn_kmeans_cluster_var_dist(kmeans_data *km, cluster_data_extra *kme
                        , gsl_matrix *X, bool get_sd);
 
 

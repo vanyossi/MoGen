@@ -29,9 +29,10 @@
 void mgn_moeadrbf_run(mgnMoa *moa)
 {
     mgnp_moeadrbf_data *moeadrbf = mgn_moeadrbf_features(moa);
+
     // === Model building
     kmeans_data *km = gsl_kmeans(moeadrbf->tset->x,moeadrbf->mdl_k, 1000);
-    kmeans_data_extra *kme = gsl_kmeans_calc(km);
+    cluster_data_extra *kme = gsl_kmeans_calc(km);
     cluster_data cdat = {km->centers, km->k};
 
     char* filename = malloc(sizeof(char) * 64);
@@ -177,7 +178,7 @@ void mgn_moeadrbf_run(mgnMoa *moa)
     free(m_w_ptr);
 
     gsl_vector_free(lambda);
-    gsl_kmeans_data_extra_free(kme);
+    mgn_cluster_data_extra_free(kme);
     gsl_kmeans_free(km);
 
 #ifdef NDEBUG
