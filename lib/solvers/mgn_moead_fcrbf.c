@@ -38,19 +38,19 @@ void mgn_moeadrbf_fc_run(mgnMoa *moa)
     mgnp_moeadrbf_data *moeadrbf = mgn_moeadrbf_features(moa);
     // === Model building
     // use archive for training
-    mgn_pop_matrix_free(moeadrbf->tset);
-    moeadrbf->tset = mgn_pop_to_popm((mgn_pop_proto*)moeadrbf->arc);
+//    mgn_pop_matrix_free(moeadrbf->tset);
+//    moeadrbf->tset = mgn_pop_to_popm((mgn_pop_proto*)moeadrbf->arc);
 
     fcmeans_data *fcdat = mgn_fcmeans(moeadrbf->tset->x,moeadrbf->mdl_k, 1000, 1e-5);
-//    double low_e = (moa->c_run < moeadrbf->max_run * 0.6)? 0 : (moa->c_run - 1.0) / moeadrbf->max_run * 0.001;
+    double low_e = (moa->tot_exec < moa->max_exec * 0.80)? 0.02 : (moa->tot_exec - 1.0) / moa->max_exec *0.3;
 
-    cluster_data_extra *cl_extra = mgn_fcmeans_calc(fcdat,0,1);
+//    printf("low_e: %zu, %zu :: %.6f,  %.6f\n", moa->tot_exec, moa->max_exec, (moa->tot_exec - 1.0) / moa->max_exec * 0.3, low_e);
+    cluster_data_extra *cl_extra = mgn_fcmeans_calc(fcdat,low_e,1);
     cluster_data cdat = {fcdat->centers, fcdat->k};
 
 
     // TODO, order indexes by probability high to low
     // select only the first N solutions
-
 //    printf("---maxiter %d\n", fcdat->iter);
 //    for (size_t l = 0; l < cl_extra->size; ++l) {
 //        for (size_t i1 = 0; i1 < cl_extra->mpos[l].size; ++i1) {
@@ -108,13 +108,13 @@ void mgn_moeadrbf_fc_run(mgnMoa *moa)
 
 
     // === Update population
-    mgn_popl_insert_pop(moeadrbf->arc,(mgn_pop_proto*)pop_sel);
+//    mgn_popl_insert_pop(moeadrbf->arc,(mgn_pop_proto*)pop_sel);
     mgnp_moeadrbf_update(moeadrbf, pop_sel);
     mgnp_moeadrbf_pop_update(moeadrbf);
 
+//    mgn_moeadfc_rbf_update_training(moeadrbf);
 
     // === free all
-    mgn_moeadfc_rbf_update_training(moeadrbf);
     mgn_pop_free(pop_sel);
 
     gsl_matrix_free(m_1phi);
