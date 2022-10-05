@@ -22,7 +22,7 @@ size_t mgn_mop_eval_pop(mgnMop *mop, mgn_pop *pop, void *params)
     UNUSED(params);
     for (size_t i = 0; i < pop->size; i++) {
 //        ((mgn_mop_p*)mop->params)->pos = i;
-        pop->ops->eval(mop, mgn_pop_get(pop,i),mop->params);
+        pop->ops->eval(mop, pop->get(pop,i),mop->params);
     }
     return pop->size;
 }
