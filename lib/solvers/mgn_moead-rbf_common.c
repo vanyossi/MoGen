@@ -247,6 +247,7 @@ void mgnp_moeadrbf_optim_s(
 
     mgn_lhci *lhci = mgn_init_new_lhci(Np,param.x_size,rlim);
     mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param,1, 0.5);
+    de->max_exec = SIZE_MAX;
     mgn_de_init(de, mgn_init_lhc, lhci);
     mgn_lhci_free(lhci);
 
@@ -421,6 +422,7 @@ void mgnp_moeadrbf_mdl_optim(mgnp_moeadrbf_mdl_p *mdl_p, mgn_pop *p_e, mgn_ptr *
     mgn_popl *tmppe = mgn_popl_alloc(p_e->ops, params);
     mgnMoa *moead = mgn_moead_de_init(mdl_p->iW, params->f_size, T, tmppe, mop
                                       , mgn_init_lhc,mdl_p->lhci,false);
+    moead->max_exec = SIZE_MAX;
     moead->set_ga_vals(moead,mdl_p->ga_probs);
     mgn_moead_set_scalarization(moead, mgn_scalar_pbi_ori);
 

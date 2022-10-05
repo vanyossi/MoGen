@@ -180,6 +180,8 @@ mgnMoa* mgn_moead_init(gsl_matrix *W,size_t nobj, size_t T
                                           ,params
                                           ,external);
     moead->run = moead_run;
+    moead->tot_exec = 0;
+    moead->c_run = 0;
 
     return moead;
 }

@@ -137,7 +137,7 @@ void moead_update_neighbour_de(mgn_pop *lpop
 //void moead_run(mgnMop *mop, void* features)
 void moead_de_run(mgnMoa* moead)
 {
-    bool count = true; //tmp var while we count exec from moa
+//    bool count = true; //tmp var while we count exec from moa
     moeadf* feat = mgn_moead_getfeatures(moead);
     // need check since init alloc are external calls
     if (!(feat->isalloc || feat->ismopset || feat->isprobset)) {
@@ -149,7 +149,7 @@ void moead_de_run(mgnMoa* moead)
     mgn_pop* ypop = pop_alloc_pop(1, feat->pop);
     for (size_t i = 0; i < n_weights; ++i) {
         if (moead->tot_exec >= moead->max_exec){
-            count = false;
+//            count = false;
             break;
         }
 //        mgn_pop* l_pop = moead_de_reproduction(feat, ypop,i);
@@ -187,7 +187,7 @@ void moead_de_run(mgnMoa* moead)
 //        }
     }
 
-    if (count) { moead->c_run++; }
+//    if (count) { moead->c_run++; }
     mgn_pop_free(ypop);
 }
 
@@ -205,6 +205,8 @@ mgnMoa* mgn_moead_de_init(gsl_matrix *W,size_t nobj, size_t T
                         ,external);
     moead_de->run = moead_de_run;
     moead_de->max_exec = 5000;
+    moead_de->c_run = 0;
+    moead_de->tot_exec = 0;
 
     return moead_de;
 }
