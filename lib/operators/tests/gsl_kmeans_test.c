@@ -57,7 +57,7 @@ int main(int argc, char const *argv[]) {
     }
 
     kmeans_data* kmd = gsl_kmeans(B,k, 100);
-    kmeans_data_extra *kdat = gsl_kmeans_calc(kmd);
+    cluster_data_extra *kdat = gsl_kmeans_calc(kmd);
 
     for (size_t l = 0; l < kdat->size; ++l) {
         size_t size = kdat->mpos[l].size;
@@ -68,7 +68,7 @@ int main(int argc, char const *argv[]) {
         printf("\n");
     }
 
-    gsl_kmeans_data_extra_free(kdat);
+    mgn_cluster_data_extra_free(kdat);
 
 
     // save B,centroids and print indexes

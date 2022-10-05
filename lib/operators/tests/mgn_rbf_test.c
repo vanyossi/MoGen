@@ -41,7 +41,7 @@ int main(int argc, char const *argv[]) {
     // define clusters
     size_t cluster_size = 5;
     kmeans_data *km = gsl_kmeans(&train_x.matrix,cluster_size, 1000);
-    kmeans_data_extra *kme = gsl_kmeans_calc(km);
+    cluster_data_extra *kme = gsl_kmeans_calc(km);
 
 //    gsl_matrix *m_variance = mgn_kmeans_cluster_var(km,kme,&train_x.matrix,true);
 //    gsl_matrix_printf(m_variance,stdout);
@@ -100,5 +100,6 @@ int main(int argc, char const *argv[]) {
     // TODO free indata
     gsl_matrix_free(trainData);
     gsl_kmeans_free(km);
+    mgn_cluster_data_extra_free(kme);
     return 0;
 }
