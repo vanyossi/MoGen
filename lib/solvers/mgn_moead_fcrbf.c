@@ -26,8 +26,8 @@ void mgn_moeadfc_rbf_update_training(mgnp_moeadrbf_data* data)
     data->mdl_k = data->tset->size;
     // clean mphi matrix
     for (size_t i = 0; i < data->mdl_size; ++i) {
-        gsl_matrix_free(data->mdl_rbf[i].m_phi);
-        data->mdl_rbf[i].m_phi = NULL;
+        gsl_matrix_free(data->rbf_data[i].mdl_rbf.m_phi);
+        data->rbf_data[i].mdl_rbf.m_phi = NULL;
     }
 }
 
@@ -63,74 +63,19 @@ void mgn_moeadrbf_fc_run(mgnMoa *moa)
     char* filename = malloc(sizeof(char) * 64);
 
     for (size_t i = 0; i < moeadrbf->mdl_size; ++i) {
+        pmgn_moeadrbf_calcNN(&moeadrbf->rbf_data[i],moeadrbf->tset,&cdat,cl_extra);
 
-        if(moeadrbf->mdl_rbf[i].p_s) {
-            gsl_vector_free(moeadrbf->mdl_rbf[i].p_s);
-        }
-        moeadrbf->mdl_rbf[i].p_s = mgn_cluster_var_dist(
-            fcdat->centers
-            ,cl_extra
-            ,moeadrbf->tset->x
-            ,true);
-//        puts("_-___________-");
-
-        // DEBUG
-        moeadrbf->mdl_rbf[i].m_phi = mgn_rbf_create_phi(moeadrbf->tset->x,&cdat
-                                                        ,moeadrbf->mdl_rbf[i].p_s
-                                                        ,moeadrbf->kernel[i]
-                                                        ,moeadrbf->mdl_rbf[i].m_phi);
-
-        moeadrbf->mdl_rbf[i].p_m_w = mgn_rbf_new_weight(moeadrbf->mdl_rbf[i].m_phi
-                                                        , moeadrbf->tset->f, 0);
-
-        gsl_matrix *y_p = gsl_matrix_alloc(moeadrbf->tset->f->size1, moeadrbf->tset->f->size2);
-        gsl_blas_dgemm(CblasNoTrans,CblasNoTrans,1
-                       ,moeadrbf->mdl_rbf[i].m_phi
-                       ,moeadrbf->mdl_rbf[i].p_m_w,0
-                       ,y_p);
-
-#ifdef DEBUG
-        asprintf(&filename, "fcmrbf_pset-%zu-%zu",moa->c_run,i);
-        mgn_plot_matrix_2d(y_p,filename,"p",0);
-        asprintf(&filename, "fcmrbf_pset-%zu-%zu.txt",moa->c_run,i);
-        gsl_matrix_save(y_p, filename);
-        // end DEBUG
-#endif
-
-        mgnp_moeadrbf_optim_s(&moeadrbf->mdl_rbf[i]
+        mgnp_moeadrbf_optim_s(&moeadrbf->rbf_data[i].mdl_rbf
                               , &cdat
                               ,moeadrbf->tset
-                              , moeadrbf->kernel[i]);
+                              , moeadrbf->rbf_data[i].kernel);
 
-//        gsl_vector_fprintf(stdout,moeadrbf->mdl_rbf[i].p_s, "%.4f");
-        moeadrbf->mdl_rbf[i].m_phi = mgn_rbf_create_phi(moeadrbf->tset->x,&cdat
-                                                        ,moeadrbf->mdl_rbf[i].p_s
-                                                        ,moeadrbf->kernel[i]
-                                                        ,moeadrbf->mdl_rbf[i].m_phi);
-
-        moeadrbf->mdl_rbf[i].p_m_w = mgn_rbf_new_weight(moeadrbf->mdl_rbf[i].m_phi
-                                                        ,moeadrbf->tset->f,moeadrbf->mdl_rbf[i].p_m_w);
-
-//        gsl_vector_fprintf(stdout,moeadrbf->mdl_rbf[i].p_s, "%.4f");
-//        puts("_-_");
-
-        // more DEBUG
-        y_p = gsl_matrix_alloc(moeadrbf->tset->f->size1, moeadrbf->tset->f->size2);
-        gsl_blas_dgemm(CblasNoTrans,CblasNoTrans,1
-                       ,moeadrbf->mdl_rbf[i].m_phi
-                       ,moeadrbf->mdl_rbf[i].p_m_w,0
-                       ,y_p);
-
-        // TODO add plot multi dataset, train vs predictions
-#ifdef DEBUG
-        asprintf(&filename, "fcmrbf_pset-%zu-%zu_p.txt",moa->c_run,i);
-        gsl_matrix_save(y_p, filename);
-#endif
+        pmgn_moeadrbf_calcPhi(&moeadrbf->rbf_data[i],moeadrbf->tset,&cdat);
     }
 
 
     gsl_vector *lambda = mgnp_moeadrbf_find_lambda(moeadrbf->tset
-                                                   , moeadrbf->mdl_rbf, moeadrbf->mdl_size);
+                                                   , moeadrbf->rbf_data, moeadrbf->mdl_size);
 //    gsl_vector_fprintf(stdout,lambda,"%.8f");
 //    exit(0);
 

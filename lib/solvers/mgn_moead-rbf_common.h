@@ -20,6 +20,9 @@
 #include <gsl/gsl_matrix.h>
 
 
+typedef struct mgnp_model_rbfdata mgn_model_rbfdata;
+
+
 #define pmgn_moeadrbf_templatep() \
     size_t max_eval;              \
     size_t nt; /* size of tset population */ \
@@ -88,8 +91,7 @@ struct mgn_moeadrbf_data {
     size_t mdl_size;// scalarization function, this is fixed to PBI
     size_t mdl_k;
     size_t mdl_wsize;
-    mgn_kernel_f kernel[3];
-    struct mgnp_rbf_weigts mdl_rbf[3]; // used for internal model
+    mgn_model_rbfdata *rbf_data;
     mgn_pop *p_aprox;
     mgn_count_ciclic sel_idx;
     mgnp_moeadrbf_mdl_p *model_data;
@@ -125,8 +127,7 @@ struct mgnp_moeadrbf_mdl_p {
     size_t mdl_k; // scalarization function, this is fixed to PBI
     gsl_matrix *iW;
     mgn_lhci *lhci;
-    mgn_kernel_f *kernel;
-    struct mgnp_rbf_weigts *mdl_rbf;
+    mgn_model_rbfdata *rbf_data;
     gsl_vector *lambda;
     cluster_data *km;
     gsl_matrix *mphi;
@@ -182,7 +183,7 @@ void mgnp_moeadrbf_optim_s(
 // find the vector weidths lambda
 // this could be done solving Ax=b system
 gsl_vector *mgnp_moeadrbf_find_lambda(mgn_pop_matrix *tset
-                                      , struct mgnp_rbf_weigts *res
+                                      , mgn_model_rbfdata *res
                                       , size_t size);
 
 /*
@@ -238,7 +239,32 @@ void mgnp_moeadrbf_update(mgnp_moeadrbf_data *mrbf, mgn_pop *pop_sel);
 
 void mgnp_moeadrbf_pop_update(mgnp_moeadrbf_data *mrbf);
 
-//void mgn_moeadrbf_common_run(mgnMoa *moa);
+
+
+/*
+ *
+ * run common routines
+ *
+ */
+
+struct mgnp_model_rbfdata {
+    mgn_kernel_f kernel;
+    struct mgnp_rbf_weigts mdl_rbf; // sigma, phi, w
+};
+
+// calculates phi and w values for rbf
+// optimizes sigma
+void pmgn_moeadrbf_calcNN(mgn_model_rbfdata *models
+                          , mgn_pop_matrix *tset
+                          , cluster_data *cdat
+                          , cluster_data_extra *cdata_extra
+                          );
+
+void pmgn_moeadrbf_calcPhi(mgn_model_rbfdata *models
+                           , mgn_pop_matrix *tset
+                           , cluster_data *cdat
+                           );
+
 
 #endif //MOGEN_MGN_MOEAD_RBF_COMMON_H
 
