@@ -72,6 +72,7 @@ void* mgn_popl_alloc_last(mgn_popl *pop)
         pop->ops->set_prev(new, last);
     }
     pop->size++;
+//    pop->last = new;
 
     return new;
 }
