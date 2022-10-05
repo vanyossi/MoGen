@@ -653,37 +653,10 @@ void mgnp_moeadrbf_update(mgnp_moeadrbf_data *mrbf, mgn_pop *pop_sel)
     mgn_pop_free(pop_tset);
 }
 
+
 void mgnp_moeadrbf_pop_update(mgnp_moeadrbf_data *mrbf)
 {
-//    double mean = gsl_stats_mean(mrbf->tset->x->data
-//                                 ,1
-//                                 ,mrbf->tset->x->size1 * mrbf->tset->x->size2
-//    );
-//    double max = gsl_matrix_max(mrbf->tset->x) + mean;
-//    double min = gsl_matrix_min(mrbf->tset->x) - mean;
-//pmgn_moeadrbf_lchi_update(mgn_lhci **lhci, gsl_matrix *x, size_t size);
     pmgn_moeadrbf_lchi_update(&mrbf->lhci, mrbf->tset->x, mrbf->model_data->iW->size1);
-
-//    printf("min max:: %.6f, %6f %.6f\n", mean, min, max);
-
-//
-//    mgnLimit *limits = mgn_limit_alloc(mrbf->tset->x->size2);
-//    for (size_t i = 0; i < limits->size; ++i) {
-//        gsl_vector_view c_col = gsl_matrix_column(mrbf->tset->x,i);
-//        double r_mean = gsl_stats_mean(c_col.vector.data,1,c_col.vector.size);
-//        limits->min[i] = fmax(gsl_vector_min(&c_col.vector) - r_mean,0);
-//        limits->max[i] = fmin(gsl_vector_max(&c_col.vector) + r_mean,1);
-//    }
-//
-//    // TODO make wrapper for this free
-//    // or accept change in all limits.
-//    if (mrbf->l_lhci_lim == true) {
-//        mgn_limit_free(mrbf->lhci->limits);
-//    }
-//    mgn_lhci_free(mrbf->lhci);
-//    mrbf->lhci = mgn_init_new_lhci(mrbf->tset->size * 2
-//        ,mrbf->solution->iparams.x_size,limits);
-//    mrbf->l_lhci_lim = true;
 }
 
 
