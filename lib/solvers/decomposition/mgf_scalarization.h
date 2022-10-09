@@ -20,7 +20,7 @@
 #ifndef MOGEN_MGF_SCALARIZATION_H
 #define MOGEN_MGF_SCALARIZATION_H
 
-#include "mgf_global_types.h"
+//#include "mgf_global_types.h"
 #include "mgf_weights.h"
 
 /**
