@@ -20,6 +20,7 @@
 #include "population.h"
 #include "mgn_poplist.h"
 #include "mgn_pareto.h"
+#include "mgn_initializer.h"
 
 #include "decomposition/mgn_scalarization.h"
 #include "operators/mgn_vector_distance.h"
@@ -88,6 +89,9 @@ mgnMoa* mgn_moead_common_init(gsl_matrix *W,size_t nobj, size_t T
                        ,mgnMop *mop
                        ,void (*apply)(void*, void*), void* params
                        ,bool external);
+
+
+void mgn_moead_pop_init_eval(mgnMoa *moa, mgn_initializer *init);
 
 
 void mgn_moead_set_scalarization(mgnMoa* moead

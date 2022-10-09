@@ -8,6 +8,7 @@
 #include "mgn_moead_fcrbf.h"
 
 #include <gsl/gsl_blas.h>
+#include <math.h>
 
 #include "mgn_rbf.h"
 #include "mgn_fcmeans.h"
@@ -23,7 +24,7 @@
 void mgn_moeadfc_rbf_update_training(mgnp_moeadrbf_data* data)
 {
     // set cluster size
-    data->mdl_k = data->tset->size;
+//    data->mdl_k = data->tset->size;
     // clean mphi matrix
     for (size_t i = 0; i < data->mdl_size; ++i) {
         gsl_matrix_free(data->rbf_data[i].mdl_rbf.m_phi);
@@ -41,8 +42,17 @@ void mgn_moeadrbf_fc_run(mgnMoa *moa)
 //    mgn_pop_matrix_free(moeadrbf->tset);
 //    moeadrbf->tset = mgn_pop_to_popm((mgn_pop_proto*)moeadrbf->arc);
 
-    fcmeans_data *fcdat = mgn_fcmeans(moeadrbf->tset->x,moeadrbf->mdl_k, 1000, 1e-5);
-    double low_e = (moa->tot_exec < moa->max_exec * 0.80)? 0.02 : (moa->tot_exec - 1.0) / moa->max_exec *0.3;
+// variable cluster size: very small or very big no advance
+//    double advance = (double)moa->tot_exec / moa->max_exec;
+//    size_t clusters = ceil(advance * moeadrbf->tset->size);
+//    moeadrbf->mdl_k = clusters;
+//    moeadrbf->model_data->mdl_k = clusters;
+//    printf("clusters %zu\n", clusters);
+    size_t clusters = moeadrbf->mdl_k;
+
+    mgn_moeadfc_rbf_update_training(moeadrbf);
+    fcmeans_data *fcdat = mgn_fcmeans(moeadrbf->tset->x, clusters, 1000, 1e-5);
+    double low_e = (moa->tot_exec < moa->max_exec * 0.75)? 0.02 : (moa->tot_exec - 1.0) / moa->max_exec * 0.3;
 
 //    printf("low_e: %zu, %zu :: %.6f,  %.6f\n", moa->tot_exec, moa->max_exec, (moa->tot_exec - 1.0) / moa->max_exec * 0.3, low_e);
     cluster_data_extra *cl_extra = mgn_fcmeans_calc(fcdat,low_e,1);
@@ -82,7 +92,7 @@ void mgn_moeadrbf_fc_run(mgnMoa *moa)
     // === Run MOEA/D -- aproximation
     gsl_matrix *m_1phi = gsl_matrix_alloc(1,moeadrbf->mdl_k);
 
-    moeadrbf->model_data->lhci = moeadrbf->lhci;
+    moeadrbf->model_data->search_lim = moeadrbf->search_lim;
     moeadrbf->model_data->lambda = lambda;
     moeadrbf->model_data->km = &cdat;
     moeadrbf->model_data->mphi = m_1phi;

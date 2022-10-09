@@ -84,7 +84,7 @@ struct mgn_moeadrbf_data {
     /* private */
     size_t max_run;
     mgn_pop_matrix *tset; // tset pop size(nt)
-    mgn_lhci *lhci; // for training pop init
+    mgnLimit *search_lim; // for training pop init
     bool l_lhci_lim; // true to free lhci limits
 //    gsl_matrix *pm;    // pop for eval with model size(n)
     int scalarf;
@@ -126,7 +126,7 @@ struct mgnp_moeadrbf_mdl_p {
     size_t mdl_size;
     size_t mdl_k; // scalarization function, this is fixed to PBI
     gsl_matrix *iW;
-    mgn_lhci *lhci;
+    mgnLimit *search_lim;
     mgn_model_rbfdata *rbf_data;
     gsl_vector *lambda;
     cluster_data *km;
@@ -191,7 +191,7 @@ gsl_vector *mgnp_moeadrbf_find_lambda(mgn_pop_matrix *tset
  * MOEAD model start
  *
  */
-void pmgn_moeadrbf_lchi_update(mgn_lhci **lhci, gsl_matrix *x, size_t size);
+void pmgn_moeadrbf_lhci_update(mgnp_moeadrbf_data *rbfdata, mgn_pop_matrix *popm);
 
 void mgnp_moeadrbf_mdl_defparam(mgnp_moeadrbf_data *moeadrbf
                                 , size_t w_size

@@ -27,6 +27,9 @@ typedef struct _mgn_mop mgnMop;
 typedef struct mgn_moa_t mgnMoa;
 typedef struct mgn_moa_ga_set mgn_ga_sets;
 
+
+#include <string.h>
+
 typedef struct mgn_limit mgnLimit;
 
 struct mgn_limit {
@@ -51,6 +54,12 @@ static void mgn_limit_free(mgnLimit *limits)
     free(limits);
 }
 
-
+static void mgn_limit_cpy(mgnLimit *dst, mgnLimit *src)
+{
+    if (dst->size == src->size) {
+        memcpy(dst->min, src->min, dst->size * sizeof(double));
+        memcpy(dst->max, src->max, dst->size * sizeof(double));
+    }
+}
 
 #endif // _MGN_TYPES_

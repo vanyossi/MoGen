@@ -23,11 +23,11 @@
 int main() {
     mgn_plot_open();
 
-    mgn_indv_param params = {6,2,0};
+    mgn_indv_param params = {8,2,0};
     mgn_indv_ops *iops = mgn_indv_ops_init();
     mgn_popl *EP = mgn_popl_alloc((void*)iops,&params);
 
-    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL
+    mgn_ga_sets ga_probs = {0.9, 0.02, NULL, NULL
         ,5, 20};
     ga_probs.mut_llim = calloc(params.x_size, sizeof(ga_probs.mut_llim));
     ga_probs.mut_ulim = calloc(params.x_size, sizeof(ga_probs.mut_ulim));
@@ -39,16 +39,20 @@ int main() {
 //    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
     mgnMop *mop = mgn_cec09_init(UF1, &params);
 
-    gsl_matrix *W = mgn_weight_slattice(30, params.f_size);
-    mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_ind_init,mop->limits,true);
+    gsl_matrix *W = mgn_weight_slattice(300, 2);
+    mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_init_transition,mop->limits,true);
+    moead->max_exec = 1000;
+
+    mgn_initializer *lhci = mgn_pinit_lhc_alloc(mgn_moead_getpop(moead),mop->limits);
+    mgn_init_pop_lhc(mgn_moead_getpop(moead),lhci, 0);
 //    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
     moead->set_ga_vals(moead,&ga_probs);
 
 //    mgn_moead_pop_init(moead,mgn_ind_init, NULL);
 
     // run must be private
-    int runs = 1000;
-    int plot_every = 500;
+    int runs = 5000;
+    int plot_every = 11;
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
     asprintf(&pdat.title, "%s", "points");
@@ -62,6 +66,9 @@ int main() {
             FILE *out = fopen("sols.txt","w");
             mgn_pop_print(EP, out);
             fclose(out);
+        }
+        if (moead->tot_exec >= moead->max_exec) {
+            break;
         }
     }
     printf("total exec: %zu\n", moead->tot_exec);

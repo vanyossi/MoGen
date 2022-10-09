@@ -7,6 +7,7 @@
 
 #include "mgn_moead_common.h"
 
+
 moeadf* mgn_moead_getfeatures(mgnMoa* moead)
 {
     return (moeadf*)moead->features;
@@ -209,17 +210,21 @@ mgnMoa* mgn_moead_common_init(gsl_matrix *W,size_t nobj, size_t T
     moead->set_ga_vals = moead_set_prob;
     moead->features = mgn_moead_alloc_features(W,nobj,T,epop,mop,external);
 
-    moeadf *fe = mgn_moead_getfeatures(moead);
-    mgn_pop_init(fe->pop, apply,params); // internal pop
-    //evaluate pop
-//    moead_pop_evaluate(rpop, fe); // external pop
-    moead_pop_evaluate(fe->pop,fe);
-    moead->tot_exec += fe->pop->size;
 //    mgn_pop_prank_sort(fe->pop);
 
     return moead;
 }
 
+void mgn_moead_pop_init_eval(mgnMoa *moa, mgn_initializer *init)
+{
+    moeadf *fe = mgn_moead_getfeatures(moa);
+    if(fe->pop) {
+        mgn_init_pop_lhc(fe->pop, init,0);
+
+        moead_pop_evaluate(fe->pop,fe);
+        moa->tot_exec += fe->pop->size;
+    }
+}
 
 void mgn_moead_set_scalarization(mgnMoa* moead
                                  ,mgnf_decomp_scalar f)

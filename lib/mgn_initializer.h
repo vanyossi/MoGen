@@ -10,36 +10,54 @@
 
 #include "mgn_types.h"
 
+typedef struct mgnp_init_params mgn_initializer;
+typedef void (*mgnf_init_start)(mgn_pop_proto*, mgn_initializer*, void*);
+typedef void (*pmgnf_init_free)(mgn_initializer*);
+
+
+// does nothing
+// exists to avoid breaking code while refactor
+typedef void (*mgnf_init_transition)(void*, void*);
+void mgn_init_transition(void *in, void* param);
+
+
+void mgn_pinit_free(mgn_initializer *idata);
+
 struct mgnp_init_params {
     mgnLimit *limit;
-    struct mgn_i_ops *ops;
+    mgnf_init_start start;
+    pmgnf_init_free free;
 };
 
-void mgn_init_rand(void* in, void* limits);
+
+
+mgn_initializer* mgn_pinit_rand_alloc(mgnLimit *limit);
+void mgn_pinit_rand_free(mgn_initializer *idata);
+
+void mgn_init_pop_rand(mgn_pop_proto *pop, mgn_initializer *init, void *extra);
 
 
 
 // =========== Latin HyperCube ======
-typedef struct pmgn_lhc_data_priv pmgn_lhcd_priv;
-typedef struct mgn_lhc mgn_lhci;
 
-struct mgn_lhc {
-    size_t psize;
-    size_t dim;
-    mgnLimit *limits;
-    gsl_matrix *m_points;
-    pmgn_lhcd_priv *_p;
-};
+mgn_initializer* mgn_pinit_lhc_alloc(mgn_pop_proto *pop, mgnLimit *limit);
+void mgn_pinit_lhc_free(mgn_initializer *idata);
 
-mgn_lhci* mgn_init_new_lhci(size_t psize, size_t dim, mgnLimit *lim);
+void mgn_init_pop_lhc(mgn_pop_proto *pop, mgn_initializer *init, void *extra);
 
 void mgn_init_lhc_to_matrix(gsl_matrix *m_a, mgnLimit *lim);
 
-void mgn_init_lhc(void *in, void* param);
 
-void mgn_lhci_reset(mgn_lhci *lhc);
 
-void mgn_lhci_free(mgn_lhci *lhci);
+
+
+//mgn_lhci* mgn_init_new_lhci(size_t psize, size_t dim, mgnLimit *lim);
+
+//void mgn_init_lhc(void *in, void* param);
+
+//void mgn_lhci_reset(mgn_lhci *lhc);
+
+//void mgn_lhci_free(mgn_lhci *lhci);
 
 //=======================
 

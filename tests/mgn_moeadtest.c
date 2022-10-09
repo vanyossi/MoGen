@@ -22,6 +22,7 @@
 #include "population.h"
 #include "mgn_poplist.h"
 #include "mgn_scalarization.h"
+#include "mgn_initializer.h"
 #include "mgn_weights.h"
 
 int main() {
@@ -32,17 +33,17 @@ int main() {
     mgn_popl *EP = mgn_popl_alloc((void*)iops,&params);
 //    mgnLimit ilimit = {0, 1};
 
-    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
+//    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
 //    mgnMop *mop  = mgn_mop_alloc();
 //    mop->eval_array = mgn_cast_eval(mgn_zdt2);
 //    strcpy(mop->name, "ZDT2");
-    mop->params = &params; // same order as mgn_indv_param
+//    mop->params = &params; // same order as mgn_indv_param
     mgnLimit *moplim = mgn_limit_alloc(params.x_size);
     for (size_t i = 0; i < moplim->size; ++i) {
         moplim->min[i] = 0;
         moplim->max[i] = 1;
     }
-    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL
+    mgn_ga_sets ga_probs = {0.9, 0.02, NULL, NULL
                             ,5, 20};
     ga_probs.mut_llim = calloc(params.x_size, sizeof(ga_probs.mut_llim));
     ga_probs.mut_ulim = calloc(params.x_size, sizeof(ga_probs.mut_ulim));
@@ -86,9 +87,16 @@ int main() {
 //    }
 
     mgn_cec09_set_limits(UF1,moplim);
-    mop = mgn_cec09_init(UF1, &params);
+    mgnMop* mop = mgn_cec09_init(UF1, &params);
+
+
     gsl_matrix *W = mgn_weight_slattice(30, params.f_size);
-    mgnMoa *moead = mgn_moead_init(W, 2, 20, EP, mop, mgn_ind_init,moplim,true);
+    printf("m size %zu %zu\n", W->size1, W->size2);
+    mgnMoa *moead = mgn_moead_init(W, 2, 20, EP, mop, mgn_init_transition,moplim,true);
+    moead->max_exec = 20000;
+
+    mgn_initializer *lhci = mgn_pinit_lhc_alloc(mgn_moead_getpop(moead),moplim);
+    mgn_init_pop_lhc(mgn_moead_getpop(moead),lhci, 0);
 //    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
     moead->set_ga_vals(moead,&ga_probs);
 
@@ -96,7 +104,7 @@ int main() {
 
     // run must be private
     int runs = 8000;
-    int plot_every = 30;
+    int plot_every = 50;
     mgn_plot_data pdat = {"", "", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
     asprintf(&pdat.title, "%s", "points");
@@ -111,9 +119,12 @@ int main() {
             mgn_pop_print(EP, out);
             fclose(out);
         }
+        if (moead->tot_exec >= moead->max_exec) {
+            break;
+        }
     }
     printf("total exec: %zu\n", moead->tot_exec);
-    printf("gens: %d\n", runs);
+    printf("gens: %d\n", moead->c_run);
 
 //    mgn_pop_prank_sort(EP);
     mgn_pop *pfinal = mgn_pop_alloc(EP->size,(void*)iops,&params);

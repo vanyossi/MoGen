@@ -16,6 +16,7 @@
 #include <gsl/gsl_matrix.h>
 
 #include "decomposition/mgn_scalarization.h"
+#include "mgn_initializer.h"
 
 
 mgnMoa* mgn_moead_de_init(gsl_matrix *W,size_t nobj, size_t T
@@ -31,6 +32,8 @@ mgnMoa* mgn_moead_de_init(gsl_matrix *W,size_t nobj, size_t T
 //                       ,bool external);
 
 void mgn_moead_free(mgnMoa *moead);
+
+void mgn_moead_pop_init_eval(mgnMoa *moa, mgn_initializer *init);
 
 void mgn_moead_set_scalarization(mgnMoa* moead
                                  ,mgnf_decomp_scalar f);

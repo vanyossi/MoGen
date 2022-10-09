@@ -7,6 +7,8 @@
 
 #include "mgn_pop_helper.h"
 
+#include <float.h>
+
 //TODO need proto indv (for different indv)
 
 void mgn_pop_copy_mp(mgn_pop_proto *pop, mgn_pop_matrix *mpop){
@@ -73,4 +75,35 @@ mgn_pop* mgn_pop_matrix_to_pop(mgn_pop_matrix *pop_m
         gsl_matrix_get_row(in->g,pop_m->g,i);
     }
     return pop;
+}
+
+
+gsl_vector* mgn_pop_getbound_column(mgn_pop_proto *pop, bool ismax)
+{
+    gsl_vector *lim = gsl_vector_alloc(pop->iparams.x_size);
+    gsl_vector_set_all(lim,(ismax)? DBL_MIN : DBL_MAX);
+
+    double *xv, *x, *xtmp;
+    xv = lim->data;
+    for (size_t i = 0; i < pop->size; ++i) {
+        x = pop->ops->get_iparams(pop->get(pop,i)).x->data;
+        for (size_t xi = 0; xi < lim->size; ++xi) {
+            if(ismax) {
+                xv[xi] = (x[xi] > xv[xi])? x[xi] : xv[xi];
+            } else {
+                xv[xi] = (x[xi] < xv[xi])? x[xi] : xv[xi];
+            }
+        }
+    }
+    return lim;
+}
+
+gsl_vector* mgn_pop_max_column(mgn_pop_proto *pop)
+{
+    return mgn_pop_getbound_column(pop,true);
+}
+
+gsl_vector* mgn_pop_min_column(mgn_pop_proto *pop)
+{
+    return mgn_pop_getbound_column(pop,false);
 }

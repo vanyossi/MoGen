@@ -150,7 +150,7 @@ void mgn_moeadrbf_fcinv_run(mgnMoa *moa)
     // === Run MOEA/D -- aproximation
     gsl_matrix *m_1phi = gsl_matrix_alloc(1,moeadrbf->mdl_k);
 
-    moeadrbf->model_data->lhci = moeadrbf->lhci;
+    moeadrbf->model_data->search_lim = moeadrbf->search_lim;
     moeadrbf->model_data->lambda = lambda;
     moeadrbf->model_data->km = &cdat;
     moeadrbf->model_data->mphi = m_1phi;

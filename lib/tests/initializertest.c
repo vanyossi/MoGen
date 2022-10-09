@@ -13,7 +13,7 @@
 
 int main() {
     rnd_initialize();
-    rnd_set_seed(454235);
+    rnd_set_seed(534563);
 
     mgn_indv_ops *iops = mgn_indv_ops_init();
     mgn_indv_param iparam = {6,2,0};
@@ -22,9 +22,9 @@ int main() {
         limits->min[i] = 0;
         limits->max[i] = 1;
     }
-    mgn_pop* pop2d = mgn_pop_alloc(6,(void*)iops, &iparam);
+    mgn_pop* pop2d = mgn_pop_alloc(200,(void*)iops, &iparam);
 
-    mgn_lhci *lhc_data = mgn_init_new_lhci(pop2d->size, iparam.x_size, limits);
+    mgn_initializer *lhci = mgn_pinit_lhc_alloc((mgn_pop_proto*)pop2d,limits);
 //    mgn_init_LHC_init(pop2d->size,iparam.x_size, limits);
 
 //    gsl_matrix *hlcm = mgn_LHC_get();
@@ -34,16 +34,20 @@ int main() {
 //    gsl_vector_fprintf(stdout, &vv.vector, "%g");
 //    struct mgnp_init_params ipar = {limits, pop2d->ops};
 //    mgn_pop_init(pop2d,mgn_init_rand,&ipar);
-    mgn_pop_init(pop2d,mgn_init_lhc,lhc_data);
+    mgn_init_pop_lhc(pop2d,lhci,0);
 
+    FILE *out = fopen("init_points2d.txt", "w");
     for (size_t i = 0; i < pop2d->size; ++i) {
         for (size_t j = 0; j < pop2d->ops->get_iparams(pop2d->I).x->size; ++j) {
             printf("%.6f ", pop2d->ops->get_iparams(mgn_pop_get(pop2d,i)).x->data[j]);
+            fprintf(out, "%.6f ", pop2d->ops->get_iparams(mgn_pop_get(pop2d,i)).x->data[j]);
         }
         printf("\n");
+        fprintf(out, "\n");
     }
+    fclose(out);
 
-    mgn_lhci_free(lhc_data);
+    mgn_pinit_lhc_free(lhci);
     mgn_pop_free(pop2d);
 
 //    double min = 100;

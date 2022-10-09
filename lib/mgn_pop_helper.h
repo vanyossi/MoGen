@@ -27,4 +27,10 @@ mgn_pop* mgn_pop_matrix_to_pop(mgn_pop_matrix *pop_m
                                ,mgn_indv_ops *ops
                                ,mgn_indv_param *params);
 
+
+
+gsl_vector* mgn_pop_max_column(mgn_pop_proto *pop);
+gsl_vector* mgn_pop_min_column(mgn_pop_proto *pop);
+
+
 #endif //MOGEN_MGN_POP_HELPER_H
