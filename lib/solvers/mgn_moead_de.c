@@ -148,10 +148,10 @@ void moead_de_run(mgnMoa* moead)
     size_t n_weights = feat->wei->size1;
     mgn_pop* ypop = pop_alloc_pop(1, feat->pop);
     for (size_t i = 0; i < n_weights; ++i) {
-        if (moead->tot_exec >= moead->max_exec){
-//            count = false;
-            break;
-        }
+//        if (moead->tot_exec >= moead->max_exec){
+////            count = false;
+//            break;
+//        }
 //        mgn_pop* l_pop = moead_de_reproduction(feat, ypop,i);
         mgn_pop* l_pop = mgn_de_recombination(feat->pop, i
                                               ,feat->size_nei
