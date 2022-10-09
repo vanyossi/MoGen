@@ -109,8 +109,8 @@ int main(int argc, char const *argv[]) {
         mgn_popl *pl_a = mgn_popl_alloc((void*)indv_ops,&params);
         gsl_matrix *m_w = mgn_weight_slattice(N,pl_a->iparams.f_size);
         printf("weight size %zu\n", m_w->size1);
-        gsl_matrix_save(m_w,"weight_vector_p.txt");
-        mgn_plot_matrix_2d(m_w,"weight_vector", "weights",0);
+//        gsl_matrix_save(m_w,"weight_vector_p.txt");
+//        mgn_plot_matrix_2d(m_w,"weight_vector", "weights",0);
 
         // Prepare Latin Hypercube// set limits
 //        mgnLimit *limits = mgn_limit_alloc(params.x_size);
