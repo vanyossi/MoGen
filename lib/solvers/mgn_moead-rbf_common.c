@@ -524,7 +524,7 @@ void mgnp_moeadrbf_select(mgn_count_ciclic *sel_idx
         } else {
             do {
 //                puts("insert");
-                i_sel = d_row.vector.data[mgn_count_add(*sel_idx,j)];
+                i_sel = d_row.vector.data[mgn_count_add(*sel_idx,1)];
                 HASH_FIND(hh,hashes
                           ,mgn_indv_getx_vec(p_orig,i_sel)->data
                           ,sizeof(double) * p_orig->iparams.x_size
