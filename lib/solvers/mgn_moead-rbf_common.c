@@ -123,6 +123,7 @@ void mgn_moa_moeadrbf_common_init(mgnMoa* moeadrbf)
 {
     mgnp_moeadrbf_data *mrbf = mgn_moeadrbf_features(moeadrbf);
     mgn_pop_matrix_eval(mrbf->tset,moeadrbf->mop);
+    moeadrbf->tot_exec += mrbf->tset->x->size1;
 
 
 #ifdef DEBUG
@@ -660,18 +661,30 @@ void mgnp_moeadrbf_update_refine(mgn_pop *pop_newt, mgn_pop *pop_sel)
     gsl_vector_int_free(sel_pos_in_newt);
 }
 
-
+static size_t crun = 0;
 void mgnp_moeadrbf_update(mgnp_moeadrbf_data *mrbf, mgn_pop *pop_sel)
 {
+//    char *filename = calloc(64,1);
+//    asprintf(&filename, "solution_before_%zu", crun);
+//    mgn_plot_fast(mrbf->solution, filename, "sol");
     for (size_t i = 0; i < pop_sel->size; ++i) {
         mgn_pop_insert_dom(mrbf->solution,mgn_pop_get(pop_sel,i));
     }
+
+//    free(filename);
+
     mgn_pop *pop_tset = mgn_pop_matrix_to_pop(mrbf->tset
                                               , (void*)mrbf->p_aprox->ops, &mrbf->p_aprox->iparams);
 
     mgn_pop *pop_u = mgn_pop_join(pop_tset, pop_sel);
     mgn_pop_prank_sort(pop_u);
     mgn_pop_copy(pop_tset,pop_u,0,0,mrbf->tset->size);
+
+//    filename = calloc(64,1);
+//    asprintf(&filename, "ptest_%zu", crun);
+//    mgn_plot_fast(pop_tset, filename, "sol");
+//    free(filename);
+//    crun++;
 
     mgnp_moeadrbf_update_refine(pop_tset,pop_sel);
 

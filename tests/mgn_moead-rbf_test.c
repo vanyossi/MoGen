@@ -121,10 +121,9 @@ int main(int argc, char const *argv[]) {
 
 //        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
 //        mgnMop* mop = mgn_zdt_init(moptype, &params);
-
+//
         MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
         mgnMop* mop = mgn_cec09_init(moptype, &params);
-
 
         mgnMoa *moead_rbf = mgn_moa_moeadrbf_alloc(maxeval
             ,Nt
@@ -135,8 +134,8 @@ int main(int argc, char const *argv[]) {
             ,iwsize);
 
         moead_rbf->max_exec = maxeval;
-
         moead_rbf->mop = mop;
+
         mgn_moa_moeadrbf_init(moead_rbf);
 
         printf("expected total runs %zu\n", total_runs);
