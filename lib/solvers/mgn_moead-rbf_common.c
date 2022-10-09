@@ -133,8 +133,11 @@ void mgn_moa_moeadrbf_common_init(mgnMoa* moeadrbf)
 //    gsl_matrix_printf(mrbf->tset->x,stdout);
 //    printf("max min, %.6f %.6f\n", gsl_matrix_min(mrbf->tset->x), gsl_matrix_max(mrbf->tset->x));
 
-    mgn_pop_copy_mp((mgn_pop_proto*)mrbf->solution,mrbf->tset);
-    moeadrbf->tot_exec += mrbf->solution->size;
+    mgn_pop *pop = mgn_pop_alloc(mrbf->tset->x->size1, mrbf->solution->ops, &mrbf->solution->iparams);
+    mgn_pop_copy_mp((mgn_pop_proto*)pop,mrbf->tset);
+    for (size_t i = 0; i < pop->size; ++i) {
+        mgn_pop_insert_dom(mrbf->solution,mgn_pop_get(pop,i));
+    }
 
     // TODO print pop
     //      done? mgn_pop_print(mrbf->solution, stdout);
