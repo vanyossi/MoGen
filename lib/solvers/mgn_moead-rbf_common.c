@@ -708,7 +708,7 @@ void mgnp_moeadrbf_pop_update(mgnp_moeadrbf_data *mrbf)
     gsl_vector *max = mgn_pop_max_column(pop);
 
     memcpy(lim->min, min->data, sizeof(double) * lim->size);
-    memcpy(lim->min, max->data, sizeof(double) * lim->size);
+    memcpy(lim->max, max->data, sizeof(double) * lim->size);
 
     gsl_vector_free(min);
     gsl_vector_free(max);
