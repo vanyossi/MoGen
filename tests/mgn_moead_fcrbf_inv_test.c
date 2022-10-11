@@ -141,7 +141,7 @@ int main(int argc, char const *argv[]) {
 
         // print results
         char tmp_fname[64];
-        char* filename = malloc(sizeof(char) * 64);
+        char* filename;
         // name, alg, var, obj, run
         asprintf(&filename, "%s_%s-%zu-%zu_%zu-%zu"
                  ,moead_fcrbf->name
@@ -166,15 +166,17 @@ int main(int argc, char const *argv[]) {
         free(filename);
 
 
-        gsl_matrix_free(m_w);
         mgn_mop_free(moead_fcrbf->mop);
         mgn_moa_moeadrbf_fcinv_free(moead_fcrbf);
-//        mgn_limit_free(limits);
+
+        mgn_limit_free(limits);
+        gsl_matrix_free(m_w);
         mgn_popl_free(pl_a);
     }
 
     mgn_indv_ops_free(indv_ops);
-
     mgn_plot_close();
+
+    free(mop_name);
     return 0;
 }

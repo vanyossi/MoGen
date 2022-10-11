@@ -240,6 +240,7 @@ mgnMoa* mgn_moa_de_alloc(size_t Np
 
     strncpy(de->name, "Differential Evolution", MOA_NAME_LEN);
     de->tot_exec = 0;
+    de->max_exec = SIZE_MAX;
     de->c_run = 0;
     de->run = mgn_de_run;
     de->pop_get = mgn_de_pop_get;

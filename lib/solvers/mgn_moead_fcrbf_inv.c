@@ -65,7 +65,11 @@ void mgn_rbfinv_populate_wdist(mgn_moeadrbf_data_inv *data)
         dindex = gsl_vector_qsort(dist);
         gsl_vector_int_view dview = gsl_vector_int_view_array(dindex,data->w_dist->size2);
         gsl_matrix_int_set_row(data->w_dist,i,&dview.vector);
+        free(dindex);
     }
+
+    gsl_vector_free(dist);
+
     return;
 }
 /*
@@ -96,6 +100,7 @@ void mgn_fcmeans_convert_tox(gsl_matrix *x
         gsl_matrix_set_row(fcm->centers,i,sum);
         gsl_vector_set_zero(sum);
     }
+    gsl_vector_free(sum);
     return;
 }
 
@@ -182,11 +187,11 @@ void mgn_moeadrbf_fcinv_run(mgnMoa *moa)
     // === free all
     mgn_pop_free(pop_sel);
 
-    gsl_matrix_free(m_1phi);
     gsl_matrix_free(m_w_ptr->p);
     free(m_w_ptr);
-
+    gsl_matrix_free(m_1phi);
     gsl_vector_free(lambda);
+
     mgn_cluster_data_extra_free(cl_extra);
     mgn_fcmeans_free(fcdat);
 
@@ -252,6 +257,15 @@ mgnMoa* mgn_moa_moeadrbf_fcinv_alloc(
 
 void mgn_moa_moeadrbf_fcinv_free(mgnMoa* moeadrbf)
 {
+    mgnp_moeadrbf_data *mrbf = mgn_moeadrbf_features(moeadrbf);
+    mgn_moeadrbf_data_inv *d_extra = (mgn_moeadrbf_data_inv*)mrbf;
+
+    gsl_matrix_free(d_extra->w_aux);
+    gsl_matrix_uint_free(d_extra->w_dist);
+    gsl_vector_free(d_extra->z);
+    mgn_mop_free(d_extra->zmop);
+
+    mgn_popl_free(mrbf->arc);
     mgn_moa_moeadrbf_common_free(moeadrbf);
 }
 

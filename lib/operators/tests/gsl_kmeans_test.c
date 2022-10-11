@@ -55,6 +55,7 @@ int main(int argc, char const *argv[]) {
 //            data[i * m + j]=val*(i+j);
         }
     }
+    free(data);
 
     kmeans_data* kmd = gsl_kmeans(B,k, 100);
     cluster_data_extra *kdat = gsl_kmeans_calc(kmd);
@@ -67,8 +68,6 @@ int main(int argc, char const *argv[]) {
         }
         printf("\n");
     }
-
-    mgn_cluster_data_extra_free(kdat);
 
 
     // save B,centroids and print indexes
@@ -87,7 +86,12 @@ int main(int argc, char const *argv[]) {
             fprintf(train_assign," ");
         }
     }
+    fclose(train_assign);
 
+    mgn_cluster_data_extra_free(kdat);
     gsl_kmeans_free(kmd);
+    gsl_matrix_free(B);
+    gsl_matrix_free(X);
+    rnd_gen_free();
     return 0;
 }

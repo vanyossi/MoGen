@@ -13,6 +13,7 @@
 #include "mgn_moead_fcrbf.h"
 #include "mgn_weights.h"
 #include "gsl_vector_additional.h"
+#include "mgn_random.h"
 
 // TODO ? sustitute by mogen.h with all types and function declarations
 #include "mgn_mop.h"
@@ -25,10 +26,12 @@
 #include "mops/mgn_zdt.h"
 
 int main(int argc, char const *argv[]) {
+
 #ifdef NDEBUG
     printf("Debug mode run\n");
 #endif
     // default values
+    unsigned long int seed = 23;
     size_t run = 1;
     size_t xsize = 8;
     size_t fsize = 2;
@@ -40,7 +43,7 @@ int main(int argc, char const *argv[]) {
     strcpy(mop_name, "UF1");
 
     char ch;
-    while ((ch = getopt(argc, argv, "E:r:x:f:t:w:m:p:")) != -1) {
+    while ((ch = getopt(argc, argv, "E:r:x:f:t:w:m:p:R:")) != -1) {
         switch (ch) {
             case 'r':
                 run = strtol(optarg, NULL,10);
@@ -72,6 +75,11 @@ int main(int argc, char const *argv[]) {
 
             case 'm':
                 strcpy(mop_name, optarg);
+                break;
+
+            case 'R':
+                seed = strtol(optarg, NULL,10);
+                gsl_rng_set(rnd_get_generator(),seed);
                 break;
 
             default:
@@ -141,7 +149,7 @@ int main(int argc, char const *argv[]) {
 
         // print results
         char tmp_fname[64];
-        char* filename = malloc(sizeof(char) * 64);
+        char* filename;
         // name, alg, var, obj, run
         asprintf(&filename, "%s_%s-%zu-%zu_%zu-%zu"
                  ,moead_fcrbf->name
@@ -169,11 +177,12 @@ int main(int argc, char const *argv[]) {
         gsl_matrix_free(m_w);
         mgn_mop_free(moead_fcrbf->mop);
         mgn_moa_moeadrbf_fc_free(moead_fcrbf);
-//        mgn_limit_free(limits);
+        mgn_limit_free(limits);
         mgn_popl_free(pl_a);
     }
 
     mgn_indv_ops_free(indv_ops);
+    free(mop_name);
 
     mgn_plot_close();
     return 0;

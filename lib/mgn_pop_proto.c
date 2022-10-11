@@ -14,17 +14,19 @@ void mgn_pop_print(mgn_pop_proto *popp, FILE *stream)
     gsl_vector *f;
     gsl_vector *g;
 
-    char *format = calloc(64, sizeof(*format));
+    char *format;
     fprintf(stream,"# ");
 
     for (size_t fi = 0; fi < popp->iparams.f_size; ++fi) {
         asprintf(&format, "<obj%zu> ", fi);
         fprintf(stream,"%s",format);
+        free(format);
     }
 
     for (size_t gi = 0; gi < popp->iparams.g_size; ++gi) {
         asprintf(&format, "<con#%zu> ", gi);
         fprintf(stream,"%s",format);
+        free(format);
     }
 
     for (size_t xi = 0; xi < popp->iparams.x_size; ++xi) {
@@ -33,6 +35,7 @@ void mgn_pop_print(mgn_pop_proto *popp, FILE *stream)
         if (xi != popp->iparams.x_size -1) {
             fprintf(stream," ");
         }
+        free(format);
     }
     fprintf(stream,"\n");
 

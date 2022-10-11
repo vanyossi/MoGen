@@ -129,6 +129,7 @@ void moead_update_neighbour_de(mgn_pop *lpop
             mgn_pop_copy(set->pop,lpop,id,0,1);
         }
     }
+    gsl_permutation_free(perm);
 }
 
 

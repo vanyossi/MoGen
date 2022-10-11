@@ -25,10 +25,11 @@ void mgn_mop_sphere(double *x, double* f, double* g, void* param)
     mop_param *prm = (mop_param*)param;
 
     f[0] = 0;
-//    f[1] = 0;
     for (size_t i = 0; i < prm->xsize; ++i) {
         f[0] += x[i] * x[i];
 //        f[1] += (x[i] -2.0) * (x[i] -2.0);
+//        f[0] = (4 * x[i]) - (x[i] * x[i]) + 3;
+//        f[0] = (2 * pow(x[i], 3)) + (3 * pow(x[i],2)) - (36 * x[i]) + 1;
     }
 }
 

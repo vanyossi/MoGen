@@ -25,10 +25,12 @@
 #include "mops/mgn_zdt.h"
 
 int main(int argc, char const *argv[]) {
+
 #ifdef NDEBUG
     printf("Debug mode run\n");
 #endif
     // default values
+    unsigned long int seed = 23;
     size_t run = 1;
     size_t xsize = 8;
     size_t fsize = 2;
@@ -40,7 +42,7 @@ int main(int argc, char const *argv[]) {
     strcpy(mop_name, "UF1");
 
     char ch;
-    while ((ch = getopt(argc, argv, "E:r:x:f:t:w:m:p:")) != -1) {
+    while ((ch = getopt(argc, argv, "E:r:x:f:t:w:m:p:R:")) != -1) {
         switch (ch) {
             case 'r':
                 run = strtol(optarg, NULL,10);
@@ -74,11 +76,17 @@ int main(int argc, char const *argv[]) {
                 strcpy(mop_name, optarg);
                 break;
 
+            case 'R':
+                seed = strtol(optarg, NULL,10);
+                gsl_rng_set(rnd_get_generator(),seed);
+                break;
+
             default:
                 // nothing
                 break;
         }
     }
+    printf("seed %lu %zu\n", seed, run);
     argc -= optind;
     argv += optind;
 
@@ -108,8 +116,9 @@ int main(int argc, char const *argv[]) {
         // non dom sol
         mgn_popl *pl_a = mgn_popl_alloc((void*)indv_ops,&params);
         gsl_matrix *m_w = mgn_weight_slattice(N,pl_a->iparams.f_size);
-        printf("weight size %zu\n", m_w->size1);
-//        gsl_matrix_save(m_w,"weight_vector_p.txt");
+
+//        printf("weight size %zu\n", m_w->size1);
+        gsl_matrix_save(m_w,"weight_vector_p.txt");
 //        mgn_plot_matrix_2d(m_w,"weight_vector", "weights",0);
 
         // Prepare Latin Hypercube// set limits
@@ -143,8 +152,8 @@ int main(int argc, char const *argv[]) {
 
         // print results
         char tmp_fname[64];
-        char* filename = malloc(sizeof(char) * 64);
-        // name, alg, var, obj, run
+        char* filename;
+//        // name, alg, var, obj, run
         asprintf(&filename, "%s_%s-%zu-%zu_%zu-%zu"
                  ,moead_rbf->name
                  ,moead_rbf->mop->name
@@ -168,14 +177,15 @@ int main(int argc, char const *argv[]) {
         free(filename);
 
 
+        mgn_moa_moeadrbf_free(moead_rbf);
         gsl_matrix_free(m_w);
         mgn_mop_free(mop);
-        mgn_moa_moeadrbf_free(moead_rbf);
         mgn_popl_free(pl_a);
     }
 
     mgn_indv_ops_free(indv_ops);
 
+    free(mop_name);
     mgn_plot_close();
     return 0;
 }

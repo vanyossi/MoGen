@@ -49,7 +49,7 @@ mgn_pop* pmgn_moead_popsel(mgnMoa *moa
 // TODO remove comments, polish args + API
 void mgn_moeadrbf_run(mgnMoa *moa)
 {
-    char* filename = malloc(sizeof(char) * 64);
+    char* filename;
     mgnp_moeadrbf_data *moeadrbf = mgn_moeadrbf_features(moa);
 
 
@@ -99,14 +99,15 @@ void mgn_moeadrbf_run(mgnMoa *moa)
     mgnp_moeadrbf_pop_update(moeadrbf);
 
 
-    // === free all
+//    // === free all
     mgn_pop_free(pop_sel);
 
-    gsl_matrix_free(m_1phi);
     gsl_matrix_free(m_w_ptr->p);
     free(m_w_ptr);
 
+    gsl_matrix_free(m_1phi);
     gsl_vector_free(lambda);
+
     mgn_cluster_data_extra_free(kme);
     gsl_kmeans_free(km);
 
@@ -116,9 +117,10 @@ void mgn_moeadrbf_run(mgnMoa *moa)
     mgn_pop_print(moeadrbf->solution, out);
     fclose(out);
     mgn_plot_fast(moeadrbf->solution, filename, "sol");
+    free(filename);
 #endif
 
-    free(filename);
+
 }
 
 //mgn_pop_proto* mgn_moeadrbf_pop_get(mgnMoa *moa)

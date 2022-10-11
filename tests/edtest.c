@@ -21,7 +21,7 @@
 #include "mgn_zdt.h"
 
 int main() {
-    mgn_indv_param param = {4, 1, 0};
+    mgn_indv_param param = {5, 1, 0};
     mgn_indv_ops* iops = mgn_indv_ops_init();
     mgnLimit *rlim = mgn_limit_alloc(param.x_size);
 
@@ -38,29 +38,32 @@ int main() {
     mgnLimit *moplim = mgn_limit_alloc(param.x_size);
     for (size_t i = 0; i < moplim->size; ++i) {
         moplim->min[i] = 0;
-        moplim->max[i] = 2;
+        moplim->max[i] = 5;
     }
     mop->params = moplim;
 
-    mgn_ga_sets ga_probs = {0.9, 0.1, NULL, NULL};
+    mgn_ga_sets ga_probs = {0.9, 0.1
+                            , NULL, NULL
+                            ,5, 20};
     ga_probs.mut_llim = calloc(param.x_size, sizeof(ga_probs.mut_llim));
     ga_probs.mut_ulim = calloc(param.x_size, sizeof(ga_probs.mut_ulim));
     for (size_t i = 0; i < param.x_size; ++i) {
         ga_probs.mut_llim[i] = 0;
-        ga_probs.mut_ulim[i] = 1;
+        ga_probs.mut_ulim[i] = 10;
     }
 
     // Initialize and RUn DE
     size_t Np = 20;
 
-    mgn_lhci *lhci = mgn_init_new_lhci(Np,param.x_size,rlim);
-    mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param,1.3, 0.5);
-    mgn_de_init(de, mgn_init_lhc, lhci);
+    mgnMoa* de = mgn_moa_de_alloc(Np,iops,&param,1.1, 0.9);
+    mgn_initializer *lhci = mgn_pinit_lhc_alloc(de->pop_get(de),moplim);
+    mgn_init_pop_lhc(de->pop_get(de), lhci, 0);
 
-    mgn_lhci_free(lhci);
+    mgn_pinit_free(lhci);
 
     mgn_de_ef_param ef_params = {0, &param.f_size};
     mgn_de_setmop(de, mop, mgn_cast_de_ef(mgn_mop_sphere_min), &ef_params);
+
     mgn_de_eval(de);
 
 
@@ -74,11 +77,10 @@ int main() {
 
     // mgn-solve
     mgn_plot_open();
-    int runs = 30;
-    int plot_every = 1;
-    mgn_plot_data pdat = {"", "", "f_1", "f_2",
+    int runs = 100;
+    int plot_every = 5;
+    mgn_plot_data pdat = {"", "DE", "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
-    strcpy(pdat.title, "DE");
 
     for (int run = 0; run < runs; ++run) {
         mgn_moa_solve(de, 1); // TODO receive solver_plot_function callback
@@ -88,9 +90,12 @@ int main() {
             mgn_plot((mgn_pop_proto *) sols, &pdat);
         }
     }
+    mgn_plot_close();
     printf("total exec: %zu\n", de->tot_exec);
     printf("gens: %d\n", runs);
-    mgn_plot_close();
+    FILE *out = fopen("ed_test.txt","w");
+    mgn_pop_print(de->pop_get(de), out);
+    fclose(out);
 
     //
 

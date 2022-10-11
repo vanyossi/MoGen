@@ -144,5 +144,6 @@ gsl_matrix* mgn_weight_slattice(size_t H, size_t nf)
         node = node->next;
         gsl_vector_node_free(node_tmp);
     }
+    gsl_vector_free(cval);
     return W;
 }

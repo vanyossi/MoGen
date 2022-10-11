@@ -178,6 +178,9 @@ mgnMoa* mgn_moa_moeadrbf_fc_alloc(
 
 void mgn_moa_moeadrbf_fc_free(mgnMoa* moeadrbf)
 {
+    mgnp_moeadrbf_data *mrbf = mgn_moeadrbf_features(moeadrbf);
+
+    mgn_popl_free(mrbf->arc);
     mgn_moa_moeadrbf_common_free(moeadrbf);
 }
 

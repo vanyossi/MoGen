@@ -105,11 +105,13 @@ void mgn_moa_moeadrbf_common_free(mgnMoa* moeadrbf)
 
     mgn_pop_matrix_free(mrbf->tset);
     mgn_pop_free(mrbf->p_aprox);
+
     for (size_t i = 0; i < mrbf->mdl_size; ++i) {
         gsl_vector_free(mrbf->rbf_data[i].mdl_rbf.p_s);
         gsl_matrix_free(mrbf->rbf_data[i].mdl_rbf.p_m_w);
         gsl_matrix_free(mrbf->rbf_data[i].mdl_rbf.m_phi);
     }
+    free(mrbf->rbf_data);
     mgn_limit_free(mrbf->search_lim);
 
     mgnp_moeadrbf_mdl_mop_param_free(mrbf);
@@ -139,6 +141,7 @@ void mgn_moa_moeadrbf_common_init(mgnMoa* moeadrbf)
     for (size_t i = 0; i < pop->size; ++i) {
         mgn_pop_insert_dom(mrbf->solution,mgn_pop_get(pop,i));
     }
+    mgn_pop_free(pop);
 
     // TODO print pop
     //      done? mgn_pop_print(mrbf->solution, stdout);
@@ -157,7 +160,6 @@ void mgn_moa_moeadrbf_common_init(mgnMoa* moeadrbf)
 //    mgn_plot((mgn_pop_proto *) mrbf->solution, &pdat);
 //    free(pdat.filename);
 //    mgn_plot_close();
-
 }
 
 
@@ -251,7 +253,7 @@ void mgnp_moeadrbf_optim_s(
 
     mgn_initializer *lhci = mgn_pinit_lhc_alloc(de->pop_get(de),rlim);
     mgn_init_pop_lhc(de->pop_get(de),lhci,0);
-    mgn_pinit_lhc_free(lhci);
+    mgn_pinit_free(lhci);
 
     de->max_exec = SIZE_MAX;
 
@@ -417,6 +419,7 @@ void mgnp_moeadrbf_mdl_mop_param_free(mgnp_moeadrbf_data *moeadrbf)
 {
     free(moeadrbf->model_data->ga_probs->mut_ulim);
     free(moeadrbf->model_data->ga_probs->mut_llim);
+    free(moeadrbf->model_data->ga_probs);
     gsl_matrix_free(moeadrbf->model_data->iW);
     free(moeadrbf->model_data);
 }
@@ -706,6 +709,9 @@ void mgnp_moeadrbf_pop_update(mgnp_moeadrbf_data *mrbf)
 
     memcpy(lim->min, min->data, sizeof(double) * lim->size);
     memcpy(lim->min, max->data, sizeof(double) * lim->size);
+
+    gsl_vector_free(min);
+    gsl_vector_free(max);
 }
 
 
@@ -750,5 +756,5 @@ void pmgn_moeadrbf_calcPhi(mgn_model_rbfdata *models
                                                ,models->mdl_rbf.m_phi);
 
     models->mdl_rbf.p_m_w = mgn_rbf_new_weight(models->mdl_rbf.m_phi
-                                               , tset->f, 0);
+                                               , tset->f, models->mdl_rbf.p_m_w);
 }

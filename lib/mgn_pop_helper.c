@@ -13,15 +13,17 @@
 
 void mgn_pop_copy_mp(mgn_pop_proto *pop, mgn_pop_matrix *mpop){
 
+    mgn_indv *indv = NULL;
     for (size_t i = 0; i < mpop->x->size1; ++i) {
-        mgn_indv *indv = NULL;
-        indv = mgn_indv_alloc(indv, pop->ops, &pop->iparams);
+        indv = mgn_indv_alloc(0, pop->ops, &pop->iparams);
 
         gsl_matrix_get_row(indv->x,mpop->x,i);
         gsl_matrix_get_row(indv->f,mpop->f,i);
         gsl_matrix_get_row(indv->g,mpop->g,i);
 
         pop->set(pop,indv,i);
+        mgn_indv_free(indv);
+        free(indv); // TODO indv_free should be the all variant
     }
 }
 

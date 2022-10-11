@@ -45,6 +45,7 @@ int main() {
 
     mgn_initializer *lhci = mgn_pinit_lhc_alloc(mgn_moead_getpop(moead),mop->limits);
     mgn_init_pop_lhc(mgn_moead_getpop(moead),lhci, 0);
+    mgn_pinit_free(lhci);
 //    mgn_moead_set_scalarization(moead, mgn_scalar_pbi);
     moead->set_ga_vals(moead,&ga_probs);
 
@@ -53,7 +54,7 @@ int main() {
     // run must be private
     int runs = 5000;
     int plot_every = 11;
-    mgn_plot_data pdat = {"", "", "f_1", "f_2",
+    mgn_plot_data pdat = {0, 0, "f_1", "f_2",
                           -0.1f,1.1f,-0.1f,1.1f};
     asprintf(&pdat.title, "%s", "points");
 
@@ -66,11 +67,13 @@ int main() {
             FILE *out = fopen("sols.txt","w");
             mgn_pop_print(EP, out);
             fclose(out);
+            free(pdat.filename);
         }
         if (moead->tot_exec >= moead->max_exec) {
             break;
         }
     }
+    free(pdat.title);
     printf("total exec: %zu\n", moead->tot_exec);
     printf("gens: %zu\n", moead->c_run);
 
@@ -103,14 +106,16 @@ int main() {
     }
 
     fclose(ofile);
+    mgn_pop_free(pfinal);
 
+    mgn_moead_free(moead);
+
+
+    gsl_matrix_free(W);
+    mgn_mop_free(mop);
     free(ga_probs.mut_llim);
     free(ga_probs.mut_ulim);
 
-    gsl_matrix_free(W);
-
-    mgn_mop_free(mop);
-    mgn_moead_free(moead);
     mgn_popl_free(EP);
     mgn_indv_ops_free(iops);
 
