@@ -20,6 +20,27 @@
 #include "mgn_weights.h"
 
 
+static size_t exec_limit = 1000;
+void de_plot_cb(mgnMoa* moa)
+{
+    if (moa->tot_exec >= exec_limit) {
+        mgn_plot_data pdat = {0, 0, "f_1", "f_2",
+                              -0.1f,1.1f,-0.1f,1.1f};
+        asprintf(&pdat.title, "%s", "points");
+        asprintf(&pdat.filename, "%s-%s_run-%d", pdat.title, moa->mop->name, moa->c_run);
+
+        mgn_pop_proto *pop = moa->pop_get(moa);
+        if (pop) {
+            mgn_plot_fast(pop, pdat.filename, "title");
+        }
+
+        free(pdat.filename);
+        free(pdat.title);
+
+        exec_limit += 1000;
+    }
+}
+
 int main() {
     mgn_plot_open();
 
@@ -41,7 +62,8 @@ int main() {
 
     gsl_matrix *W = mgn_weight_slattice(300, 2);
     mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_init_transition,mop->limits,true);
-    moead->max_exec = 1000;
+    mgn_moa_set_callback(moead,de_plot_cb);
+    moead->max_exec = 20000;
 
     mgn_initializer *lhci = mgn_pinit_lhc_alloc(mgn_moead_getpop(moead),mop->limits);
     mgn_init_pop_lhc(mgn_moead_getpop(moead),lhci, 0);
@@ -53,27 +75,28 @@ int main() {
 
     // run must be private
     int runs = 5000;
-    int plot_every = 11;
-    mgn_plot_data pdat = {0, 0, "f_1", "f_2",
-                          -0.1f,1.1f,-0.1f,1.1f};
-    asprintf(&pdat.title, "%s", "points");
-
-    for (int run = 1; run <= runs; ++run) {
-        mgn_moa_solve(moead, 1);
-
-        if (run % plot_every == 0) {
-            asprintf(&pdat.filename, "%s-%s_run-%d", pdat.title, mop->name, run);
-            mgn_plot_fast((mgn_pop_proto *) EP, pdat.filename, "title");
-            FILE *out = fopen("sols.txt","w");
-            mgn_pop_print(EP, out);
-            fclose(out);
-            free(pdat.filename);
-        }
-        if (moead->tot_exec >= moead->max_exec) {
-            break;
-        }
-    }
-    free(pdat.title);
+    mgn_moa_solve(moead, runs);
+//    int plot_every = 11;
+//    mgn_plot_data pdat = {0, 0, "f_1", "f_2",
+//                          -0.1f,1.1f,-0.1f,1.1f};
+//    asprintf(&pdat.title, "%s", "points");
+//
+//    for (int run = 1; run <= runs; ++run) {
+//        mgn_moa_solve(moead, 1);
+//
+//        if (run % plot_every == 0) {
+//            asprintf(&pdat.filename, "%s-%s_run-%d", pdat.title, mop->name, run);
+//            mgn_plot_fast((mgn_pop_proto *) EP, pdat.filename, "title");
+//            FILE *out = fopen("sols.txt","w");
+//            mgn_pop_print(EP, out);
+//            fclose(out);
+//            free(pdat.filename);
+//        }
+//        if (moead->tot_exec >= moead->max_exec) {
+//            break;
+//        }
+//    }
+//    free(pdat.title);
     printf("total exec: %zu\n", moead->tot_exec);
     printf("gens: %zu\n", moead->c_run);
 

@@ -209,7 +209,9 @@ mgnMoa* mgn_moead_common_init(gsl_matrix *W,size_t nobj, size_t T
     moead->stop = moead_stop;
     moead->set_ga_vals = moead_set_prob;
     moead->features = mgn_moead_alloc_features(W,nobj,T,epop,mop,external);
+    moead->mop = mop; // TODO pick one mop location
 
+    moead->pop_get = mgn_moead_getpop;
 //    mgn_pop_prank_sort(fe->pop);
 
     return moead;

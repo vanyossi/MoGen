@@ -25,10 +25,17 @@ void mgn_moa_callback_virtual(mgnMoa* moa)
     UNUSED(moa);
 }
 
+mgn_pop_proto* mgn_moa_popget_virtual(mgnMoa* moa)
+{
+    UNUSED(moa);
+    return 0;
+}
+
 mgnMoa* mgn_moa_alloc()
 {
     mgnMoa *moa = malloc(sizeof(*moa));
     moa->callback = mgn_moa_callback_virtual;
+    moa->pop_get = mgn_moa_popget_virtual;
     return moa;
 }
 

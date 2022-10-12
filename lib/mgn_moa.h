@@ -10,7 +10,8 @@
 //typedef struct mgn_moa_t mgnMoa;
 //typedef struct mgn_moa_ga_set mgn_ga_sets;
 
-typedef void (*mgn_moa_callback_f)(mgnMoa *moa);
+typedef void (*mgn_moa_callback_f)(mgnMoa*);
+typedef mgn_pop_proto* (*mgn_moa_popget_f)(mgnMoa*);
 
 struct mgn_moa_t {
     char name[MOA_NAME_LEN];
@@ -22,7 +23,7 @@ struct mgn_moa_t {
     bool (*stop)(mgnMoa*);
     void (*set_ga_vals)(mgnMoa*, mgn_ga_sets*);
     void* features;
-    mgn_pop_proto* (*pop_get)(mgnMoa*);
+    mgn_moa_popget_f pop_get;
     mgn_moa_callback_f callback;
 };
 
