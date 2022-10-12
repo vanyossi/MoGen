@@ -495,7 +495,7 @@ void mgnp_moeadrbf_select(mgn_count_ciclic *sel_idx
     // TODO change comments to DEBUG clauses
     mgnp_selhash *hashes = NULL;
     mgnp_selhash *sh, *cur_sh; // = malloc(sizeof(*sh));
-    for (size_t i = 0; i < m_ws->size1; ++i) {
+    for (size_t i = 0; i < p_dest->size; ++i) {
 //        printf("searching %zu\n", i);
         gsl_vector_int_view d_row = gsl_matrix_int_row(m_dist_i,i);
 //        sel->data[i] = d_row.vector.data[*sel_idx];

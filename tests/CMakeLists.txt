@@ -32,3 +32,8 @@ add_executable(moead_fcrbf_inv_test
         ${CMAKE_SOURCE_DIR}/lib/solvers/mgn_moead_fcrbf_inv.c
         mgn_moead_fcrbf_inv_test.c)
 target_link_libraries(moead_fcrbf_inv_test mgnmoefa)
+
+add_executable(moead_fcrbf_nn_test
+    ${CMAKE_SOURCE_DIR}/lib/solvers/mgn_moead_fcrbf_nn.c
+    mgn_moead_fcrbf_nn_test.c)
+target_link_libraries(moead_fcrbf_nn_test mgnmoefa)
