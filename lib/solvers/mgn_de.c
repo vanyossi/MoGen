@@ -226,7 +226,7 @@ mgnMoa* mgn_moa_de_alloc(size_t Np
                          ,double cr
 )
 {
-    mgnMoa *de = malloc(sizeof(*de));
+    mgnMoa *de = mgn_moa_alloc();
     de_param* params = malloc(sizeof(*params));
 
     params->size = Np;

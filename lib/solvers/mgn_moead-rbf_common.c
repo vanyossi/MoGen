@@ -42,7 +42,7 @@ mgnMoa* mgn_moa_moeadrbf_common_alloc(
     , size_t Nw /* size of internal weight vector */
     )
 {
-    mgnMoa *moa = malloc(sizeof(*moa));
+    mgnMoa *moa = mgn_moa_alloc();
     mgnp_moeadrbf_data *mrbf = malloc(sizeof(*mrbf));
 
     size_t x_size = A->iparams.x_size;

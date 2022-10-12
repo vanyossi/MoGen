@@ -10,6 +10,8 @@
 //typedef struct mgn_moa_t mgnMoa;
 //typedef struct mgn_moa_ga_set mgn_ga_sets;
 
+typedef void (*mgn_moa_callback_f)(mgnMoa *moa);
+
 struct mgn_moa_t {
     char name[MOA_NAME_LEN];
     size_t c_run;
@@ -21,6 +23,7 @@ struct mgn_moa_t {
     void (*set_ga_vals)(mgnMoa*, mgn_ga_sets*);
     void* features;
     mgn_pop_proto* (*pop_get)(mgnMoa*);
+    mgn_moa_callback_f callback;
 };
 
 struct mgn_moa_ga_set {
@@ -32,8 +35,12 @@ struct mgn_moa_ga_set {
     double sbx_m;
 };
 
+mgnMoa* mgn_moa_alloc();
+
 bool mgn_moa_solve(mgnMoa *moa, size_t runs);
 
 void mgn_moa_set_mop(mgnMoa *moa, mgnMop *mop);
+
+void mgn_moa_set_callback(mgnMoa *moa, mgn_moa_callback_f callback);
 
 #endif // _LIB_MGN_MOA_H_
