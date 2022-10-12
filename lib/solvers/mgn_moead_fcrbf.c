@@ -105,7 +105,8 @@ void mgn_moeadrbf_fc_run(mgnMoa *moa)
     // mgn_popl pop_p: has all nondom aprox solutions
     // S set size of RBF cluster vectors.
     mgn_pop *pop_sel = mgn_pop_alloc(moeadrbf->m_w->size1
-                                     ,(void*)moeadrbf->solution->ops, &moeadrbf->solution->iparams);
+                                     ,(void*)moeadrbf->solution->ops
+                                     , &moeadrbf->solution->iparams);
 
     mgnp_moeadrbf_select(&moeadrbf->sel_idx
                          ,m_w_ptr->p
