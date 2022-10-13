@@ -19,6 +19,9 @@
 #include "mgn_poplist.h"
 #include "mgn_weights.h"
 
+#include "mgn_pop_helper.h"
+#include "indicator/hv/hv.h"
+
 
 static size_t exec_limit = 1000;
 void de_plot_cb(mgnMoa* moa)
@@ -29,7 +32,19 @@ void de_plot_cb(mgnMoa* moa)
         asprintf(&pdat.title, "%s", "points");
         asprintf(&pdat.filename, "%s-%s_run-%d", pdat.title, moa->mop->name, moa->c_run);
 
-        mgn_pop_proto *pop = moa->pop_get(moa);
+        mgn_pop_proto *pop = moa->get_solutions(moa);
+        mgn_pop_matrix *popm = mgn_pop_to_popm(pop);
+        double *ref = calloc(2, sizeof(*ref));
+        ref[0] =  ref[1] = 1;
+        double hv = fpli_hv(popm->f->data
+            ,popm->f->size2
+            ,popm->f->size1
+            , ref);
+        printf("hypervol: %.6f %d, %d\n", hv, popm->f->size2, popm->f->size1);
+
+        mgn_pop_matrix_free(popm);
+        free(ref);
+
         if (pop) {
             mgn_plot_fast(pop, pdat.filename, "title");
         }
@@ -57,8 +72,8 @@ int main() {
         ga_probs.mut_ulim[i] = 1;
     }
 
-//    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
-    mgnMop *mop = mgn_cec09_init(UF1, &params);
+    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
+//    mgnMop *mop = mgn_cec09_init(UF1, &params);
 
     gsl_matrix *W = mgn_weight_slattice(300, 2);
     mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_init_transition,mop->limits,true);
@@ -76,6 +91,8 @@ int main() {
     // run must be private
     int runs = 5000;
     mgn_moa_solve(moead, runs);
+    exec_limit = 0;
+    de_plot_cb(moead);
 //    int plot_every = 11;
 //    mgn_plot_data pdat = {0, 0, "f_1", "f_2",
 //                          -0.1f,1.1f,-0.1f,1.1f};

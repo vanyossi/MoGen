@@ -2,6 +2,7 @@ add_subdirectory(math)
 add_subdirectory(operators)
 add_subdirectory(mops)
 add_subdirectory(solvers)
+add_subdirectory(indicator)
 
 add_subdirectory(tests)
 

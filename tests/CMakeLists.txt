@@ -15,7 +15,7 @@ add_executable(moeadtest mgn_moeadtest.c)
 target_link_libraries(moeadtest mgnmoefa)
 
 add_executable(moead_de_test moead_de_test.c)
-target_link_libraries(moead_de_test mgnmoefa)
+target_link_libraries(moead_de_test mgnmoefa fpli_hv)
 
 add_executable(edtest edtest.c)
 target_link_libraries(edtest mgnmoefa)
