@@ -103,6 +103,8 @@ gsl_matrix* mgn_moead_get_w(mgnMoa* moead);
 
 mgn_pop* mgn_moead_getpop(mgnMoa* moead);
 
+mgn_pop_proto* mgn_moead_get_solutions(mgnMoa *moead);
+
 
 void mgn_moead_set_mop(mgnMoa* moead, mgnMop *mop, int type);
 

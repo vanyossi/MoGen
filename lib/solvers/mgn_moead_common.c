@@ -212,6 +212,7 @@ mgnMoa* mgn_moead_common_init(gsl_matrix *W,size_t nobj, size_t T
     moead->mop = mop; // TODO pick one mop location
 
     moead->pop_get = mgn_moead_getpop;
+    moead->get_solutions = mgn_moead_get_solutions;
 //    mgn_pop_prank_sort(fe->pop);
 
     return moead;
@@ -245,6 +246,11 @@ gsl_matrix* mgn_moead_get_w(mgnMoa* moead)
 mgn_pop* mgn_moead_getpop(mgnMoa* moead)
 {
     return ((moeadf*)moead->features)->pop;
+}
+
+mgn_pop_proto* mgn_moead_get_solutions(mgnMoa *moead)
+{
+    return ((moeadf*)moead->features)->epop;
 }
 
 void mgn_moead_set_mop(mgnMoa* moead, mgnMop *mop, int type)

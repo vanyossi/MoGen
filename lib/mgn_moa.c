@@ -36,6 +36,7 @@ mgnMoa* mgn_moa_alloc()
     mgnMoa *moa = malloc(sizeof(*moa));
     moa->callback = mgn_moa_callback_virtual;
     moa->pop_get = mgn_moa_popget_virtual;
+    moa->get_solutions = mgn_moa_popget_virtual;
     return moa;
 }
 
