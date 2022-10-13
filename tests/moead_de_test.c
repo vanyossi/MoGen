@@ -21,9 +21,14 @@
 
 #include "mgn_pop_helper.h"
 #include "indicator/hv/hv.h"
+#include "indicator/indicadores.h"
+#include "mgn_io.h"
 
+struct _inGroup_list FP;
+gsl_matrix *m_pf;
 
 static size_t exec_limit = 1000;
+
 void de_plot_cb(mgnMoa* moa)
 {
     if (moa->tot_exec >= exec_limit) {
@@ -34,13 +39,20 @@ void de_plot_cb(mgnMoa* moa)
 
         mgn_pop_proto *pop = moa->get_solutions(moa);
         mgn_pop_matrix *popm = mgn_pop_to_popm(pop);
+
+        // hypercube
         double *ref = calloc(2, sizeof(*ref));
         ref[0] =  ref[1] = 1;
         double hv = fpli_hv(popm->f->data
             ,popm->f->size2
             ,popm->f->size1
             , ref);
-        printf("hypervol: %.6f %d, %d\n", hv, popm->f->size2, popm->f->size1);
+
+        // IGD+
+        double igdp = IGDplus(m_pf, popm->f,2);
+        double igd = IGD(m_pf, popm->f,2);
+
+        printf("hv IGD IGD+: %.6f %.6f, %.6f\n", hv, igd, igdp);
 
         mgn_pop_matrix_free(popm);
         free(ref);
@@ -72,8 +84,13 @@ int main() {
         ga_probs.mut_ulim[i] = 1;
     }
 
-    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
-//    mgnMop *mop = mgn_cec09_init(UF1, &params);
+//    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
+    mgnMop *mop = mgn_cec09_init(UF1, &params);
+
+    FP.size = 0;
+    FP.next = 0;
+    it_read_data("../fronts/cecUF1.txt",&FP);
+    m_pf = inData_toGSLMatrix(inGroup_getListAt(&FP,0));
 
     gsl_matrix *W = mgn_weight_slattice(300, 2);
     mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_init_transition,mop->limits,true);
