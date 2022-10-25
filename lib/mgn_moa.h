@@ -22,10 +22,10 @@ struct mgn_moa_t {
     void (*run)(mgnMoa*);
     bool (*stop)(mgnMoa*);
     void (*set_ga_vals)(mgnMoa*, mgn_ga_sets*);
-    void* features;
     mgn_moa_popget_f pop_get;
     mgn_moa_popget_f get_solutions;
     mgn_moa_callback_f callback;
+    void* features;
 };
 
 struct mgn_moa_ga_set {

@@ -10,7 +10,7 @@ bool mgn_moa_solve(mgnMoa *moa, size_t runs)
     size_t i = 0;
 
     for (i = 0; i < runs; ++i) {
-        if (moa->tot_exec <= moa->max_exec) {
+        if (moa->tot_exec < moa->max_exec) {
             moa->run(moa);
             moa->c_run++;
 
