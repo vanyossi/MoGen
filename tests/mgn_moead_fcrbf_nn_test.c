@@ -24,21 +24,12 @@
 #include "mops/mgn_cec09.h"
 #include "mops/mgn_zdt.h"
 
-void plot_callback(mgnMoa* moa)
-{
-    mgn_plot_data pdat = {0, 0, "f_1", "f_2",
-                          -0.1f,1.1f,-0.1f,1.1f};
-    asprintf(&pdat.title, "%s", "points");
-    asprintf(&pdat.filename, "%s-%s_run-%d", pdat.title, moa->mop->name, moa->c_run);
+#include "callback_test.h"
 
-    mgn_pop_proto *pop = moa->pop_get(moa);
-    if (pop) {
-        mgn_plot_fast(pop, pdat.filename, "title");
-    }
+#ifndef FP_DIR
+#define FP_DIR "."
+#endif
 
-    free(pdat.filename);
-    free(pdat.title);
-}
 
 int main(int argc, char const *argv[]) {
 #ifdef NDEBUG
@@ -142,7 +133,7 @@ int main(int argc, char const *argv[]) {
                                                    ,iwsize);
 
         moead_fcrbf->max_exec = maxeval;
-        mgn_moa_set_callback(moead_fcrbf, plot_callback);
+//        mgn_moa_set_callback(moead_fcrbf, plot_callback);
 
 //        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
 //        mgnMop* mop = mgn_zdt_init(moptype, &params);
@@ -151,6 +142,27 @@ int main(int argc, char const *argv[]) {
         mgnMop* mop = mgn_cec09_init(moptype, &params);
 
         moead_fcrbf->mop = mop;
+
+        // plot callback setup
+        cb_set_rate(1);
+        mgn_moa_set_callback(moead_fcrbf, cb_record_perf);
+        asprintf(&CALLBACK_FILENAME, "%s_%s_%zu-%zu_%zu-%zu-perf.txt"
+                 , moead_fcrbf->name
+                 , mop->name
+                 , xsize
+                 , fsize
+                 , maxeval
+                 , run);
+        cp_record_perf_header();
+
+        struct _inGroup_list io_data_fp = {0, 0};//malloc(sizeof(*io_data_fp));
+        char *file_front;
+
+        asprintf(&file_front, "%s/cec%s.txt",FP_DIR,mop->name);
+        it_read_data(file_front,&io_data_fp); // alters size of pl_a
+        CALLBACK_FP_M = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
+        free(file_front);
+        // callback setup end
 
         mgn_moa_moeadrbf_fcnn_init(moead_fcrbf);
 
@@ -195,5 +207,6 @@ int main(int argc, char const *argv[]) {
     free(mop_name);
 
     mgn_plot_close();
+    free(CALLBACK_FILENAME);
     return 0;
 }

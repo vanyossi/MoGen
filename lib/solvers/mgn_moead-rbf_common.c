@@ -89,12 +89,15 @@ mgnMoa* mgn_moa_moeadrbf_common_alloc(
     moa->set_ga_vals = mgnp_moeadrbf_set_ga_vals;
     moa->features = mrbf;
     moa->pop_get = mgn_moeadrbf_pop_get;
+    moa->get_solutions = mgn_moeadrbf_pop_get;
 
     // initialize model parameters
     mrbf->model_data = calloc(1, sizeof(*mrbf->model_data));
     mrbf->model_data->iW = mgn_weight_slattice(Nw, f_size);
     mrbf->model_data->mop_limits = limits;
     mgnp_moeadrbf_mdl_defparam(mrbf,Nw,0.9,0.02);
+
+    mgnp_moeadrbf_data *mrbf2 = mgn_moeadrbf_features(moa);
 
     return moa;
 }

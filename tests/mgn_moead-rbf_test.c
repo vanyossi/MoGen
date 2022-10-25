@@ -24,6 +24,12 @@
 #include "mops/mgn_cec09.h"
 #include "mops/mgn_zdt.h"
 
+#include "callback_test.h"
+
+#ifndef FP_DIR
+#define FP_DIR "."
+#endif
+
 int main(int argc, char const *argv[]) {
 
 #ifdef NDEBUG
@@ -35,7 +41,7 @@ int main(int argc, char const *argv[]) {
     size_t xsize = 8;
     size_t fsize = 2;
     size_t train_pop_size = 100;
-    size_t wsize = 11; // weight vector size external
+    size_t wsize = 9; // weight vector size external
     size_t maxeval = train_pop_size + wsize;
     size_t iwsize = 100;
     char* mop_name =  malloc(sizeof(char) * 64);
@@ -118,7 +124,7 @@ int main(int argc, char const *argv[]) {
         gsl_matrix *m_w = mgn_weight_slattice(N,pl_a->iparams.f_size);
 
 //        printf("weight size %zu\n", m_w->size1);
-        gsl_matrix_save(m_w,"weight_vector_p.txt");
+//        gsl_matrix_save(m_w,"weight_vector_p.txt");
 //        mgn_plot_matrix_2d(m_w,"weight_vector", "weights",0);
 
         // Prepare Latin Hypercube// set limits
@@ -144,6 +150,27 @@ int main(int argc, char const *argv[]) {
 
         moead_rbf->max_exec = maxeval;
         moead_rbf->mop = mop;
+
+        // plot callback setup
+        cb_set_rate(1);
+        mgn_moa_set_callback(moead_rbf, cb_record_perf);
+        asprintf(&CALLBACK_FILENAME, "%s_%s_%zu-%zu_%zu-%zu-perf.txt"
+                 , moead_rbf->name
+                 , mop->name
+                 , xsize
+                 , fsize
+                 , maxeval
+                 , run);
+        cp_record_perf_header();
+
+        struct _inGroup_list io_data_fp = {0, 0};//malloc(sizeof(*io_data_fp));
+        char *file_front;
+
+        asprintf(&file_front, "%s/cec%s.txt",FP_DIR,mop->name);
+        it_read_data(file_front,&io_data_fp); // alters size of pl_a
+        CALLBACK_FP_M = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
+        free(file_front);
+        // callback setup end
 
         mgn_moa_moeadrbf_init(moead_rbf);
 
@@ -187,5 +214,6 @@ int main(int argc, char const *argv[]) {
 
     free(mop_name);
     mgn_plot_close();
+    free(CALLBACK_FILENAME);
     return 0;
 }

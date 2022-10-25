@@ -42,12 +42,13 @@ int main(int argc, char const *argv[]) {
     size_t cluster_size = 5;
     kmeans_data *km = gsl_kmeans(&train_x.matrix,cluster_size, 1000);
     cluster_data_extra *kme = gsl_kmeans_calc(km);
+    cluster_data cdat = {km->centers, km->k};
 
 //    gsl_matrix *m_variance = mgn_kmeans_cluster_var(km,kme,&train_x.matrix,true);
 //    gsl_matrix_printf(m_variance,stdout);
 
     gsl_vector *dist_sigma = mgn_kmeans_cluster_var_dist(km,kme,&train_x.matrix,true);
-    gsl_matrix *mphi = mgn_rbf_create_phi(&train_x.matrix,km,dist_sigma,rbf_kernel_gauss,0);
+    gsl_matrix *mphi = mgn_rbf_create_phi(&train_x.matrix,&cdat,dist_sigma,rbf_kernel_gauss,0);
     printf("size of sigma %zu, km %zu, phi %zu, %zu tset %zu %zu\n"
            , dist_sigma->size, km->k, train_x.matrix.size1, train_x.matrix.size1
            , mphi->size1, mphi->size2);
@@ -73,7 +74,7 @@ int main(int argc, char const *argv[]) {
 
     gsl_matrix_printf(&test_x.matrix, stdout);
     gsl_matrix *y_t = gsl_matrix_alloc(1, train_y.matrix.size2);
-    gsl_matrix *mphi_t = mgn_rbf_create_phi(&test_x.matrix,km,dist_sigma,rbf_kernel_gauss,0);
+    gsl_matrix *mphi_t = mgn_rbf_create_phi(&test_x.matrix,&cdat,dist_sigma,rbf_kernel_gauss,0);
     gsl_blas_dgemm(CblasNoTrans,CblasNoTrans,1,mphi_t,W,0,y_t);
 
     gsl_matrix_printf(y_t, stdout);

@@ -14,7 +14,6 @@
 #include "mgn_weights.h"
 #include "gsl_vector_additional.h"
 
-// TODO ? sustitute by mogen.h with all types and function declarations
 #include "mgn_mop.h"
 #include "individual.h"
 #include "mgn_poplist.h"
@@ -23,6 +22,13 @@
 
 #include "mops/mgn_cec09.h"
 #include "mops/mgn_zdt.h"
+
+#include "callback_test.h"
+
+#ifndef FP_DIR
+#define FP_DIR "."
+#endif
+
 
 int main(int argc, char const *argv[]) {
 #ifdef NDEBUG
@@ -132,7 +138,31 @@ int main(int argc, char const *argv[]) {
 //        moead_fcrbf->mop->limits = limits;
 
         MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
-        moead_fcrbf->mop = mgn_cec09_init(moptype, &params);
+        mgnMop *mop = mgn_cec09_init(moptype, &params);
+        moead_fcrbf->mop = mop;
+
+
+        // plot callback setup
+        cb_set_rate(1);
+        mgn_moa_set_callback(moead_fcrbf, cb_record_perf);
+        asprintf(&CALLBACK_FILENAME, "%s_%s_%zu-%zu_%zu-%zu-perf.txt"
+                 , moead_fcrbf->name
+                 , mop->name
+                 , xsize
+                 , fsize
+                 , maxeval
+                 , run);
+        cp_record_perf_header();
+
+        struct _inGroup_list io_data_fp = {0, 0};//malloc(sizeof(*io_data_fp));
+        char *file_front;
+
+        asprintf(&file_front, "%s/cec%s.txt",FP_DIR,mop->name);
+        it_read_data(file_front,&io_data_fp); // alters size of pl_a
+        CALLBACK_FP_M = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
+        free(file_front);
+        // callback setup end
+
 
         mgn_moa_moeadrbf_fcinv_init(moead_fcrbf);
 
@@ -166,7 +196,7 @@ int main(int argc, char const *argv[]) {
         free(filename);
 
 
-        mgn_mop_free(moead_fcrbf->mop);
+        mgn_mop_free(mop);
         mgn_moa_moeadrbf_fcinv_free(moead_fcrbf);
 
         mgn_limit_free(limits);
@@ -175,8 +205,9 @@ int main(int argc, char const *argv[]) {
     }
 
     mgn_indv_ops_free(indv_ops);
-    mgn_plot_close();
-
     free(mop_name);
+
+    mgn_plot_close();
+    free(CALLBACK_FILENAME);
     return 0;
 }

@@ -25,6 +25,12 @@
 #include "mops/mgn_cec09.h"
 #include "mops/mgn_zdt.h"
 
+#include "callback_test.h"
+
+#ifndef FP_DIR
+#define FP_DIR "."
+#endif
+
 int main(int argc, char const *argv[]) {
 
 #ifdef NDEBUG
@@ -36,7 +42,7 @@ int main(int argc, char const *argv[]) {
     size_t xsize = 8;
     size_t fsize = 2;
     size_t train_pop_size = 100;
-    size_t wsize = 11; // weight vector size external
+    size_t wsize = 9; // weight vector size external
     size_t maxeval = train_pop_size + wsize;
     size_t iwsize = 100;
     char* mop_name =  malloc(sizeof(char) * 64);
@@ -116,7 +122,7 @@ int main(int argc, char const *argv[]) {
         // non dom sol
         mgn_popl *pl_a = mgn_popl_alloc((void*)indv_ops,&params);
         gsl_matrix *m_w = mgn_weight_slattice(N,pl_a->iparams.f_size);
-        printf("weight size %zu\n", m_w->size1);
+//        printf("weight size %zu\n", m_w->size1);
 
         // Prepare Latin Hypercube// set limits
         mgnLimit *limits = mgn_limit_alloc(params.x_size);
@@ -140,7 +146,29 @@ int main(int argc, char const *argv[]) {
 //        moead_fcrbf->mop->limits = limits;
 
         MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
-        moead_fcrbf->mop = mgn_cec09_init(moptype, &params);
+        mgnMop *mop = mgn_cec09_init(moptype, &params);
+        moead_fcrbf->mop = mop;
+
+        // plot callback setup
+        cb_set_rate(1);
+        mgn_moa_set_callback(moead_fcrbf, cb_record_perf);
+        asprintf(&CALLBACK_FILENAME, "%s_%s_%zu-%zu_%zu-%zu-perf.txt"
+                 , moead_fcrbf->name
+                 , mop->name
+                 , xsize
+                 , fsize
+                 , maxeval
+                 , run);
+        cp_record_perf_header();
+
+        struct _inGroup_list io_data_fp = {0, 0};//malloc(sizeof(*io_data_fp));
+        char *file_front;
+
+        asprintf(&file_front, "%s/cec%s.txt",FP_DIR,mop->name);
+        it_read_data(file_front,&io_data_fp); // alters size of pl_a
+        CALLBACK_FP_M = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
+        free(file_front);
+        // callback setup end
 
         mgn_moa_moeadrbf_fc_init(moead_fcrbf);
 
@@ -175,7 +203,7 @@ int main(int argc, char const *argv[]) {
 
 
         gsl_matrix_free(m_w);
-        mgn_mop_free(moead_fcrbf->mop);
+        mgn_mop_free(mop);
         mgn_moa_moeadrbf_fc_free(moead_fcrbf);
         mgn_limit_free(limits);
         mgn_popl_free(pl_a);
@@ -185,5 +213,6 @@ int main(int argc, char const *argv[]) {
     free(mop_name);
 
     mgn_plot_close();
+    free(CALLBACK_FILENAME);
     return 0;
 }

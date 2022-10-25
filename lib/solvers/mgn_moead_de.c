@@ -204,6 +204,7 @@ mgnMoa* mgn_moead_de_init(gsl_matrix *W,size_t nobj, size_t T
                         ,apply
                         ,params
                         ,external);
+    strncpy(moead_de->name, "MOEAD-DE", MOA_NAME_LEN);
     moead_de->run = moead_de_run;
     moead_de->max_exec = 5000;
     moead_de->c_run = 0;

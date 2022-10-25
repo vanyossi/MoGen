@@ -86,7 +86,6 @@ struct mgn_moeadrbf_data {
     mgn_pop_matrix *tset; // tset pop size(nt)
     mgnLimit *search_lim; // for training pop init
     bool l_lhci_lim; // true to free lhci limits
-//    gsl_matrix *pm;    // pop for eval with model size(n)
     int scalarf;
     size_t mdl_size;// scalarization function, this is fixed to PBI
     size_t mdl_k;

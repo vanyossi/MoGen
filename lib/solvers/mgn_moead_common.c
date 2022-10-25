@@ -203,7 +203,7 @@ mgnMoa* mgn_moead_common_init(gsl_matrix *W,size_t nobj, size_t T
                        ,bool external)
 {
     mgnMoa* moead = mgn_moa_alloc();
-    strncpy(moead->name, "MOEA/D", MOA_NAME_LEN);
+    strncpy(moead->name, "MOEAD", MOA_NAME_LEN);
     moead->tot_exec = 0;
 //    moead->run = moead_run;
     moead->stop = moead_stop;

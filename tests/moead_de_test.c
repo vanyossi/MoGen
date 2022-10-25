@@ -24,49 +24,8 @@
 #include "indicator/indicadores.h"
 #include "mgn_io.h"
 
-struct _inGroup_list FP;
-gsl_matrix *m_pf;
+#include "callback_test.h"
 
-static size_t exec_limit = 1000;
-
-void de_plot_cb(mgnMoa* moa)
-{
-    if (moa->tot_exec >= exec_limit) {
-        mgn_plot_data pdat = {0, 0, "f_1", "f_2",
-                              -0.1f,1.1f,-0.1f,1.1f};
-        asprintf(&pdat.title, "%s", "points");
-        asprintf(&pdat.filename, "%s-%s_run-%d", pdat.title, moa->mop->name, moa->c_run);
-
-        mgn_pop_proto *pop = moa->get_solutions(moa);
-        mgn_pop_matrix *popm = mgn_pop_to_popm(pop);
-
-        // hypercube
-        double *ref = calloc(2, sizeof(*ref));
-        ref[0] =  ref[1] = 1;
-        double hv = fpli_hv(popm->f->data
-            ,popm->f->size2
-            ,popm->f->size1
-            , ref);
-
-        // IGD+
-        double igdp = IGDplus(m_pf, popm->f,2);
-        double igd = IGD(m_pf, popm->f,2);
-
-        printf("hv IGD IGD+: %.6f %.6f, %.6f\n", hv, igd, igdp);
-
-        mgn_pop_matrix_free(popm);
-        free(ref);
-
-        if (pop) {
-            mgn_plot_fast(pop, pdat.filename, "title");
-        }
-
-        free(pdat.filename);
-        free(pdat.title);
-
-        exec_limit += 1000;
-    }
-}
 
 int main() {
     mgn_plot_open();
@@ -87,15 +46,20 @@ int main() {
 //    mgnMop *mop = mgn_zdt_init(ZDT3,&params);
     mgnMop *mop = mgn_cec09_init(UF1, &params);
 
-    FP.size = 0;
-    FP.next = 0;
-    it_read_data("../fronts/cecUF1.txt",&FP);
-    m_pf = inData_toGSLMatrix(inGroup_getListAt(&FP,0));
-
-    gsl_matrix *W = mgn_weight_slattice(300, 2);
+    gsl_matrix *W = mgn_weight_slattice(249, 2);
     mgnMoa *moead = mgn_moead_de_init(W, 2, 20, EP, mop, mgn_init_transition,mop->limits,true);
-    mgn_moa_set_callback(moead,de_plot_cb);
-    moead->max_exec = 20000;
+    moead->max_exec = 1000;
+
+
+    // plot callback setup
+    cb_set_rate(1);
+    mgn_moa_set_callback(moead, cb_record_perf);
+    asprintf(&CALLBACK_FILENAME, "%s_%s_perf.txt", moead->name, mop->name);
+    cp_record_perf_header();
+
+    struct _inGroup_list io_data_fp;
+    it_read_data("../fronts/cecUF1.txt",&io_data_fp);
+    CALLBACK_FP_M = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
 
     mgn_initializer *lhci = mgn_pinit_lhc_alloc(mgn_moead_getpop(moead),mop->limits);
     mgn_init_pop_lhc(mgn_moead_getpop(moead),lhci, 0);
@@ -108,8 +72,9 @@ int main() {
     // run must be private
     int runs = 5000;
     mgn_moa_solve(moead, runs);
-    exec_limit = 0;
-    de_plot_cb(moead);
+
+//    CALLBACK_RATE = 0;
+//    cb_record_perf(moead);
 //    int plot_every = 11;
 //    mgn_plot_data pdat = {0, 0, "f_1", "f_2",
 //                          -0.1f,1.1f,-0.1f,1.1f};

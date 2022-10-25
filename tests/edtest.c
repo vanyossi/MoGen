@@ -20,6 +20,8 @@
 #include "mgn_sphere.h"
 #include "mgn_zdt.h"
 
+#include "callback_test.h"
+
 int main() {
     mgn_indv_param param = {5, 1, 0};
     mgn_indv_ops* iops = mgn_indv_ops_init();
