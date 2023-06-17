@@ -701,20 +701,35 @@ void mgnp_moeadrbf_update(mgnp_moeadrbf_data *mrbf, mgn_pop *pop_sel)
     mgn_pop_free(pop_tset);
 }
 
-
+/*
+ * Calcula los nuevos límites para población subrogada
+ *      limites = media +- sd de soluciones
+ */
 void mgnp_moeadrbf_pop_update(mgnp_moeadrbf_data *mrbf)
 {
     mgn_pop_proto *pop = mrbf->solution;
     mgnLimit *lim = mrbf->search_lim;
 
-    gsl_vector *min = mgn_pop_min_column(pop);
-    gsl_vector *max = mgn_pop_max_column(pop);
+    double mean;
+    double std;
+    mgn_pop_matrix *sol_m = mgn_pop_to_popm(pop);
+    for (size_t i = 0; i < lim->size; ++i) {
+        gsl_vector_view cv = gsl_matrix_column(sol_m,i);
+        mean = gsl_stats_mean(cv.vector.data,1,cv.vector.size);
+        std = gsl_stats_sd(cv.vector.data,1,cv.vector.size);
+        lim->min[i] = mean - std;
+        lim->max[i] = mean + std;
+    }
 
-    memcpy(lim->min, min->data, sizeof(double) * lim->size);
-    memcpy(lim->max, max->data, sizeof(double) * lim->size);
-
-    gsl_vector_free(min);
-    gsl_vector_free(max);
+    // TODO: old, used for first exp
+//    gsl_vector *min = mgn_pop_min_column(pop);
+//    gsl_vector *max = mgn_pop_max_column(pop);
+//
+//    memcpy(lim->min, min->data, sizeof(double) * lim->size);
+//    memcpy(lim->max, max->data, sizeof(double) * lim->size);
+//
+//    gsl_vector_free(min);
+//    gsl_vector_free(max);
 }
 
 
