@@ -15,7 +15,7 @@ void mgn_pop_copy_mp(mgn_pop_proto *pop, mgn_pop_matrix *mpop){
 
     mgn_indv *indv = NULL;
     for (size_t i = 0; i < mpop->x->size1; ++i) {
-        indv = mgn_indv_alloc(0, pop->ops, &pop->iparams);
+        indv = mgn_indv_alloc(NULL, pop->ops, &pop->iparams);
 
         gsl_matrix_get_row(indv->x,mpop->x,i);
         gsl_matrix_get_row(indv->f,mpop->f,i);
