@@ -108,6 +108,9 @@ void mgn_fcmeans_convert_tox(gsl_matrix *x
 // TODO remove comments, polish args + API
 void mgn_moeadrbf_fcinv_run(mgnMoa *moa)
 {
+#ifdef NDEBUG
+    char* filename = malloc(sizeof(char) * 64);
+#endif
     mgnp_moeadrbf_data *moeadrbf = mgn_moeadrbf_features(moa);
     mgn_moeadrbf_data_inv *d_extra = (mgn_moeadrbf_data_inv*)moeadrbf;
 
@@ -132,8 +135,6 @@ void mgn_moeadrbf_fcinv_run(mgnMoa *moa)
 //        }
 //        puts("--");
 //    }
-
-    char* filename = malloc(sizeof(char) * 64);
 
     for (size_t i = 0; i < moeadrbf->mdl_size; ++i) {
         pmgn_moeadrbf_calcNN(&moeadrbf->rbf_data[i],moeadrbf->tset,&cdat,cl_extra);
@@ -201,9 +202,10 @@ void mgn_moeadrbf_fcinv_run(mgnMoa *moa)
     mgn_pop_print(moeadrbf->solution, out);
     fclose(out);
     mgn_plot_fast(moeadrbf->solution, filename, "sol");
+    
+    free(filename);
 #endif
 
-    free(filename);
 }
 
 

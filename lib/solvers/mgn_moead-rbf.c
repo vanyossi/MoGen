@@ -14,7 +14,9 @@
 #include "mgn_fcmeans.h"
 #include "mgn_poplist.h"
 #include "mgn_pop_helper.h"
-//#include "mgn_gnuplot.h"
+#ifdef NDEBUG
+    #include "mgn_gnuplot.h"
+#endif
 
 // helper functions
 mgn_pop* pmgn_moead_popsel(mgnMoa *moa
