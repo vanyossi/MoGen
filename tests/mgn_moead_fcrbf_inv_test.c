@@ -98,7 +98,7 @@ int main(int argc, char const *argv[]) {
 //    wsize = 20;
 
     mgn_plot_open();
-
+    CALLBACK_RUN = run;
 
     // Problem definition
     mgn_indv_param params = {xsize,fsize,0};
@@ -108,7 +108,7 @@ int main(int argc, char const *argv[]) {
         // External referenced variables (input)
         size_t Nt = train_pop_size; //Number of m_points in tset set
         size_t N = wsize;
-        printf("%zu %zu %zu\n", maxeval, Nt, N);
+        printf("%zu %zu %zu, run %zu\n", maxeval, Nt, N, run);
         size_t total_runs = (maxeval - Nt) / N;
 
         // non dom sol
