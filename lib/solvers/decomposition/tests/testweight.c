@@ -20,14 +20,14 @@ int main() {
 
 void test_wei_das_dennis()
 {
-    gsl_matrix *W = mgn_weight_slattice(60, 3);
+    gsl_matrix *W = mgn_weight_slattice(4, 3);
     printf("Permutation test, size: %zu, %zu\n", W->size1, W->size2);
 
     mgn_plot_open();
     mgn_plot_matrix_2d(W,"wvec_comb2", "wei",0);
     mgn_plot_close();
 
-    //    test_print_matrix(W);
+        test_print_matrix(W);
 
     gsl_matrix_free(W);
 }
