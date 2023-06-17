@@ -13,6 +13,8 @@
 
 #include "mgn_gnuplot.h"
 
+#define MAX_EPOP 2000
+
 // DE operators
 //same as de
 void mgnp_moead_de_rndseq_except(gsl_vector_ulong *seq, size_t except)
@@ -179,6 +181,10 @@ void moead_de_run(mgnMoa* moead)
 
         moead_update_ep(feat, l_pop);
         mgn_pop_free(l_pop);
+
+        if(feat->epop && feat->epop->size > MAX_EPOP) {
+            moead->tot_exec = moead->max_exec;
+        }
 
 //        if ( moead->tot_exec % 300 == 0) {
 //            char *filename = malloc(64);
