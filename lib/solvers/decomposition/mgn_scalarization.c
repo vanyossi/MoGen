@@ -63,23 +63,31 @@ double mgn_scalar_pbi(gsl_vector *w, gsl_vector *f, gsl_vector *z, void *d_theta
     double d1, d2, nl;
 
     gsl_vector *work_vec = gsl_vector_alloc(z->size);
-
+    gsl_vector *work_vec_w = gsl_vector_alloc(w->size);
+    double wnorm = gsl_blas_dnrm2(w);
     // calculate d1
     gsl_blas_dcopy(f,work_vec);
     gsl_vector_sub(work_vec,z);
     gsl_blas_ddot(work_vec, w, &nl);
 
-    d1 = fabs(nl) / gsl_blas_dnrm2(w);
+    d1 = fabs(nl) / wnorm;
 
     // calc d2
-    gsl_blas_dcopy(z,work_vec);
-    gsl_blas_daxpy(d1,w,work_vec);
-    gsl_vector_sub(work_vec, f);
+    gsl_blas_dcopy(f,work_vec);
+    gsl_blas_dcopy(w,work_vec_w);
+
+    gsl_vector_sub(work_vec, z); // f - z
+    gsl_vector_scale(work_vec_w,1.0 / wnorm); // w / ||w||
+    gsl_vector_scale(work_vec_w, d1);
+    gsl_vector_scale(work_vec_w, -1);
+
+    gsl_vector_sub(work_vec, work_vec_w);
     d2 = gsl_blas_dnrm2(work_vec);
 
 //    printf("vector d1,d2: %6f,%3.6f\n", d1, d2);
 
     gsl_vector_free(work_vec);
+    gsl_vector_free(work_vec_w);
     return (d1 + theta * d2);
 }
 
