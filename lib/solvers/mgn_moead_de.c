@@ -192,6 +192,12 @@ void moead_de_run(mgnMoa* moead)
     mgn_pop_free(ypop);
 }
 
+/**
+ * Initializes moa parameters
+ * @param epop external pop pointer
+ * @param external, if TRUE training use external pop as training population
+ *                  population initialization can be skipped
+ */
 mgnMoa* mgn_moead_de_init(gsl_matrix *W,size_t nobj, size_t T
                           ,mgn_popl *epop
                           ,mgnMop *mop
