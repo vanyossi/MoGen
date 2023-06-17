@@ -192,6 +192,7 @@ void* pmgn_popl_get(void* pop_in, size_t index)
     return mgn_popl_get(popl,index);
 }
 
+// TODO: should copy before setting
 void pmgn_popl_set(void* pop_in, void* indv, size_t index)
 {
     UNUSED(index);

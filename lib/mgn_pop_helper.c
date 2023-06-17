@@ -9,8 +9,8 @@
 
 #include <float.h>
 
-//TODO need proto indv (for different indv)
 
+//TODO need proto indv (for different indv)
 void mgn_pop_copy_mp(mgn_pop_proto *pop, mgn_pop_matrix *mpop){
 
     mgn_indv *indv = NULL;
