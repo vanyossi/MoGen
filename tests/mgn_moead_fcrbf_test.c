@@ -142,8 +142,7 @@ int main(int argc, char const *argv[]) {
         moead_fcrbf->max_exec = maxeval;
 
 //        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
-//        moead_fcrbf->mop = mgn_zdt_init(moptype, &params);
-//        moead_fcrbf->mop->limits = limits;
+//        mgnMop *mop = mgn_zdt_init(moptype, &params);
 
         MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
         mgnMop *mop = mgn_cec09_init(moptype, &params);
