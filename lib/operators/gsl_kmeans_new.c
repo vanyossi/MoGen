@@ -97,7 +97,6 @@ gsl_kmeans_update_index(gsl_matrix *X, gsl_vector_int *idx, gsl_matrix *C)
         gsl_vector_repeat(&cs.vector, C->size1,base);
         // || X_i - c_i ||^2
         gsl_matrix_sub(base, C);
-        gsl_matrix_mul_elements(base,base);
 
         for (size_t row = 0; row < base->size1; ++row) {
             gsl_vector_view crow = gsl_matrix_row(base,row);
