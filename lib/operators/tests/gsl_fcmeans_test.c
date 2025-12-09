@@ -10,6 +10,7 @@
 #include "mgn_random.h"
 
 #include "gsl_vector_additional.h"
+#include "mgn_io.h"
 
 #include <string.h>
 
@@ -45,34 +46,28 @@ int main(int argc, char const *argv[]) {
     int m=2;    //Number of variables
     int k=5;
 
-    //Number of groups
-    gsl_matrix *B = gsl_matrix_alloc(n,m);
-    int i,j;
-    double val;
-//    int maxiter=100;
-//    double * data = (double*) malloc(n* m * sizeof(double));
-    for (i=0;i<n;i++){
-        for (j=0;j<m;j++){
-            val= ((float)rand())/(float)RAND_MAX;
-            gsl_matrix_set(B,i,j,val);
-//            data[i * m + j]=val*(i+j);
-        }
-    }
+    char* fname = "kmeans_test.txt";
+    struct _inGroup_list io_data_fp = {0, 0};
+    it_read_data(fname,&io_data_fp); // alters size of pl_a
+    gsl_matrix *B = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
 
-    fcmeans_data * kmd = mgn_fcmeans(B, k, 300, 0.005);
-    printf("---maxiter %d\n", kmd->iter);
+    k = 3;
 
-    cluster_data_extra *fcm_extra = mgn_fcmeans_calc(kmd,0.30, 1);
 
-    for (size_t l = 0; l < fcm_extra->size; ++l) {
-        for (size_t i1 = 0; i1 < fcm_extra->mpos[l].size; ++i1) {
-            printf("%d(%0.2f),", fcm_extra->mpos[l].pos[i1],
-                   gsl_matrix_get(kmd->m_u,fcm_extra->mpos[l].pos[i1],l));
-        }
-        puts("--");
-    }
+   fcmeans_data * kmd = mgn_fcmeans(B, k, 300, 0.005);
+   printf("---maxiter %d\n", kmd->iter);
 
-    mgn_cluster_data_extra_free(fcm_extra);
+   cluster_data_extra *fcm_extra = mgn_fcmeans_calc(kmd,0.30, 1);
+
+   for (size_t l = 0; l < fcm_extra->size; ++l) {
+       for (size_t i1 = 0; i1 < fcm_extra->mpos[l].size; ++i1) {
+           printf("%d(%0.2f),", fcm_extra->mpos[l].pos[i1],
+                  gsl_matrix_get(kmd->m_u,fcm_extra->mpos[l].pos[i1],l));
+       }
+       puts("--");
+   }
+
+   mgn_cluster_data_extra_free(fcm_extra);
 
 
 
@@ -90,22 +85,22 @@ int main(int argc, char const *argv[]) {
 //    gsl_kmeans_data_extra_free(kdat);
 
 
-    // save B,centroids and print indexes
-    FILE *train_data = fopen("fcm_train_data.txt","w");
-    gsl_matrix_printf(B,train_data);
-    fclose(train_data);
+   // save B,centroids and print indexes
+   FILE *train_data = fopen("fcm_train_data.txt","w");
+   gsl_matrix_printf(B,train_data);
+   fclose(train_data);
 
-    FILE *train_center = fopen("fcm_train_center.txt","w");
-    gsl_matrix_printf(kmd->centers, train_center);
-    fclose(train_center);
+   FILE *train_center = fopen("fcm_train_center.txt","w");
+   gsl_matrix_printf(kmd->centers, train_center);
+   fclose(train_center);
 
-    FILE *train_assign = fopen("fcm_train_assign.txt","w");
-    gsl_matrix_printf(kmd->m_u, train_center);
-    fclose(train_assign);
+   FILE *train_assign = fopen("fcm_train_assign.txt","w");
+   gsl_matrix_printf(kmd->m_u, train_center);
+   fclose(train_assign);
 
-    gsl_matrix_free(X);
-    gsl_matrix_free(B);
-    mgn_fcmeans_free(kmd);
-    rnd_gen_free();
-    return 0;
+   gsl_matrix_free(X);
+   gsl_matrix_free(B);
+   mgn_fcmeans_free(kmd);
+   rnd_gen_free();
+   return 0;
 }

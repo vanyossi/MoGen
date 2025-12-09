@@ -17,6 +17,8 @@ void mgn_mop_free(mgnMop *mop)
     free(mop);
 }
 
+#include "individual.h"
+#include <math.h>
 size_t mgn_mop_eval_pop(mgnMop *mop, mgn_pop *pop, void *params)
 {
     UNUSED(params);

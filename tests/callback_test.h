@@ -94,7 +94,7 @@ void cb_record_perf(mgnMoa* moa)
         mgn_pop_matrix *popm = mgn_pop_to_popm(pop);
         // hypercube
         double *ref = calloc(3, sizeof(*ref));
-        ref[0] = ref[1] = ref[2] = 2;
+        ref[0] = ref[1] = ref[2] = 1;
         double hv = fpli_hv(popm->f->data
                             ,popm->f->size2
                             ,popm->f->size1

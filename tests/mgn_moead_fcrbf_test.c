@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]) {
 #endif
     // default values
     unsigned long int seed = 23;
-    size_t run = 1;
+    size_t run = 2;
     size_t xsize = 8;
     size_t fsize = 2;
     size_t train_pop_size = 100;
@@ -46,7 +46,7 @@ int main(int argc, char const *argv[]) {
     size_t maxeval = train_pop_size + wsize;
     size_t iwsize = 100;
     char* mop_name =  malloc(sizeof(char) * 64);
-    strcpy(mop_name, "UF1");
+    strcpy(mop_name, "ZDT3");
 
     char ch;
     while ((ch = getopt(argc, argv, "E:r:x:f:t:w:m:p:R:")) != -1) {
@@ -141,16 +141,16 @@ int main(int argc, char const *argv[]) {
 
         moead_fcrbf->max_exec = maxeval;
 
-//        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
-//        mgnMop *mop = mgn_zdt_init(moptype, &params);
-
-        MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
-        mgnMop *mop = mgn_cec09_init(moptype, &params);
+        MGN_ZDT_VAR moptype = mop_zdt_str_toenum(mop_name);
+        mgnMop *mop = mgn_zdt_init(moptype, &params);
+//
+//        MGN_CEC09_VAR moptype = mop_cec09_str_toenum(mop_name);
+//        mgnMop *mop = mgn_cec09_init(moptype, &params);
         moead_fcrbf->mop = mop;
 
         // plot callback setup
         cb_set_rate(1);
-        mgn_moa_set_callback(moead_fcrbf, cb_record_perf);
+//        mgn_moa_set_callback(moead_fcrbf, cb_record_perf);
         asprintf(&CALLBACK_FILENAME, "%s_%s_%zu-%zu_%zu-%zu-perf.txt"
                  , moead_fcrbf->name
                  , mop->name
@@ -164,8 +164,8 @@ int main(int argc, char const *argv[]) {
         char *file_front;
 
         asprintf(&file_front, "%s/cec%s.txt",FP_DIR,mop->name);
-        it_read_data(file_front,&io_data_fp); // alters size of pl_a
-        CALLBACK_FP_M = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
+//        it_read_data(file_front,&io_data_fp); // alters size of pl_a
+//        CALLBACK_FP_M = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
         free(file_front);
         // callback setup end
 

@@ -20,7 +20,7 @@ int main() {
 
 void test_wei_das_dennis()
 {
-    gsl_matrix *W = mgn_weight_slattice(4, 3);
+    gsl_matrix *W = mgn_weight_slattice(60, 3);
     printf("Permutation test, size: %zu, %zu\n", W->size1, W->size2);
 
     mgn_plot_open();

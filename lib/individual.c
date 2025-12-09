@@ -159,6 +159,7 @@ size_t mgn_sizeofp()
     return sizeof(mgn_indv);
 }
 
+#include <math.h>
 void mgn_indv_eval(mgnMop *mop, void* indv, void* param)
 {
     UNUSED(param);
@@ -167,6 +168,17 @@ void mgn_indv_eval(mgnMop *mop, void* indv, void* param)
         mop->eval(in->x, in->f, in->g, mop->params);
     } else if (mop->eval_array) {
         mop->eval_array(in->x->data, in->f->data, in->g->data, (void*)mop->params);
+#ifdef DEBUG
+        printf("f:");
+        for (size_t f = 0; f < in->f->size; ++f) {
+            printf("%e ", in->f->data[f]);
+        }
+        printf("\nx:");
+        for (size_t f = 0; f < in->x->size; ++f) {
+            printf("%e ", in->x->data[f]);
+        }
+        puts("");
+#endif
     }
     return;
 }

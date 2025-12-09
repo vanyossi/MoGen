@@ -9,6 +9,7 @@
 #include "mgn_random.h"
 
 #include "gsl_vector_additional.h"
+#include "mgn_io.h"
 
 #include <string.h>
 
@@ -42,23 +43,25 @@ int main(int argc, char const *argv[]) {
     int m=2;    //Number of variables
     int k=10;
 
-    //Number of groups
-    gsl_matrix *B = gsl_matrix_alloc(n,m);
-    int i,j;
-    double val;
-    int maxiter=100;
-    double * data = (double*) malloc(n* m * sizeof(double));
-    for (i=0;i<n;i++){
-        for (j=0;j<m;j++){
-            val= ((float)rand())/(float)RAND_MAX;
-            gsl_matrix_set(B,i,j,val);
-//            data[i * m + j]=val*(i+j);
-        }
-    }
-    free(data);
+    /**
+     * @result
+        66.0     55.0
+        48.0     52.0
+        27.75    55.0
+        56.75    35.75
+        43.2     16.7
+        30.8333  74.6667
+     */
+    char* fname = "kmeans_test.txt";
+    struct _inGroup_list io_data_fp = {0, 0};
+    it_read_data(fname,&io_data_fp); // alters size of pl_a
+    gsl_matrix *B = inData_toGSLMatrix(inGroup_getListAt(&io_data_fp,0));
+
+    k = 3;
 
     kmeans_data* kmd = gsl_kmeans(B,k, 100);
     cluster_data_extra *kdat = gsl_kmeans_calc(kmd);
+    printf("max iter: %lu\n", kmd->iter);
 
     for (size_t l = 0; l < kdat->size; ++l) {
         size_t size = kdat->mpos[l].size;

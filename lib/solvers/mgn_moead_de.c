@@ -170,16 +170,31 @@ void moead_de_run(mgnMoa* moead)
                       ,indv_x->size
         );
 
+        if( isnan(mgn_indv_geto_vec(l_pop,0)->data[0]) ) {
+            printf("WARNING: NaN, mgn_indv_geto_vec");
+        }
         // TODO add mop params to mop (?)
         moead->tot_exec += mgn_mop_eval_pop(feat->mop,l_pop,feat->mop->params);
+        if( isnan(mgn_indv_geto_vec(l_pop,0)->data[0]) ) {
+            printf("WARNING: NaN, mgn_indv_geto_vec");
+        }
         // update z
         mgn_mop_eval_pop(feat->_mop, l_pop, feat);
+        if( isnan(mgn_indv_geto_vec(l_pop,0)->data[0]) ) {
+            printf("WARNING: NaN, mgn_indv_geto_vec");
+        }
         // update rank
 
         // update neighbour
         moead_update_neighbour_de(l_pop,feat,i,2);
+        if( isnan(mgn_indv_geto_vec(l_pop,0)->data[0]) ) {
+            printf("WARNING: NaN, mgn_indv_geto_vec");
+        }
 
         moead_update_ep(feat, l_pop);
+        if( isnan(mgn_indv_geto_vec(feat->pop,0)->data[0]) ) {
+            printf("WARNING: NaN, mgn_indv_geto_vec");
+        }
         mgn_pop_free(l_pop);
 
         if(feat->epop && feat->epop->size > MAX_EPOP) {

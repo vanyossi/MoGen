@@ -36,6 +36,7 @@ void mgn_moeadfc_rbf_update_training(mgnp_moeadrbf_data* data)
 // TODO remove comments, polish args + API
 void mgn_moeadrbf_fc_run(mgnMoa *moa)
 {
+    printf("starting moead_fcrbf run %zu\n", moa->c_run);
     mgnp_moeadrbf_data *moeadrbf = mgn_moeadrbf_features(moa);
     // === Model building
     // use archive for training

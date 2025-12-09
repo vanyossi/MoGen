@@ -18,7 +18,7 @@ typedef struct gsl_vector_list gsl_vector_list;
 
 struct gsl_vector_node {
     gsl_vector *v;
-    gsl_vector_node *next
+    gsl_vector_node *next;
 };
 
 struct gsl_vector_list {

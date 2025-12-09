@@ -7,7 +7,7 @@
 
 #include "mgn_pop_proto.h"
 
-
+#include <math.h>
 void mgn_pop_print(mgn_pop_proto *popp, FILE *stream)
 {
     gsl_vector *x;
